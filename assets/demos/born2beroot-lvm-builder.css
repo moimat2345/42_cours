@@ -1,0 +1,54 @@
+[data-demo="born2beroot-lvm-builder"] .lb-title{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+[data-demo="born2beroot-lvm-builder"] .lb-controls{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end}
+[data-demo="born2beroot-lvm-builder"] .lb-disk{display:flex;flex-direction:column;gap:6px;flex:1 1 280px;min-width:0}
+[data-demo="born2beroot-lvm-builder"] .lb-disk-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+[data-demo="born2beroot-lvm-builder"] .lb-disk-out{font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--text)}
+[data-demo="born2beroot-lvm-builder"] .lb-disk input[type="range"]{width:100%;min-height:32px;padding:0;background:transparent;border:0;accent-color:var(--accent);cursor:pointer}
+[data-demo="born2beroot-lvm-builder"] .lb-sw{display:flex;align-items:center;gap:10px;cursor:pointer;min-height:40px;color:var(--text);font-size:.84rem}
+[data-demo="born2beroot-lvm-builder"] .lb-sw input{-webkit-appearance:none;appearance:none;flex:none;width:46px;height:26px;padding:0;margin:0;border-radius:100px;background:var(--surface-2);border:1px solid var(--border-strong);position:relative;cursor:pointer;transition:.2s}
+[data-demo="born2beroot-lvm-builder"] .lb-sw input::before{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:.2s}
+[data-demo="born2beroot-lvm-builder"] .lb-sw input:checked{background:color-mix(in srgb,var(--stack) 26%,transparent);border-color:var(--stack)}
+[data-demo="born2beroot-lvm-builder"] .lb-sw input:checked::before{transform:translateX(20px);background:var(--stack)}
+[data-demo="born2beroot-lvm-builder"] .lb-sw input:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+[data-demo="born2beroot-lvm-builder"] .lb-sw input:checked ~ .lb-sw-state{color:var(--stack);border-color:var(--stack-line)}
+[data-demo="born2beroot-lvm-builder"] .lb-sw-state{font-family:var(--mono);font-size:.72rem;font-weight:700;border:1px solid var(--border-strong);border-radius:100px;padding:2px 9px;color:var(--muted)}
+[data-demo="born2beroot-lvm-builder"] .lb-vols-head{margin-top:18px;font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+[data-demo="born2beroot-lvm-builder"] .lb-vols{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:8px}
+[data-demo="born2beroot-lvm-builder"] .lb-vol{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);min-width:0}
+[data-demo="born2beroot-lvm-builder"] .lb-vn{font-family:var(--mono);font-size:.8rem;color:var(--text);flex:1 1 auto;min-width:0}
+[data-demo="born2beroot-lvm-builder"] .lb-vm{font-family:var(--mono);font-size:.7rem;color:var(--muted);flex:none}
+[data-demo="born2beroot-lvm-builder"] .lb-vol input{width:76px;flex:none;padding:6px 8px}
+[data-demo="born2beroot-lvm-builder"] .lb-vol input[aria-invalid="true"]{border-color:var(--err);outline:1px solid var(--err)}
+[data-demo="born2beroot-lvm-builder"] .lb-vu{font-family:var(--mono);font-size:.74rem;color:var(--muted);flex:none}
+[data-demo="born2beroot-lvm-builder"] .lb-actions button{font-size:.76rem}
+[data-demo="born2beroot-lvm-builder"] .lb-tree{margin:18px 0 0;padding:14px 16px;overflow-x:auto;white-space:pre;line-height:1.55;font-size:.8rem}
+[data-demo="born2beroot-lvm-builder"] .lb-row{white-space:pre}
+[data-demo="born2beroot-lvm-builder"] .lb-row.head{color:var(--muted)}
+[data-demo="born2beroot-lvm-builder"] .lb-row.head .lb-mnt{color:var(--muted)}
+[data-demo="born2beroot-lvm-builder"] .lb-row.disk{color:var(--muted)}
+[data-demo="born2beroot-lvm-builder"] .lb-row.part{color:var(--ptr)}
+[data-demo="born2beroot-lvm-builder"] .lb-row.crypt{color:var(--ref)}
+[data-demo="born2beroot-lvm-builder"] .lb-row.crypt.over{color:var(--err);font-weight:700}
+[data-demo="born2beroot-lvm-builder"] .lb-row.lvm{color:var(--text)}
+[data-demo="born2beroot-lvm-builder"] .lb-mnt{color:var(--stack)}
+[data-demo="born2beroot-lvm-builder"] .lb-legend{margin-top:10px;font-family:var(--mono);font-size:.76rem;color:var(--muted);overflow-wrap:anywhere}
+[data-demo="born2beroot-lvm-builder"] .lb-bar{position:relative;display:flex;height:24px;margin-top:14px;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden;background:#0c0f15}
+[data-demo="born2beroot-lvm-builder"] .lb-seg{display:block;height:100%;flex:none;border-right:1px solid #0c0f15}
+[data-demo="born2beroot-lvm-builder"] .lb-seg.boot{background:var(--faint)}
+[data-demo="born2beroot-lvm-builder"] .lb-seg.v0{background:color-mix(in srgb,var(--ref) 70%,#0c0f15)}
+[data-demo="born2beroot-lvm-builder"] .lb-seg.v1{background:color-mix(in srgb,var(--ptr) 70%,#0c0f15)}
+[data-demo="born2beroot-lvm-builder"] .lb-seg.v2{background:color-mix(in srgb,var(--heap) 70%,#0c0f15)}
+[data-demo="born2beroot-lvm-builder"] .lb-seg.v3{background:color-mix(in srgb,var(--stack) 60%,#0c0f15)}
+[data-demo="born2beroot-lvm-builder"] .lb-seg.v4{background:color-mix(in srgb,var(--amber) 70%,#0c0f15)}
+[data-demo="born2beroot-lvm-builder"] .lb-seg.v5{background:color-mix(in srgb,var(--ptr) 40%,var(--ref) 40%)}
+[data-demo="born2beroot-lvm-builder"] .lb-seg.v6{background:color-mix(in srgb,var(--stack) 35%,var(--ptr) 45%)}
+[data-demo="born2beroot-lvm-builder"] .lb-seg.free{background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(150,170,200,.18) 6px 12px)}
+[data-demo="born2beroot-lvm-builder"] .lb-cap{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--text)}
+[data-demo="born2beroot-lvm-builder"] .lb-overflow{position:absolute;top:0;bottom:0;right:0;background:repeating-linear-gradient(45deg,rgba(255,93,115,.55) 0 6px,rgba(255,93,115,.2) 6px 12px);pointer-events:none}
+[data-demo="born2beroot-lvm-builder"] .lb-bar-note{margin-top:6px;font-size:.72rem;color:var(--muted);font-family:var(--mono)}
+/* the page accent of this course is red: "good" must stay green, not follow the accent */
+[data-demo="born2beroot-lvm-builder"] .verdict-box.good{background:var(--stack-glow);color:var(--stack);border:1px solid var(--stack-line)}
+[data-demo="born2beroot-lvm-builder"] .lb-hint{margin-top:10px;font-size:.78rem;color:var(--muted);font-weight:300}
+@media (max-width:680px){
+  [data-demo="born2beroot-lvm-builder"] .lb-tree{font-size:.7rem}
+}

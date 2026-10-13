@@ -1,0 +1,308 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>Projet 42 · Fondations C</span>
+  <h1 class="title">Le projet <span class="g">libft</span></h1>
+  <p class="lead">Réécrire <b>ta propre bibliothèque C</b> : des fonctions de la libc, des utilitaires et des listes chaînées. Ce qu'il faut comprendre <b>avant d'écrire la première ligne</b>.</p>
+  <p class="subj">libft.a · cc -Wall -Wextra -Werror · ar rcs · la Norme</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>Le projet en <span class="accent">bref</span></h2></div>
+    <p class="body"><b>libft</b> est le premier projet de code du tronc commun : tu construis ta propre bibliothèque statique, <code class="inline">libft.a</code>. Les projets suivants du tronc commun peuvent la réutiliser (chaque sujet indique si c'est autorisé) : ce que tu écris ici te sert longtemps.</p>
+    <p class="body">On te demande trois choses : <b>refaire des fonctions de la libc</b> (même prototype, même comportement, préfixe <code class="inline">ft_</code>), <b>écrire des utilitaires</b> qui n'existent pas dans la libc, et, en bonus, <b>manipuler des listes chaînées</b>.</p>
+    <p class="body">Rien de magique là-dedans : chaque fonction est une petite boucle sur des octets. Ce qui fait réussir ou échouer en correction, c'est le détail aux limites : une taille de 0, un pointeur nul, un <code class="inline">malloc</code> qui échoue, un entier qui déborde.</p>
+    <div class="callout"><span class="bulb">📖</span><p><b>Ton référentiel, c'est le sujet et les pages de man.</b> Avant chaque fonction, lis sa ligne de description dans le sujet et sa page de man (<code class="inline">man 3 strlcpy</code>). Ce cours t'aide à comprendre les points délicats ; il ne remplace pas ce travail.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>La carte du <span class="accent">projet</span></h2></div>
+    <div class="map">
+      <div class="map-item"><span class="ex">Partie 1</span><div><h4>La libc refaite (23)</h4><p>21 fonctions à refaire à l'identique, de <code class="inline">ft_isalpha</code> à <code class="inline">ft_atoi</code>, plus <code class="inline">ft_calloc</code> et <code class="inline">ft_strdup</code> qui utilisent <code class="inline">malloc</code>.</p></div></div>
+      <div class="map-item"><span class="ex">Partie 2</span><div><h4>Fonctions utilitaires (11)</h4><p>Absentes de la libc ou sous une autre forme : <code class="inline">ft_substr</code>, <code class="inline">ft_strjoin</code>, <code class="inline">ft_strtrim</code>, <code class="inline">ft_split</code>, <code class="inline">ft_itoa</code>, <code class="inline">ft_strmapi</code>, <code class="inline">ft_striteri</code> et quatre <code class="inline">ft_put*_fd</code>.</p></div></div>
+      <div class="map-item"><span class="ex">Bonus</span><div><h4>Listes chaînées (9)</h4><p>La structure <code class="inline">t_list</code> et neuf fonctions, de <code class="inline">ft_lstnew</code> à <code class="inline">ft_lstmap</code>. Évalué seulement si l'obligatoire est parfait.</p></div></div>
+      <div class="map-item"><span class="ex">Rendu</span><div><h4>Makefile, libft.h, ft_*.c</h4><p>Tout à la racine du dépôt. Ton Makefile y fabrique <code class="inline">libft.a</code> ; savoir si elle se versionne avec le reste est à vérifier dans ton sujet.</p></div></div>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Les règles à connaître</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Règle</th><th>Ce que ça veut dire pour toi</th></tr></thead>
+        <tbody>
+          <tr><td>libft.a</td><td>La bibliothèque porte ce nom et se construit à la racine du dépôt.</td></tr>
+          <tr><td>ar, pas libtool</td><td>Tu fabriques l'archive avec <code class="inline">ar</code> ; <code class="inline">libtool</code> est interdit. La commande habituelle est <code class="inline">ar rcs libft.a $(OBJ)</code> : <code class="inline">r</code> insère les objets, <code class="inline">c</code> crée l'archive sans message, <code class="inline">s</code> y ajoute l'index des symboles.</td></tr>
+          <tr><td>-Wall -Wextra -Werror</td><td>Chaque <code class="inline">.c</code> compile avec ces trois drapeaux, donc sans le moindre warning.</td></tr>
+          <tr><td>Makefile</td><td>Au minimum les règles <code class="inline">$(NAME)</code>, <code class="inline">all</code>, <code class="inline">clean</code>, <code class="inline">fclean</code>, <code class="inline">re</code>, plus une règle <code class="inline">bonus</code> pour les listes. Il <b>ne doit pas relink</b> : un second <code class="inline">make</code> ne refait rien.</td></tr>
+          <tr><td>Pas de globale</td><td>Aucune variable globale. Une fonction auxiliaire se déclare <code class="inline">static</code> : sa portée reste dans son fichier.</td></tr>
+          <tr><td>Pas de <code class="inline">restrict</code></td><td>Le mot-clé n'apparaît pas dans tes prototypes, et tu ne compiles pas avec <code class="inline">-std=c99</code>.</td></tr>
+          <tr><td>Fichiers</td><td>Pas de fichier inutile dans le dépôt : ton <code class="inline">main</code> de test n'y a pas sa place.</td></tr>
+          <tr><td>Crashs et fuites</td><td>Aucun crash (segfault, double free…) hors des cas où la vraie fonction a un comportement indéfini, et toute mémoire allouée doit être libérée.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><span class="bulb">📏</span><p><b>La Norme</b> est un document à part, vérifié par <code class="inline">norminette</code>. Retiens les limites qui structurent ton code : <b>25 lignes</b> par fonction, <b>5 fonctions</b> par fichier, <b>4 paramètres</b>, <b>5 variables locales</b>, <b>80 colonnes</b>, pas de <code class="inline">for</code>, de <code class="inline">do…while</code>, de <code class="inline">switch</code> ni de <code class="inline">goto</code>, et l'en-tête 42 en tête de chaque fichier. Pour le ternaire : selon la version de la Norme, interdit ou limité aux cas simples non imbriqués — vérifie la Norme en vigueur. Si ta version de la Norme diffère, c'est elle qui fait foi.</p></div>
+  </section>
+
+  <section id="libc">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Partie 1 : la <span class="accent">libc</span> refaite</h2></div>
+    <p class="body">La consigne tient en une phrase : <b>mêmes prototypes, mêmes comportements</b>, seul le nom change. Le man de chaque fonction est donc ton cahier des charges. Certaines pages de man déclarent leurs prototypes avec <code class="inline">restrict</code> : ne le recopie pas. Et <code class="inline">strlcpy</code>, <code class="inline">strlcat</code> et <code class="inline">strnstr</code> viennent des systèmes BSD : leur page n'est pas toujours installée sous Linux, cherche-la en ligne si besoin.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fonction</th><th>Comme la vraie libc… et ce qu'il faut surveiller</th></tr></thead>
+        <tbody>
+          <tr><td>ft_isalpha, ft_isdigit, ft_isalnum, ft_isascii, ft_isprint</td><td>Elles prennent un <code class="inline">int</code> et renvoient une valeur <b>non nulle</b> si le test est vrai, 0 sinon. Ne suppose pas que « vrai » vaut 1.</td></tr>
+          <tr><td>ft_toupper, ft_tolower</td><td>Reçoivent et renvoient un <code class="inline">int</code>. Ce qui n'est pas une lettre revient tel quel.</td></tr>
+          <tr><td>ft_memset, ft_bzero</td><td>Remplissent <code class="inline">n</code> octets. Le <code class="inline">int c</code> de <code class="inline">memset</code> est converti en <code class="inline">unsigned char</code> ; <code class="inline">bzero</code> ne renvoie rien.</td></tr>
+          <tr><td>ft_memcpy</td><td>Copie <code class="inline">n</code> octets. Le man précise que les zones <b>ne doivent pas se chevaucher</b>.</td></tr>
+          <tr><td>ft_memmove</td><td>Même signature, mais le résultat doit être correct <b>même si les zones se chevauchent</b>. C'est le point de la démo plus bas.</td></tr>
+          <tr><td>ft_memchr, ft_memcmp</td><td>Travaillent sur <code class="inline">n</code> octets, pas sur des chaînes : un <code class="inline">'\0'</code> n'arrête rien. La comparaison se fait en <code class="inline">unsigned char</code>.</td></tr>
+          <tr><td>ft_strlen</td><td>Renvoie un <code class="inline">size_t</code>.</td></tr>
+          <tr><td>ft_strchr, ft_strrchr</td><td>Cherchent <code class="inline">c</code> (un <code class="inline">int</code> converti en <code class="inline">char</code>). Chercher <code class="inline">'\0'</code> est valide : le résultat pointe sur le terminateur.</td></tr>
+          <tr><td>ft_strncmp</td><td>Compare au plus <code class="inline">n</code> caractères, en <code class="inline">unsigned char</code>.</td></tr>
+          <tr><td>ft_strnstr</td><td>Cherche <code class="inline">little</code> dans les <code class="inline">len</code> premiers caractères de <code class="inline">big</code>. Si <code class="inline">little</code> est vide, renvoie <code class="inline">big</code> ; s'il est introuvable, renvoie NULL.</td></tr>
+          <tr><td>ft_strlcpy, ft_strlcat</td><td>Copient ou concatènent <b>en respectant une taille</b>, et le <code class="inline">\0</code> final est posé dès qu'il y a de la place (<code class="inline">size &gt; 0</code> pour <code class="inline">strlcpy</code>, <code class="inline">size &gt; strlen(dst)</code> pour <code class="inline">strlcat</code>). Elles renvoient <b>la longueur qu'elles voulaient obtenir</b>, pas ce qu'elles ont écrit (détail ci-dessous).</td></tr>
+          <tr><td>ft_atoi</td><td>Saute les espaces, lit un signe optionnel puis des chiffres, s'arrête au premier caractère invalide. Aucune gestion d'erreur : rien de valide donne 0.</td></tr>
+          <tr><td>ft_calloc</td><td>Alloue <code class="inline">nmemb * size</code> octets, tous mis à 0. Si la multiplication déborde, il faut renvoyer NULL.</td></tr>
+          <tr><td>ft_strdup</td><td>Alloue la longueur de la chaîne <b>plus un</b>, copie, et renvoie NULL si <code class="inline">malloc</code> échoue.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">strlcpy et strlcat : la valeur de retour</h3>
+    <p class="body">Ces deux fonctions renvoient la <b>longueur totale qu'elles ont essayé de créer</b>. Pour <code class="inline">strlcpy</code>, c'est la longueur de <code class="inline">src</code>. Pour <code class="inline">strlcat</code>, c'est la longueur initiale de <code class="inline">dst</code> (plafonnée à <code class="inline">size</code>) plus celle de <code class="inline">src</code>. Résultat : <code class="inline">retour &gt;= size</code> signifie « tronqué ». Quelques cas pour te repérer (dans le dernier, <code class="inline">size</code> est inférieur ou égal à la longueur de <code class="inline">dst</code> : rien n'est ajouté, et le retour vaut <code class="inline">size</code> plus la longueur de <code class="inline">src</code>) :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">cas à reproduire dans ton main</span></div>
+<pre><span class="cm">// strlcpy(dst, "hello", size)</span>
+size 3 <span class="op">→</span> <span class="st">"he"</span>        retour <span class="nm">5</span>  tronqué
+size 8 <span class="op">→</span> <span class="st">"hello"</span>     retour <span class="nm">5</span>
+size 0 <span class="op">→</span> rien écrit  retour <span class="nm">5</span>
+
+<span class="cm">// strlcat(dst, "cdef", size)</span>
+<span class="cm">// avec dst = "ab" au départ</span>
+size 8 <span class="op">→</span> <span class="st">"abcdef"</span>   retour <span class="nm">6</span>
+size 5 <span class="op">→</span> <span class="st">"abcd"</span>     retour <span class="nm">6</span>  tronqué
+size 1 <span class="op">→</span> <span class="st">"ab"</span>       retour <span class="nm">5</span>  inchangé</pre>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">memmove : le sens de la copie</h3>
+    <p class="body">Si tu copies toujours du premier octet vers le dernier, tu peux <b>lire un octet que ta propre copie vient d'écraser</b> : c'est le cas quand la destination commence à l'intérieur de la source. <code class="inline">memmove</code> doit se comporter comme si les octets passaient par un tampon intermédiaire. La parade tient en un test sur les adresses : si <code class="inline">dst</code> est <b>après</b> <code class="inline">src</code>, copie depuis la fin ; sinon, depuis le début. Essaie les deux sens :</p>
+
+    <div class="demo" data-demo="libft-memmove-overlap">
+      <div class="demo-static">
+        <p class="body">Démo : un tableau de 10 octets <code class="inline">A B C D E F G H I J</code>. On copie <code class="inline">n = 6</code> octets depuis <code class="inline">src = 0</code> vers <code class="inline">dst = 3</code>, les zones se chevauchent.</p>
+        <p class="body">Copie avant : <code class="inline">A B C A B C A B C J</code> (corrompu : les octets A, B, C sont relus après avoir été recopiés). Copie arrière : <code class="inline">A B C A B C D E F J</code> (correct).</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Tableau de 10 octets : dans quel sens faut-il avancer ?","src":"src (source)","dst":"dst (destination)","n":"n (octets)","forward":"Copie avant","backward":"Copie arrière","presetA":"Cas 1 : src 0, dst 3, n 6","presetB":"Cas 2 : src 3, dst 0, n 6","step":"Étape de la copie","legend":"S = octet de la zone source · D = octet de la zone destination · ≠ = octet différent du résultat attendu","errEmpty":"Entre trois entiers positifs ou nuls (src, dst, n).","errRange":"Il faut src + n ≤ 10 et dst + n ≤ 10 : le tableau n'a que 10 octets.","nothing":"Aucun octet à copier (n = 0).","choiceSame":"src = dst : les zones sont identiques, il n'y a rien à déplacer.","choiceBackward":"memmove copie ici de la fin vers le début (dst > src).","choiceForward":"memmove copie ici du début vers la fin (dst < src).","choiceAny":"rien à protéger, les deux sens donnent le même résultat.","overlap":"Les zones se chevauchent","noOverlap":"Les zones sont disjointes","before":"Avant","after":"Après","expected":"Attendu (memmove)","stepNone":"Aucun octet copié pour l'instant.","opLine":"Étape {k} : tab[{to}] reçoit tab[{from}], qui contient « {val} ».","stale":"Cet octet a déjà été écrasé : à l'origine c'était « {orig} ».","result":"Résultat :","ok":"Résultat correct : identique à celui d'un memmove.","bad":"Résultat corrompu : la copie a lu des octets qu'elle venait d'écraser."}</script>
+    </div>
+
+    <p class="body">On travaille octet par octet, sur des <code class="inline">unsigned char</code>. Le schéma tient en quelques lignes ; à toi d'écrire les boucles :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ft_memmove.c · idée</span></div>
+<pre><span class="ty">unsigned char</span>       *d = (<span class="ty">unsigned char</span> *)dst;
+<span class="k">const</span> <span class="ty">unsigned char</span> *s = (<span class="k">const</span> <span class="ty">unsigned char</span> *)src;
+<span class="cm">// d après s : de la fin vers le début</span>
+<span class="cm">// sinon     : du début vers la fin</span></pre>
+    </div>
+  </section>
+
+  <section id="utils">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>Partie 2 : les <span class="accent">utilitaires</span></h2></div>
+    <p class="body">Ces fonctions n'existent pas dans la libc, ou pas sous cette forme. Presque toutes <b>allouent</b> : le sujet précise qu'elles utilisent <code class="inline">malloc</code> et qu'elles renvoient NULL si l'allocation échoue. Pour chacune, le sujet liste aussi les fonctions externes que tu as le droit d'appeler (<code class="inline">malloc</code>, <code class="inline">free</code> ou <code class="inline">write</code> selon le cas) : relis cette ligne avant de coder.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fonction</th><th>Ce que dit le sujet, et ce qu'il faut en retenir</th></tr></thead>
+        <tbody>
+          <tr><td>ft_substr</td><td><code class="inline">char *ft_substr(char const *s, unsigned int start, size_t len)</code><br>Sous-chaîne de <code class="inline">s</code> qui commence à l'indice <code class="inline">start</code>, de taille <b>maximale</b> <code class="inline">len</code>. Que faire si <code class="inline">start</code> dépasse la fin de <code class="inline">s</code> ? Le sujet ne le dit pas : l'usage courant est de renvoyer une chaîne vide (pas NULL). Choisis, et sois prêt à défendre ton choix.</td></tr>
+          <tr><td>ft_strjoin</td><td><code class="inline">char *ft_strjoin(char const *s1, char const *s2)</code><br>Nouvelle chaîne : <code class="inline">s1</code> puis <code class="inline">s2</code>. Compte le <code class="inline">\0</code> dans la taille allouée.</td></tr>
+          <tr><td>ft_strtrim</td><td><code class="inline">char *ft_strtrim(char const *s1, char const *set)</code><br>Copie de <code class="inline">s1</code> sans les caractères de <code class="inline">set</code> au début et à la fin. <code class="inline">set</code> est un <b>ensemble de caractères</b>, pas une sous-chaîne à retirer. Cas à tester : <code class="inline">s1</code> composée uniquement de caractères du <code class="inline">set</code>, qui donne une chaîne vide.</td></tr>
+          <tr><td>ft_split</td><td><code class="inline">char **ft_split(char const *s, char c)</code><br>Tableau de chaînes obtenu en découpant <code class="inline">s</code> avec le délimiteur <code class="inline">c</code>. Le tableau <b>se termine par un pointeur NULL</b>. La plus riche du projet : voir plus bas.</td></tr>
+          <tr><td>ft_itoa</td><td><code class="inline">char *ft_itoa(int n)</code><br>Chaîne qui représente l'entier, négatifs compris. Calcule la taille avant d'allouer : nombre de chiffres, plus un pour le signe si besoin, plus un pour le <code class="inline">\0</code>. Cas à tester : 0 et <code class="inline">INT_MIN</code>.</td></tr>
+          <tr><td>ft_strmapi</td><td><code class="inline">char *ft_strmapi(char const *s, char (*f)(unsigned int, char))</code><br>Applique <code class="inline">f</code> à chaque caractère (son indice, puis le caractère) et range les résultats dans une <b>nouvelle</b> chaîne. <code class="inline">s</code> n'est pas modifiée.</td></tr>
+          <tr><td>ft_striteri</td><td><code class="inline">void ft_striteri(char *s, void (*f)(unsigned int, char*))</code><br>Même idée, mais chaque caractère est passé <b>par adresse</b> : <code class="inline">f</code> modifie <code class="inline">s</code> en place. Rien à allouer, rien à renvoyer.</td></tr>
+          <tr><td>ft_putchar_fd, ft_putstr_fd, ft_putendl_fd, ft_putnbr_fd</td><td><code class="inline">void ft_putchar_fd(char c, int fd)</code> et ses trois cousines (<code class="inline">char *s</code> pour les deux chaînes, <code class="inline">int n</code> pour le nombre). Elles écrivent sur le descripteur <code class="inline">fd</code> ; <code class="inline">putendl</code> ajoute un <code class="inline">\n</code>. Seule fonction externe permise : <code class="inline">write</code>, donc pas de <code class="inline">printf</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">ft_split : un tableau de chaînes à construire</h3>
+    <p class="body">Découpe le travail en quatre temps : <b>compter</b> les mots (un mot est une suite de caractères différents de <code class="inline">c</code>), <b>allouer</b> le tableau de « mots + 1 » pointeurs, puis pour chaque mot <b>mesurer, allouer, copier</b>, et enfin poser le <b>NULL</b> final. Des séparateurs répétés, en tête ou en queue ne produisent jamais de mot vide. Voilà ce que tu dois obtenir en mémoire :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ft_split("hello world 42", ' ')</span></div>
+<pre>tab ──&gt; [ • ][ • ][ • ][NULL]
+          │    │    │
+          │    │    └──&gt; "42\0"
+          │    └───────&gt; "world\0"
+          └────────────&gt; "hello\0"</pre>
+    </div>
+    <p class="body">Trois mots, donc <b>4 appels à malloc</b> : un par mot, plus un pour le tableau. Le NULL n'est pas une allocation, c'est la valeur de la dernière case. Joue avec la démo :</p>
+
+    <div class="demo" data-demo="libft-split-words">
+      <div class="demo-static">
+        <p class="body">Démo : le champ de texte et le séparateur donnent la liste des mots que <code class="inline">ft_split</code> doit renvoyer, leur nombre et le nombre de <code class="inline">malloc</code>.</p>
+        <p class="body"><code class="inline">"  hello   world  42 "</code> avec <code class="inline">' '</code> donne <code class="inline">hello</code>, <code class="inline">world</code>, <code class="inline">42</code> (3 mots, 4 malloc). <code class="inline">",,a,,b,"</code> avec <code class="inline">','</code> donne <code class="inline">a</code>, <code class="inline">b</code> (2 mots). La chaîne vide donne 0 mot et un tableau qui ne contient que NULL.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Découpe une chaîne comme le ferait ft_split","text":"Chaîne s (40 caractères max.)","sep":"Séparateur c","sepRead":"lu :","presetA":"Cas 1 : \"  hello   world  42 \" avec ' '","presetB":"Cas 2 : \",,a,,b,\" avec ','","presetC":"Cas 3 : chaîne vide","emptyString":"(chaîne vide)","errSep":"Le séparateur doit être un seul caractère ASCII (c'est un char en C).","summary":"Mots : {n} · malloc : {m} ({n} pour les mots + 1 pour le tableau)","note":"Le tableau a {m} cases : {n} pointeur(s) vers les mots, puis NULL. La case NULL n'est pas un malloc, c'est seulement la valeur de la dernière case.","noteEmpty":"Aucun mot : ft_split renvoie quand même un tableau (1 malloc) dont la seule case vaut NULL. Elle ne renvoie pas NULL, qui est réservé à l'échec d'une allocation."}</script>
+    </div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Et si un malloc échoue au milieu ?</b> Les mots déjà alloués doivent être libérés avant de renvoyer NULL : voir les <a href="#pitfalls">pièges</a>.</p></div>
+  </section>
+
+  <section id="lists">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>Bonus : les listes <span class="accent">chaînées</span></h2></div>
+    <p class="body">Le bonus ajoute à ton <code class="inline">libft.h</code> la structure que donne le sujet, puis neuf fonctions pour la manipuler :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">libft.h</span></div>
+<pre><span class="k">typedef struct</span> s_list
+{
+	<span class="ty">void</span>			*content;
+	<span class="k">struct</span> s_list	*next;
+}	t_list;</pre>
+    </div>
+
+    <p class="body"><code class="inline">content</code> porte la donnée (un <code class="inline">void *</code> accepte n'importe quel type) ; <code class="inline">next</code> est l'adresse du nœud suivant, ou NULL si c'est le dernier.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fonction</th><th>Rôle</th></tr></thead>
+        <tbody>
+          <tr><td>ft_lstnew</td><td><code class="inline">t_list *ft_lstnew(void *content)</code><br>Alloue un nœud : <code class="inline">content</code> reçoit la valeur donnée, <code class="inline">next</code> vaut NULL.</td></tr>
+          <tr><td>ft_lstadd_front</td><td><code class="inline">void ft_lstadd_front(t_list **lst, t_list *new)</code><br>Ajoute <code class="inline">new</code> au début de la liste.</td></tr>
+          <tr><td>ft_lstsize</td><td><code class="inline">int ft_lstsize(t_list *lst)</code><br>Compte les nœuds.</td></tr>
+          <tr><td>ft_lstlast</td><td><code class="inline">t_list *ft_lstlast(t_list *lst)</code><br>Renvoie le dernier nœud.</td></tr>
+          <tr><td>ft_lstadd_back</td><td><code class="inline">void ft_lstadd_back(t_list **lst, t_list *new)</code><br>Ajoute <code class="inline">new</code> à la fin de la liste.</td></tr>
+          <tr><td>ft_lstdelone</td><td><code class="inline">void ft_lstdelone(t_list *lst, void (*del)(void *))</code><br>Libère le contenu avec <code class="inline">del</code>, puis le nœud avec <code class="inline">free</code>. La mémoire de <code class="inline">next</code> <b>n'est pas</b> libérée.</td></tr>
+          <tr><td>ft_lstclear</td><td><code class="inline">void ft_lstclear(t_list **lst, void (*del)(void *))</code><br>Supprime le nœud donné et tous ses successeurs, puis met le pointeur de liste à NULL.</td></tr>
+          <tr><td>ft_lstiter</td><td><code class="inline">void ft_lstiter(t_list *lst, void (*f)(void *))</code><br>Applique <code class="inline">f</code> au contenu de chaque nœud.</td></tr>
+          <tr><td>ft_lstmap</td><td><code class="inline">t_list *ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *))</code><br>Applique <code class="inline">f</code> au contenu de chaque nœud et construit une <b>nouvelle</b> liste avec les résultats. <code class="inline">del</code> sert à détruire un contenu si besoin. NULL si une allocation échoue.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Pourquoi un double pointeur ?</h3>
+    <p class="body">En C, un argument est passé <b>par copie</b>. Si <code class="inline">ft_lstadd_front</code> recevait seulement un <code class="inline">t_list *</code>, elle changerait sa copie de la tête et l'appelant ne verrait rien. Avec un <code class="inline">t_list **</code>, elle reçoit <b>l'adresse du pointeur de l'appelant</b> et peut le modifier. Même raison pour <code class="inline">ft_lstclear</code>, qui doit remettre la tête à NULL.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">utilisation</span></div>
+<pre>t_list	*head;
+
+head = <span class="nm">NULL</span>;
+<span class="cm">// &amp;head : la fonction peut modifier head</span>
+<span class="fn">ft_lstadd_back</span>(&amp;head, <span class="fn">ft_lstnew</span>(content));</pre>
+    </div>
+    <p class="body">Construis une liste, double ses valeurs avec <code class="inline">ft_lstmap</code>, vide-la avec <code class="inline">ft_lstclear</code>. Les compteurs <code class="inline">malloc</code> et <code class="inline">free</code> montrent ce que ta liste a vraiment alloué : décoche la case pour voir ce que coûte l'oubli de libérer l'ancienne liste.</p>
+
+    <div class="demo" data-demo="libft-list-builder">
+      <div class="demo-static">
+        <p class="body">Démo : une liste d'entiers que l'on construit avec <code class="inline">ft_lstadd_front</code> et <code class="inline">ft_lstadd_back</code>.</p>
+        <p class="body">Séquence de contrôle : <code class="inline">add_back 1</code>, <code class="inline">add_back 2</code>, <code class="inline">add_front 0</code> donnent <code class="inline">0 → 1 → 2 → NULL</code> (taille 3). <code class="inline">ft_lstmap</code> (×2) donne <code class="inline">0 → 2 → 4 → NULL</code>. <code class="inline">ft_lstclear</code> vide la liste.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Construis une liste (valeur : entier de -999 à 999)","value":"Valeur","first":"premier","reset":"Tout réinitialiser","freeOld":"Libérer l'ancienne liste après ft_lstmap (décoche pour provoquer une fuite)","emptyList":"lst = NULL (liste vide)","stats":"taille : {size} · dernier : {last} · malloc : {alloc} · free : {free} · fuites : {leak}","errValue":"Entre un entier de -999 à 999.","errFull":"La démo limite la liste à {max} nœuds.","errEmpty":"La liste est vide : il n'y a rien à faire ici.","errBig":"La démo limite les valeurs à ±{max} pour rester lisible.","logFront":"ft_lstadd_front : le nœud {v} devient la tête de la liste.","logBack":"ft_lstadd_back : le nœud {v} est accroché à la fin.","logDelone":"ft_lstdelone : le nœud de tête ({v}) est libéré, le suivant devient la tête. ft_lstdelone ne touche pas à next : c'est à toi de garder le suivant.","logMapFreed":"ft_lstmap : nouvelle liste construite ({n} nœuds, contenu × 2) et ancienne liste libérée avec ft_lstclear.","logMapLeak":"ft_lstmap : l'ancienne liste n'est plus accessible et n'a pas été libérée : fuite de {n} nœud(s).","logClear":"ft_lstclear : {n} nœud(s) libéré(s) (contenu puis nœud), lst vaut NULL.","logClearEmpty":"ft_lstclear sur une liste déjà vide : rien à libérer, lst reste NULL.","logReset":"Démo réinitialisée."}</script>
+    </div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>Étape par <span class="accent">étape</span></h2></div>
+    <p class="body">Un ordre qui limite les allers-retours : chaque étape s'appuie sur ce que tu viens d'écrire.</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Prépare le terrain.</b> Un <code class="inline">libft.h</code> avec ses gardes d'inclusion, un Makefile minimal (voir plus bas) et un <code class="inline">main</code> de test <b>en dehors du dépôt</b> ou non suivi par git. Lance <code class="inline">norminette</code> dès le premier fichier.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Échauffement.</b> Les tests de caractères, <code class="inline">ft_toupper</code>, <code class="inline">ft_tolower</code> et <code class="inline">ft_strlen</code>. Courts, mais ils te font prendre le pli de la Norme.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Les chaînes.</b> <code class="inline">ft_strchr</code>, <code class="inline">ft_strrchr</code>, <code class="inline">ft_strncmp</code>, <code class="inline">ft_strnstr</code>, puis <code class="inline">ft_strlcpy</code> et <code class="inline">ft_strlcat</code> en testant les tailles 0, 1 et trop petites.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>La mémoire.</b> <code class="inline">ft_memset</code>, <code class="inline">ft_bzero</code>, <code class="inline">ft_memcpy</code>, <code class="inline">ft_memmove</code>, <code class="inline">ft_memchr</code>, <code class="inline">ft_memcmp</code>. Puis <code class="inline">ft_calloc</code> et <code class="inline">ft_strdup</code>, premières fonctions qui allouent.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>Conversion et premières allocations de la partie 2.</b> <code class="inline">ft_atoi</code> d'abord, puis la partie 2 : <code class="inline">ft_substr</code>, <code class="inline">ft_strjoin</code>, <code class="inline">ft_strtrim</code>, qui réutilisent ce que tu as déjà.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>Sorties et fonctions en paramètre.</b> <code class="inline">ft_itoa</code>, <code class="inline">ft_strmapi</code>, <code class="inline">ft_striteri</code>, les quatre <code class="inline">ft_put*_fd</code>. Garde <code class="inline">ft_split</code> pour la fin : c'est la plus riche en gestion d'erreurs.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>Le Makefile complet.</b> Objets, archive, <code class="inline">clean</code>, <code class="inline">fclean</code>, <code class="inline">re</code>, sans relink.</span></div>
+      <div class="step on"><span class="n">8</span><span class="txt"><b>Le bonus.</b> <code class="inline">ft_lstnew</code>, <code class="inline">ft_lstadd_front</code>, <code class="inline">ft_lstsize</code>, <code class="inline">ft_lstlast</code>, <code class="inline">ft_lstadd_back</code>, <code class="inline">ft_lstdelone</code>, <code class="inline">ft_lstclear</code>, <code class="inline">ft_lstiter</code>, <code class="inline">ft_lstmap</code>, puis la règle <code class="inline">bonus</code> du Makefile, qui ajoute ces fonctions à <code class="inline">libft.a</code>. Vérifie dans ton sujet si leurs fichiers doivent porter le suffixe <code class="inline">_bonus</code>.</span></div>
+      <div class="step on"><span class="n">9</span><span class="txt"><b>Contrôle final.</b> Tes propres <code class="inline">main</code> avec les cas limites, puis <code class="inline">valgrind</code> ou <code class="inline">-fsanitize=address</code> sous Linux : aucune fuite, aucun crash. Sur Mac Apple Silicon, la détection de fuites d'AddressSanitizer n'est pas disponible : utilise plutôt <code class="inline">leaks --atExit -- ./a.out</code>. Les testeurs écrits par la communauté complètent tes tests, ils ne les remplacent pas.</span></div>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Un Makefile qui ne relink pas</h3>
+    <p class="body">Un « relink » : <code class="inline">make</code> refait l'archive alors que rien n'a changé. Pour l'éviter, la règle de l'archive dépend des fichiers objets, et chaque objet de son <code class="inline">.c</code> ; <code class="inline">make</code> ne reconstruit alors que ce qui est plus ancien que sa source.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Makefile · squelette</span></div>
+<pre>NAME = libft.a
+CFLAGS = -Wall -Wextra -Werror
+SRCS = ft_atoi.c ft_bzero.c <span class="cm">...</span>
+OBJ = $(SRCS:.c=.o)
+
+all: $(NAME)
+
+<span class="cm"># dépend des .o : aucun .o modifié, aucune nouvelle archive</span>
+$(NAME): $(OBJ)
+	ar rcs $(NAME) $(OBJ)
+
+%.o: %.c libft.h
+	$(CC) $(CFLAGS) -c $&lt; -o $@</pre>
+    </div>
+    <p class="body">Le test est simple : lance <code class="inline">make</code> deux fois de suite. La seconde fois, il doit répondre qu'il n'y a rien à faire pour <code class="inline">all</code>. Fais le même essai avec <code class="inline">make bonus</code>.</p>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Pièges <span class="accent">classiques</span></h2></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Un malloc échoue en plein milieu.</b> Dans <code class="inline">ft_split</code>, si l'allocation du troisième mot échoue, les deux premiers et le tableau existent déjà. Il faut libérer chaque mot déjà alloué, puis le tableau, avant de renvoyer NULL ; sinon c'est une fuite. Même logique dans <code class="inline">ft_lstmap</code> (la nouvelle liste en cours de construction) et partout où tu enchaînes deux allocations. Teste le retour de <b>chaque</b> <code class="inline">malloc</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Un <code class="inline">size_t</code> ne descend jamais sous zéro.</b> Il est non signé : 0 moins 1 donne la plus grande valeur possible, pas -1.</p></div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">piege.c</span></div>
+<pre><span class="ty">size_t</span>	i;
+
+i = <span class="nm">0</span>;
+i--;                <span class="cm">// SIZE_MAX, pas -1</span>
+<span class="k">while</span> (i &gt;= <span class="nm">0</span>)    <span class="cm">// toujours vrai</span>
+	i--;</pre>
+    </div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p>Cas typiques : <code class="inline">size - 1</code> quand <code class="inline">size</code> vaut 0 (<code class="inline">ft_strlcpy</code>), <code class="inline">len - 1</code> sur une chaîne vide (<code class="inline">ft_strtrim</code>, <code class="inline">ft_strrchr</code>), une boucle <code class="inline">while (n--)</code> dont tu relis <code class="inline">n</code> ensuite. Ces formes indirectes sont le vrai danger : le compilateur ne les signale pas. La forme directe de l'exemple (<code class="inline">i &gt;= 0</code> sur un non signé) dépend du compilateur : GCC la signale avec <code class="inline">-Wtype-limits</code>, inclus dans <code class="inline">-Wextra</code>, donc refusée avec <code class="inline">-Werror</code> ; le clang d'Apple ne dit rien. Comparer un <code class="inline">int</code> à un <code class="inline">size_t</code> déclenche <code class="inline">-Wsign-compare</code>, activé par <code class="inline">-Wextra</code> et donc refusé avec <code class="inline">-Werror</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">ft_itoa(INT_MIN)</code>.</b> <code class="inline">INT_MIN</code> vaut -2147483648 mais <code class="inline">INT_MAX</code> seulement 2147483647 : écrire <code class="inline">-n</code> sur un <code class="inline">int</code> déborde (comportement indéfini). Travaille sur un type plus large (<code class="inline">long long</code> a au moins 64 bits). Pense aussi à 0, qui doit donner <code class="inline">"0"</code>, et à compter le signe dans la taille allouée. La même précaution vaut pour <code class="inline">ft_putnbr_fd(-2147483648, fd)</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">ft_atoi</code> et débordement.</b> Le man de <code class="inline">atoi</code> ne définit pas le résultat quand la valeur ne tient pas dans un <code class="inline">int</code>, et le sujet ne te demande pas d'inventer une règle. Veille quand même à ne pas planter, et à bien lire <code class="inline">"-2147483648"</code> : accumuler dans un <code class="inline">int</code> dépasse déjà avant d'appliquer le signe, un accumulateur plus large évite cette surprise. Les espaces à sauter sont ceux de <code class="inline">isspace</code> (espace, <code class="inline">\t</code>, <code class="inline">\n</code>, <code class="inline">\v</code>, <code class="inline">\f</code>, <code class="inline">\r</code>) ; un seul signe est lu, donc <code class="inline">"+-5"</code> donne 0.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">ft_strlcpy</code> avec <code class="inline">dstsize == 0</code>.</b> Avec une taille nulle, il ne faut <b>rien écrire</b>, pas même le <code class="inline">\0</code>, mais renvoyer quand même la longueur de <code class="inline">src</code>. L'erreur classique est de poser <code class="inline">dst[size - 1] = '\0'</code> sans test : <code class="inline">size - 1</code> vaut alors <code class="inline">SIZE_MAX</code> (piège précédent) et tu écris très loin hors de <code class="inline">dst</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Fuite dans <code class="inline">ft_lstclear</code>.</b> Pour chaque nœud : garde <code class="inline">next</code> <b>avant</b> de libérer, applique <code class="inline">del</code> au contenu, libère le nœud, avance. Oublier <code class="inline">del</code>, oublier le <code class="inline">free</code> du nœud, ou relire <code class="inline">next</code> après le <code class="inline">free</code> sont les trois classiques. À la fin, le pointeur de liste doit valoir NULL.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">ft_calloc</code> et multiplication qui déborde.</b> <code class="inline">nmemb * size</code> se calcule en <code class="inline">size_t</code> : si le produit dépasse <code class="inline">SIZE_MAX</code>, il revient à une petite valeur, <code class="inline">malloc</code> réussit et tu rends un bloc <b>trop petit</b> (corruption mémoire à l'usage). Teste avant de multiplier (<code class="inline">SIZE_MAX</code> vient de <code class="inline">stdint.h</code>) :</p></div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ft_calloc.c · l'idée du test</span></div>
+<pre><span class="cm">// le produit déborderait ?</span>
+<span class="k">if</span> (nmemb != <span class="nm">0</span> &amp;&amp; size &gt; SIZE_MAX / nmemb)
+	<span class="k">return</span> (<span class="nm">NULL</span>);</pre>
+    </div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Un Makefile qui relink.</b> Si une règle <code class="inline">all</code> relance <code class="inline">ar</code> sans dépendre des objets, ou si <code class="inline">$(NAME)</code> est déclarée <code class="inline">.PHONY</code> alors qu'elle produit un fichier, <code class="inline">make</code> refait l'archive à chaque appel (les objets, eux, ne sont pas recompilés). Teste deux <code class="inline">make</code> de suite.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Une fonction auxiliaire qui n'est pas <code class="inline">static</code>.</b> Elle devient visible de tout le programme : si un autre fichier (ou le projet qui utilisera ta libft) définit le même nom, l'édition de liens échoue (« multiple definition » sous Linux, « duplicate symbol » sous macOS). Le sujet demande des helpers <code class="inline">static</code> pour limiter leur portée au fichier.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Comparer en <code class="inline">char</code> au lieu de <code class="inline">unsigned char</code>.</b> Dans <code class="inline">ft_memcmp</code> et <code class="inline">ft_strncmp</code>, les octets supérieurs à 127 doivent être comparés comme des valeurs de 0 à 255. Avec un <code class="inline">char</code> signé, ils deviendraient négatifs et l'ordre serait faux.</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Comment je <span class="accent">l'ai fait</span></h2></div>
+    <div class="how"><p class="body">J'ai suivi l'ordre du sujet, en commençant par les fonctions courtes dont les autres dépendent. Mon Makefile range les sources en trois listes (partie 1, partie 2, bonus) ; une règle générique compile chaque fichier avec les trois drapeaux, <code class="inline">ar rcs</code> fabrique <code class="inline">libft.a</code>, et la règle <code class="inline">bonus</code> y ajoute les fonctions de liste. Pour <code class="inline">ft_memmove</code>, je compare les deux adresses afin de choisir le sens de la copie. J'ai découpé <code class="inline">ft_split</code> en petites fonctions (compter les mots, mesurer le suivant, remplir le tableau) plus un nettoyage qui libère les mots déjà alloués si un <code class="inline">malloc</code> échoue. <code class="inline">ft_itoa</code> calcule sur un <code class="inline">long</code> à cause de <code class="inline">INT_MIN</code>, et <code class="inline">ft_lstmap</code> vide la nouvelle liste dès qu'un nœud échoue. J'ai testé avec mes propres <code class="inline">main</code>, puis avec des testeurs de la communauté.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 À retenir (défense d'éval)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>libft.a se construit avec <code class="inline">ar rcs</code></b> (jamais <code class="inline">libtool</code>), avec <code class="inline">-Wall -Wextra -Werror</code>, à la racine du dépôt.</div></li>
+        <li><span class="chk">✓</span><div><b>Le Makefile a <code class="inline">$(NAME)</code>, <code class="inline">all</code>, <code class="inline">clean</code>, <code class="inline">fclean</code>, <code class="inline">re</code></b> (et <code class="inline">bonus</code>), et ne relink pas : un second <code class="inline">make</code> ne fait rien.</div></li>
+        <li><span class="chk">✓</span><div><b>memcpy ou memmove ?</b> <code class="inline">memmove</code> gère le chevauchement : si <code class="inline">dst</code> est après <code class="inline">src</code>, on copie depuis la fin.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">strlcpy</code> et <code class="inline">strlcat</code> renvoient la longueur qu'elles voulaient créer</b> ; un retour supérieur ou égal à <code class="inline">size</code> signale une troncature, et <code class="inline">size == 0</code> n'écrit rien.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">size_t</code> est non signé</b> : <code class="inline">0 - 1</code> donne <code class="inline">SIZE_MAX</code>, et comparer un <code class="inline">int</code> à un <code class="inline">size_t</code> fait échouer <code class="inline">-Werror</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Chaque <code class="inline">malloc</code> est testé</b> ; en cas d'échec on libère tout ce qui est déjà alloué (<code class="inline">ft_split</code>, <code class="inline">ft_lstmap</code>) avant de renvoyer NULL.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">ft_itoa</code> et <code class="inline">ft_putnbr_fd</code> gèrent <code class="inline">INT_MIN</code></b> grâce à un type plus large, et <code class="inline">ft_itoa(0)</code> donne <code class="inline">"0"</code>.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">ft_calloc</code> teste le dépassement avant de multiplier</b>, puis met le bloc à zéro.</div></li>
+        <li><span class="chk">✓</span><div><b>Pourquoi <code class="inline">t_list **</code> ?</b> Pour modifier la tête de l'appelant. <code class="inline">ft_lstclear</code> libère le contenu (via <code class="inline">del</code>) puis le nœud, et met la tête à NULL ; <code class="inline">ft_lstmap</code> crée une nouvelle liste.</div></li>
+        <li><span class="chk">✓</span><div><b>Helpers <code class="inline">static</code>, aucune variable globale, Norme respectée</b> (25 lignes, 5 fonctions par fichier, pas de <code class="inline">for</code> ; ternaire : selon la version de la Norme, interdit ou limité aux cas simples non imbriqués — vérifie la Norme en vigueur).</div></li>
+        <li><span class="chk">☐</span><div><b>Checklist avant de rendre.</b> <code class="inline">norminette</code> sans erreur, bonus compris.</div></li>
+        <li><span class="chk">☐</span><div><b>Checklist.</b> <code class="inline">make</code> deux fois de suite, puis <code class="inline">make re</code> ; <code class="inline">nm libft.a</code> ne montre aucun <code class="inline">main</code>.</div></li>
+        <li><span class="chk">☐</span><div><b>Checklist.</b> Tes propres tests aux limites, puis <code class="inline">valgrind</code> ou <code class="inline">-fsanitize=address</code> sous Linux (sur Mac Apple Silicon : <code class="inline">leaks --atExit -- ./a.out</code>) : aucune fuite, aucun crash. Aucun fichier de test dans le dépôt.</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

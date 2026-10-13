@@ -1,0 +1,240 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>Projet C · get_next_line</span>
+  <h1 class="title">get_next_line, <span class="g">ligne par ligne</span></h1>
+  <p class="lead">Comprendre la <b>variable statique</b>, <code class="inline">read()</code> et <code class="inline">BUFFER_SIZE</code> pour rendre <b>une ligne par appel</b>, quelle que soit la taille du buffer, sans perdre de texte et sans fuite mémoire.</p>
+  <p class="subj">sujet : Get Next Line · version 14.0 · cc -Wall -Wextra -Werror -D BUFFER_SIZE=n · read, malloc, free</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>Le projet en <span class="accent">bref</span></h2></div>
+    <p class="body">Tu écris <code class="inline">get_next_line</code> : une fonction qui, à chaque appel, rend <b>la ligne suivante</b> d'un descripteur de fichier. Appelée en boucle, elle lit un fichier entier ligne par ligne ; quand il n'y a plus rien à lire, elle rend <code class="inline">NULL</code>. Le sujet la présente comme une fonction utile à garder dans ta collection (tu pourras l'ajouter à ta libft une fois le projet validé) et comme le moment d'apprendre un concept important du C : les <b>variables statiques</b>.</p>
+    <p class="body">Voilà comment un programme de test l'utilise. Ce <code class="inline">main</code> n'est pas à rendre : le sujet encourage à écrire tes propres tests, qui ne sont pas notés.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">main.c (ton test, non rendu)</span></div>
+<pre><span class="ty">int</span>	<span class="fn">main</span>(<span class="ty">void</span>)
+{
+	<span class="ty">int</span>	fd;
+	<span class="ty">char</span>	*line;
+
+	fd = <span class="fn">open</span>(<span class="st">"fichier.txt"</span>, O_RDONLY);
+	<span class="k">while</span> ((line = <span class="fn">get_next_line</span>(fd)) != <span class="nm">NULL</span>)
+	{
+		<span class="fn">printf</span>(<span class="st">"%s"</span>, line);	<span class="cm">// la ligne contient déjà son \n</span>
+		<span class="fn">free</span>(line);		<span class="cm">// c'est à l'appelant de la libérer</span>
+	}
+	<span class="fn">close</span>(fd);
+	<span class="k">return</span> (<span class="nm">0</span>);
+}</pre>
+    </div>
+    <p class="body">Trois questions résument tout le projet. Le reste du cours y répond une par une.</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Où garder ce qui a été lu en trop ?</b> <code class="inline">read()</code> lit des blocs, pas des lignes : il dépasse presque toujours la fin de la ligne. Le surplus doit survivre jusqu'à l'appel suivant.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Quand arrêter de lire ?</b> Dès qu'un <code class="inline">\n</code> est dans ce que tu as lu, ou quand <code class="inline">read()</code> annonce la fin du fichier ou une erreur.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Qui libère quoi ?</b> Le sujet ne tolère aucune fuite mémoire. Chaque zone allouée doit être libérée, sur tous les chemins.</span></div>
+    </div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>La carte du <span class="accent">projet</span></h2></div>
+    <div class="map">
+      <div class="map-item"><span class="ex">Fonction</span><div><h4>get_next_line</h4><p>Prototype : <code class="inline">char *get_next_line(int fd);</code> Rend la ligne lue sur <code class="inline">fd</code>, ou <code class="inline">NULL</code> s'il n'y a plus rien à lire ou en cas d'erreur.</p></div></div>
+      <div class="map-item"><span class="ex">Fichiers</span><div><h4>À rendre</h4><p><code class="inline">get_next_line.c</code>, <code class="inline">get_next_line_utils.c</code>, <code class="inline">get_next_line.h</code>. Le header contient au moins le prototype ; tes fonctions d'aide vont dans le fichier <code class="inline">_utils</code>. Pas de Makefile dans la liste.</p></div></div>
+      <div class="map-item"><span class="ex">Autorisé</span><div><h4>Fonctions externes</h4><p><code class="inline">read</code>, <code class="inline">malloc</code>, <code class="inline">free</code>. Pour le reste, tu l'écris toi-même.</p></div></div>
+      <div class="map-item"><span class="ex">Interdit</span><div><h4>Ce qui te ferait échouer</h4><p>Ta <code class="inline">libft</code>, <code class="inline">lseek()</code> et les variables globales.</p></div></div>
+      <div class="map-item"><span class="ex">Compiler</span><div><h4>-D BUFFER_SIZE=n</h4><p>Avec <code class="inline">cc -Wall -Wextra -Werror</code>. Le projet doit aussi compiler <b>sans</b> ce drapeau : tu choisis la valeur par défaut.</p></div></div>
+      <div class="map-item"><span class="ex">Bonus</span><div><h4>Plusieurs descripteurs</h4><p>Une seule variable statique et plusieurs <code class="inline">fd</code> lus en alternance. Fichiers <code class="inline">get_next_line_bonus.c</code>, <code class="inline">get_next_line_bonus.h</code>, <code class="inline">get_next_line_utils_bonus.c</code>. Évalué seulement si l'obligatoire est parfait.</p></div></div>
+      <div class="map-item"><span class="ex">README</span><div><h4>README.md à la racine</h4><p>Première ligne en italique : <i>This project has been created as part of the 42 curriculum by &lt;login&gt;</i>. Sections « Description », « Instructions », « Resources » (avec l'usage de l'IA), plus l'explication et la justification de ton algorithme.</p></div></div>
+      <div class="map-item"><span class="ex">Norme</span><div><h4>Règles communes</h4><p>Norme sur tous les fichiers, bonus compris : une erreur de Norme donne 0. Un crash (segfault, double free…) donne 0. Aucune fuite mémoire n'est tolérée.</p></div></div>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">compilation</span></div>
+<pre>cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c main.c
+<span class="cm"># le 42 du -D est un exemple : tes évaluateurs et la Moulinette changeront la valeur</span></pre>
+    </div>
+    <p class="body">Le sujet fixe aussi le comportement attendu. Garde ce tableau sous les yeux pendant que tu codes.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Règle</th><th>Ce que ça veut dire pour toi</th></tr></thead>
+        <tbody>
+          <tr><td>Une ligne par appel</td><td>Des appels répétés (une boucle) doivent permettre de lire tout le fichier, une ligne à la fois.</td></tr>
+          <tr><td>Le \n est inclus</td><td>La ligne rendue contient son <code class="inline">\n</code> final, sauf si la fin du fichier est atteinte et que le fichier ne finit pas par un <code class="inline">\n</code>.</td></tr>
+          <tr><td>NULL</td><td>Rien à lire (ou plus rien) ou erreur : <code class="inline">NULL</code>.</td></tr>
+          <tr><td>Fichier et stdin</td><td>La fonction doit marcher aussi bien sur un fichier que sur l'entrée standard.</td></tr>
+          <tr><td>Lire le moins possible</td><td>Dès que tu rencontres un <code class="inline">\n</code>, tu rends la ligne. Interdit de lire tout le fichier puis de découper.</td></tr>
+          <tr><td>BUFFER_SIZE</td><td>Réglé par tes évaluateurs et la Moulinette. Le sujet demande si ça marche avec 9999, avec 1, avec 10000000, et si tu sais pourquoi.</td></tr>
+          <tr><td>Comportement indéfini</td><td>Fichier modifié après le dernier appel alors que <code class="inline">read()</code> n'a pas atteint la fin ; fichier binaire (tu peux le gérer si tu veux, ce n'est pas exigé).</td></tr>
+          <tr><td>Descripteurs</td><td>Un <code class="inline">fd</code> ne pointe pas toujours vers un fichier ordinaire : prévois des tests variés.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="static">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Pourquoi une variable <span class="accent">static</span></h2></div>
+    <p class="body">Un appel de <code class="inline">get_next_line</code> rend <b>une seule ligne</b>. Mais <code class="inline">read()</code> ne sait pas où finissent tes lignes : il lit un bloc d'octets, point. Presque toujours, ce bloc contient la fin d'une ligne <b>et le début de la suivante</b>. Ce surplus, tu l'as lu : il n'est plus dans le fichier, le descripteur a avancé. Et <code class="inline">lseek()</code> est interdit, donc pas question de reculer. Si tu le jettes à la fin de l'appel, il est perdu pour de bon.</p>
+    <p class="body">Il te faut donc un endroit où ce « reste » <b>survit entre deux appels</b>. Une variable locale ordinaire disparaît quand la fonction retourne. Une variable globale réglerait le problème, mais elles sont interdites. La réponse du sujet : la variable <code class="inline">static</code>.</p>
+    <div class="duo">
+      <div class="card">
+        <h3>Variable locale</h3>
+        <ul>
+          <li><span class="m">•</span><span>Créée à chaque appel de la fonction</span></li>
+          <li><span class="m">•</span><span>Détruite au <code class="inline">return</code></span></li>
+          <li><span class="m">•</span><span>Valeur de départ indéterminée tant que tu ne l'initialises pas</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Variable static</h3>
+        <ul>
+          <li><span class="m">•</span><span>Créée une seule fois, elle existe pendant tout le programme</span></li>
+          <li><span class="m">•</span><span>Garde sa valeur d'un appel à l'autre</span></li>
+          <li><span class="m">•</span><span>Vaut zéro au départ (donc <code class="inline">NULL</code> pour un pointeur) si tu ne l'initialises pas</span></li>
+          <li><span class="m">•</span><span>Reste visible uniquement dans la fonction qui la déclare</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="body" style="margin-top:18px">Un exemple minuscule, sans rapport avec le projet, pour voir la différence :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">compteur.c</span></div>
+<pre><span class="ty">int</span>	<span class="fn">compteur</span>(<span class="ty">void</span>)
+{
+	<span class="k">static</span> <span class="ty">int</span>	n;	<span class="cm">// vaut 0 au premier appel, puis garde sa valeur</span>
+
+	n++;
+	<span class="k">return</span> (n);
+}
+<span class="cm">// compteur() rend 1, puis 2, puis 3... Sans static, n repartirait d'une valeur indéterminée à chaque appel.</span></pre>
+    </div>
+    <div class="callout"><span class="bulb">💡</span><p><b>Ce qui survit, c'est le pointeur. Le texte aussi, s'il est sur le heap.</b> Ta variable statique sera typiquement un <code class="inline">char *</code> qui pointe vers une chaîne allouée avec <code class="inline">malloc</code> : la chaîne reste là tant que tu ne la libères pas, et la variable statique est la poignée qui te permet de la retrouver au prochain appel. C'est donc à toi de libérer ce reste, au bon moment.</p></div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">get_next_line.c (squelette)</span></div>
+<pre><span class="ty">char</span>	*<span class="fn">get_next_line</span>(<span class="ty">int</span> fd)
+{
+	<span class="k">static</span> <span class="ty">char</span>	*stash;	<span class="cm">// le reste des lectures précédentes (NULL au départ)</span>
+
+	<span class="cm">// 1. remplir le reste jusqu'à y trouver un \n (ou la fin du fichier)</span>
+	<span class="cm">// 2. en extraire la ligne</span>
+	<span class="cm">// 3. ne garder dans le reste que ce qui suit la ligne</span>
+}</pre>
+    </div>
+    <p class="body">Où la déclarer ? <b>Dans la fonction.</b> Une variable statique placée en dehors de toute fonction est visible de tout le fichier : un évaluateur pourra la juger équivalente à une variable globale.</p>
+  </section>
+
+  <section id="read">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2><span class="accent">read()</span> et BUFFER_SIZE</h2></div>
+    <p class="body"><code class="inline">read(fd, buf, count)</code> (page de manuel <code class="inline">man 2 read</code>, header <code class="inline">&lt;unistd.h&gt;</code>) lit <b>au plus</b> <code class="inline">count</code> octets depuis <code class="inline">fd</code> et les écrit dans <code class="inline">buf</code>. Son retour compte :</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>read() rend</th><th>Signification</th><th>Ce que tu fais</th></tr></thead>
+        <tbody>
+          <tr><td>n &gt; 0</td><td>n octets ont été lus (parfois moins que demandé)</td><td>Tu les ajoutes au reste et tu regardes s'il y a un <code class="inline">\n</code></td></tr>
+          <tr><td>0</td><td>Fin du fichier</td><td>Du texte en attente ? tu le rends tel quel. Rien ? <code class="inline">NULL</code></td></tr>
+          <tr><td>-1</td><td>Erreur</td><td>Tu libères ce que tu tiens et tu rends <code class="inline">NULL</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px"><code class="inline">read</code> ne met <b>pas</b> de <code class="inline">'\0'</code> à la fin : ton buffer est un bloc d'octets, pas une chaîne C. Prévois une place de plus que <code class="inline">BUFFER_SIZE</code> et termine-le toi-même avant d'appeler une fonction de chaîne.</p>
+    <p class="body"><code class="inline">BUFFER_SIZE</code> est la taille de bloc demandée à chaque <code class="inline">read()</code>. Elle n'est pas dans ton code : elle vient de la ligne de compilation (<code class="inline">-D BUFFER_SIZE=n</code>) et tes correcteurs la changent. Comme le projet doit aussi compiler sans le drapeau, tu donnes une valeur par défaut dans le header :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">get_next_line.h</span></div>
+<pre><span class="op">#ifndef</span> BUFFER_SIZE
+<span class="op"># define</span> BUFFER_SIZE <span class="nm">42</span>	<span class="cm">// la valeur par défaut est libre</span>
+<span class="op">#endif</span></pre>
+    </div>
+    <p class="body">La méthode tient en une boucle : <b>tant que le reste ne contient pas de <code class="inline">\n</code>, lis un bloc et colle-le au reste</b>. Dès qu'il y a un <code class="inline">\n</code> (ou que <code class="inline">read</code> rend 0), tu découpes : la ligne part, la suite reste en <code class="inline">static</code>. Joue avec la démo ci-dessous. Le « fichier » est une simple chaîne, et chaque clic appelle <code class="inline">get_next_line</code> une fois.</p>
+    <div class="demo" data-demo="get_next_line-buffer">
+      <div class="demo-static">
+        <p class="body"><b>Démo (nécessite JavaScript) :</b> un « fichier » de texte, un curseur <code class="inline">BUFFER_SIZE</code> de 1 à 16 et un bouton pour appeler <code class="inline">get_next_line</code>. À chaque appel, la démo affiche chaque <code class="inline">read()</code>, le contenu de la variable statique avant et après, la ligne retournée et le nombre de <code class="inline">read()</code> cumulés.</p>
+        <p class="body">Exemple sans JavaScript : fichier <code class="inline">ab\ncd\nef</code> (sans <code class="inline">\n</code> final), <code class="inline">BUFFER_SIZE=4</code>.</p>
+        <p class="body"><b>Appel 1.</b> <code class="inline">read</code> lit <code class="inline">"ab\nc"</code>, la fonction retourne <code class="inline">"ab\n"</code>, le reste est <code class="inline">"c"</code>.<br><b>Appel 2.</b> <code class="inline">read</code> lit <code class="inline">"d\nef"</code>, retourne <code class="inline">"cd\n"</code>, reste <code class="inline">"ef"</code>.<br><b>Appel 3.</b> <code class="inline">read</code> lit 0 octet (fin du fichier), retourne <code class="inline">"ef"</code>, <code class="inline">static</code> repasse à <code class="inline">NULL</code>.<br><b>Appel 4.</b> <code class="inline">read</code> lit encore 0 octet, retourne <code class="inline">NULL</code>.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"À chaque clic, get_next_line lit seulement ce qu'il faut pour rendre une ligne.","file_label":"Contenu du « fichier » (120 caractères max., ASCII, un caractère = un octet)","sample":"ab\ncd\nef","bs_label":"BUFFER_SIZE","call":"Appeler get_next_line","restart":"Recommencer","empty":"Aucun appel pour l'instant. Si tu changes le fichier ou BUFFER_SIZE, la démo repart de zéro, comme après une nouvelle compilation.","legend_done":"déjà rendu","legend_stash":"dans la variable statique","legend_unread":"pas encore lu","legend_eof":"fin de fichier atteinte (read a rendu 0)","log_label":"Appels de get_next_line, le plus récent en premier","call_n":"Appel n° {n}","k_before":"static avant","k_reads":"read() de cet appel","k_after":"static après","k_ret":"get_next_line retourne","k_total":"read() cumulés","read_n":"read n° {i}","bytes":"octets lus : {n}","eof":"fin de fichier","no_read":"aucun read() : le reste suffisait","more_reads":"… {n} autres read() …","note_noread":"Le reste contenait déjà un \\n : aucun read() n'a été nécessaire. On rend la ligne et on garde la suite.","note_found":"Un \\n est apparu dans ce qui vient d'être lu : on arrête de lire, on rend la ligne et on garde la suite dans static.","note_eofline":"read() a rendu 0 (fin de fichier) et il restait du texte sans \\n : on le rend tel quel, c'est la dernière ligne, et static repasse à NULL.","note_null":"read() a rendu 0 et il ne reste rien dans static (NULL) : il n'y a plus rien à rendre, donc NULL (et non une chaîne vide).","warn_ascii":"Caractères ignorés (hors ASCII imprimable) : {n}."}</script>
+    </div>
+    <p class="body">Ce que la démo te montre, à reproduire toi-même :</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Le reste fait le lien.</b> Avec le fichier d'exemple et <code class="inline">BUFFER_SIZE=4</code>, le 1<sup>er</sup> appel lit <code class="inline">"ab\nc"</code> : il rend <code class="inline">"ab\n"</code> et garde <code class="inline">"c"</code>, que le 2<sup>e</sup> appel complète.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Un appel peut ne pas lire du tout.</b> Mets <code class="inline">BUFFER_SIZE</code> à 16 : tout le fichier arrive au premier appel, puis tant que le reste contient un <code class="inline">\n</code>, les lignes en sortent sans nouveau <code class="inline">read()</code>.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Avec 1, tout marche aussi, mais lentement.</b> Autant de <code class="inline">read()</code> que d'octets : le compteur « cumulés » grimpe vite.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>La fin se lit en deux temps.</b> Fichier sans <code class="inline">\n</code> final : un <code class="inline">read()</code> à 0 fait rendre la dernière ligne, l'appel suivant rend <code class="inline">NULL</code>. Fichier qui finit par <code class="inline">\n</code> : après la dernière ligne, le <code class="inline">read()</code> suivant rend 0 et la fonction rend <code class="inline">NULL</code>.</span></div>
+    </div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>Étape par <span class="accent">étape</span></h2></div>
+    <p class="body">Un ordre de travail qui évite de tout déboguer d'un coup. Le découpage en fonctions est un conseil, pas une exigence : le sujet ne fixe que le prototype et les fichiers. Ne le prends pas pour une solution toute faite, chaque étape reste à écrire.</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Pose le header.</b> Le prototype de <code class="inline">get_next_line</code>, une garde d'inclusion, les includes dont tu as besoin (<code class="inline">&lt;stdlib.h&gt;</code> pour <code class="inline">malloc</code> et <code class="inline">free</code>, <code class="inline">&lt;unistd.h&gt;</code> pour <code class="inline">read</code>) et la valeur par défaut de <code class="inline">BUFFER_SIZE</code>.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Écris tes outils dans <code class="inline">get_next_line_utils.c</code>.</b> La libft est interdite : tu réécris seulement ce dont tu as besoin. Typiquement la longueur d'une chaîne, la recherche d'un caractère, la concaténation de deux chaînes (dans une nouvelle allocation) et la copie d'une portion. La Norme limite la taille des fonctions et leur nombre par fichier : ces petits outils t'aideront à rester dans les clous. Teste chacun à part.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Commence par les garde-fous.</b> <code class="inline">fd</code> négatif : <code class="inline">NULL</code> tout de suite. Une valeur de <code class="inline">BUFFER_SIZE</code> qui n'a aucun sens (zéro, négatif) mérite aussi un <code class="inline">NULL</code> plutôt qu'un comportement indéfini.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>Remplis le reste.</b> Alloue un buffer de lecture (avec <code class="inline">malloc</code>, de <code class="inline">BUFFER_SIZE</code> + 1 octets). Tant que le reste n'a pas de <code class="inline">\n</code> : <code class="inline">read</code>, termine le bloc par un <code class="inline">'\0'</code> et ajoute-le au reste. Si <code class="inline">read</code> rend 0, sors de la boucle. S'il rend -1, libère tout et rends <code class="inline">NULL</code>. Libère le buffer de lecture à chaque sortie.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>Extrais la ligne.</b> S'il y a un <code class="inline">\n</code>, copie jusqu'à lui, <code class="inline">\n</code> compris. Sinon (fin du fichier sans <code class="inline">\n</code>), copie tout ce qui reste. Si le reste est vide ou n'existe pas : rien à rendre, donc <code class="inline">NULL</code>.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>Recalcule le reste.</b> Ce qui suit le <code class="inline">\n</code> devient le nouveau reste (nouvelle allocation), puis tu libères l'ancien. S'il ne reste rien, ne garde pas une chaîne vide en vie : libère et remets le pointeur à <code class="inline">NULL</code>.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>Teste méthodiquement.</b> <code class="inline">BUFFER_SIZE</code> à 1, 2, 42, 9999, 10000000. Fichier vide, une seule ligne sans <code class="inline">\n</code>, que des <code class="inline">\n</code>, une très longue ligne. L'entrée standard. Un descripteur invalide. Chaque test sous <code class="inline">valgrind</code> (ou <code class="inline">leaks</code> sur macOS) pour chasser les fuites.</span></div>
+    </div>
+    <p class="body" style="margin-top:22px"><b>Bonus : plusieurs descripteurs.</b> Le bonus change une seule chose : au lieu d'<b>un</b> reste, il t'en faut <b>un par descripteur</b>, et le sujet impose <b>une seule variable statique</b>. L'interprétation courante est qu'un tableau déclaré <code class="inline">static</code> compte pour une seule variable : tu l'indexes par <code class="inline">fd</code>. Le sujet ne le dit pas en toutes lettres : confirme-le avec ton évaluateur. Essaie la démo en alternant les deux boutons, d'abord avec un seul reste partagé, puis avec un reste par descripteur.</p>
+    <div class="demo" data-demo="get_next_line-multi-fd">
+      <div class="demo-static">
+        <p class="body"><b>Démo (nécessite JavaScript) :</b> deux « fichiers », ouverts sur <code class="inline">fd 3</code> et <code class="inline">fd 4</code>, et deux boutons pour appeler <code class="inline">get_next_line(3)</code> ou <code class="inline">get_next_line(4)</code> en alternance. Deux modes : un seul reste pour tous les descripteurs, ou un reste par descripteur.</p>
+        <p class="body">Exemple sans JavaScript : <code class="inline">fd 3</code> contient <code class="inline">a1\na2\na3</code>, <code class="inline">fd 4</code> contient <code class="inline">b1\nb2\nb3</code>, <code class="inline">BUFFER_SIZE=4</code>, appels dans l'ordre fd 3, fd 4, fd 3, fd 4.</p>
+        <p class="body"><b>Un seul reste partagé :</b> <code class="inline">"a1\n"</code>, <code class="inline">"ab1\n"</code>, <code class="inline">"b2\n"</code>, <code class="inline">"a32\n"</code>. Seul le premier appel est bon.<br><b>Un reste par descripteur :</b> <code class="inline">"a1\n"</code>, <code class="inline">"b1\n"</code>, <code class="inline">"a2\n"</code>, <code class="inline">"b2\n"</code>. Toutes les lignes sont bonnes.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"mode_label":"Comment la fonction garde son reste","mode_shared":"Un seul reste pour tous les fd","mode_perfd":"Un reste par fd (bonus)","hint_shared":"Une seule variable statique contient le reste, quel que soit le descripteur. Alterne les appels : le reste d'un fichier se retrouve collé devant la ligne de l'autre.","hint_perfd":"Un seul tableau statique, indexé par le descripteur : chaque fd retrouve son propre reste. Alterne les appels : les lignes ne se mélangent plus.","file_label":"« Fichier » ouvert sur fd {fd} (60 caractères max., ASCII)","file3":"a1\na2\na3","file4":"b1\nb2\nb3","call_fd":"Appeler get_next_line({fd})","bs_label":"BUFFER_SIZE","restart":"Recommencer","empty":"Aucun appel pour l'instant. Alterne get_next_line(3) et get_next_line(4), puis change de mode pour comparer.","log_label":"Appels, le plus récent en premier","stash_shared":"stash (partagé)","stash_fd":"stash[{fd}]","progress":"octets lus par read() : {a} / {b}","call_head":"Appel n° {n} · fd {fd}","k_before":"avant · {name}","k_after":"après · {name}","k_reads":"read() de cet appel","k_ret":"get_next_line retourne","k_want":"ligne attendue pour fd {fd}","read_n":"read n° {i} sur fd {fd}","eof":"fin de fichier","no_read":"aucun read() : le reste suffisait","more_reads":"… {n} autres read() …","verdict_ok":"✓ bonne ligne","verdict_bad":"✗ ce n'est pas la ligne attendue : le reste partagé a mélangé les deux fichiers","warn_ascii":"Caractères ignorés (hors ASCII imprimable) : {n}."}</script>
+    </div>
+    <div class="callout"><span class="bulb">💡</span><p><b>La taille du tableau est ton choix.</b> Le sujet ne dit pas combien de descripteurs gérer. Prends une constante raisonnable (1024, par exemple) plutôt que la valeur de <code class="inline">ulimit -n</code> : cette limite peut être énorme dans un conteneur. Rends <code class="inline">NULL</code> pour un <code class="inline">fd</code> négatif ou supérieur ou égal à cette constante. Tes fichiers bonus portent le suffixe <code class="inline">_bonus</code> et s'ajoutent aux fichiers obligatoires.</p></div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>Pièges <span class="accent">classiques</span></h2></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>BUFFER_SIZE = 1.</b> Un <code class="inline">read</code> par octet : ta fonction doit rester juste, et pas absurdement lente. Méfie-toi d'un code qui suppose plusieurs octets par bloc, et d'une recherche du <code class="inline">\n</code> qui repart du début de tout le reste à chaque tour de boucle.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>BUFFER_SIZE = 10 000 000.</b> Ne déclare jamais ton buffer de lecture comme un tableau local : <code class="inline">char buf[BUFFER_SIZE + 1]</code> demande environ 10 Mo à la <i>stack</i>, plus que sa taille habituelle (8 Mo sur beaucoup de systèmes, <code class="inline">ulimit -s</code>). Résultat : segfault, donc 0. Alloue-le avec <code class="inline">malloc</code> et libère-le.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Fichier sans <code class="inline">\n</code> final.</b> La dernière ligne n'a pas de <code class="inline">\n</code> : tu la rends quand même, telle quelle, puis <code class="inline">NULL</code> à l'appel suivant. Ne la perds pas, et n'en ajoute pas un de ton cru : le sujet est précis sur ce point.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Une ligne qui commence par <code class="inline">\n</code>.</b> Une ligne vide dans le fichier, c'est la chaîne <code class="inline">"\n"</code> : un caractère, pas une chaîne vide. Un test du genre « si la ligne est vide, c'est la fin » te fait perdre les lignes vides. Seul <code class="inline">NULL</code> signale la fin.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Rendre <code class="inline">""</code> à la fin au lieu de <code class="inline">NULL</code>.</b> À la fin du fichier, tu rends <code class="inline">NULL</code>, pas une chaîne vide allouée. Avec <code class="inline">""</code>, une boucle <code class="inline">while (line)</code> ne s'arrêterait jamais, et chaque chaîne vide allouée serait une fuite de plus.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>read() rend -1.</b> Descripteur invalide ou fermé, dossier ouvert à la place d'un fichier : <code class="inline">read</code> échoue et rend -1 (c'est le cas pour <code class="inline">-1</code>, pour un descripteur non ouvert et pour un dossier). Teste <code class="inline">&lt; 0</code> explicitement : une boucle <code class="inline">while (read(...))</code> traite -1 comme « continue ». Sur erreur, libère le reste et le buffer, puis rends <code class="inline">NULL</code>. Le sujet le demande pour toute erreur.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Les fuites, aux trois endroits classiques.</b> Le buffer de lecture (à libérer à chaque sortie, erreurs comprises), l'ancien reste (à libérer dès qu'un nouveau le remplace) et le reste final (à libérer et remettre à <code class="inline">NULL</code> dès que la dernière ligne est partie). La ligne rendue appartient à l'appelant. Pense aussi à l'échec de <code class="inline">malloc</code> : chaque chemin doit libérer ce qu'il tient.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>La concaténation qui recopie tout.</b> Si, à chaque bloc lu, tu recopies tout le reste dans une nouvelle chaîne, et si, à chaque ligne rendue, tu recopies tout ce qui suit, un grand fichier ou une très longue ligne coûtent un temps quadratique. Avec un gros <code class="inline">BUFFER_SIZE</code>, le reste est énorme dès le premier <code class="inline">read</code>, et chaque ligne rendue en recopie presque tout. Éviter ces recopies est une optimisation, pas une exigence du sujet. Pour voir où tu en es, n'utilise pas une durée absolue : sur <b>le même</b> fichier de 100 à 500 Ko, compare <code class="inline">BUFFER_SIZE=1</code> et <code class="inline">BUFFER_SIZE=10000000</code> à un <code class="inline">BUFFER_SIZE</code> raisonnable comme 42. Avec 1, un code linéaire reste lent (un appel système par octet) : ce qui doit t'alerter, c'est un temps qui explose quand tu doubles la taille du fichier. Cherche le <code class="inline">\n</code> seulement dans le dernier bloc ajouté.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>L'entrée standard.</b> Le sujet exige que ça marche aussi avec <code class="inline">get_next_line(0)</code>. Teste avec une redirection (<code class="inline">./a.out &lt; fichier</code>), avec un pipe (<code class="inline">printf 'a\nb' | ./a.out</code>) et au clavier (Ctrl-D en début de ligne envoie la fin du fichier). Au clavier, <code class="inline">read</code> rend au plus une ligne à la fois, même avec un grand <code class="inline">BUFFER_SIZE</code> : ton code ne doit jamais supposer que <code class="inline">read</code> remplit le buffer.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Bonus : un fd hors du tableau.</b> Un <code class="inline">fd</code> négatif ou trop grand écrit hors du tableau de restes. Vérifie l'indice avant d'y toucher. Et rappelle-toi : une seule variable statique, pas une par descripteur (un tableau compte pour une, selon l'interprétation courante ; le sujet ne le précise pas, vérifie avec ton évaluateur).</p></div>
+    <p class="body" style="margin-top:22px">Une batterie de tests minimale, avec ce que ta fonction doit rendre, appel après appel, quel que soit <code class="inline">BUFFER_SIZE</code> :</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Contenu du fichier</th><th>Valeurs retournées, dans l'ordre</th></tr></thead>
+        <tbody>
+          <tr><td>(vide)</td><td><code class="inline">NULL</code></td></tr>
+          <tr><td>a</td><td><code class="inline">"a"</code> puis <code class="inline">NULL</code></td></tr>
+          <tr><td>a\n</td><td><code class="inline">"a\n"</code> puis <code class="inline">NULL</code></td></tr>
+          <tr><td>\n</td><td><code class="inline">"\n"</code> puis <code class="inline">NULL</code></td></tr>
+          <tr><td>a\n\nb</td><td><code class="inline">"a\n"</code>, <code class="inline">"\n"</code>, <code class="inline">"b"</code> puis <code class="inline">NULL</code></td></tr>
+          <tr><td>ab\ncd\nef</td><td><code class="inline">"ab\n"</code>, <code class="inline">"cd\n"</code>, <code class="inline">"ef"</code> puis <code class="inline">NULL</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Comment je <span class="accent">l'ai fait</span></h2></div>
+    <div class="how"><p class="body">J'ai gardé tout le texte lu mais pas encore rendu dans une seule variable statique : un pointeur vers une chaîne allouée. À chaque appel, une première fonction lit des blocs de <code class="inline">BUFFER_SIZE</code> octets dans un tampon temporaire et les colle au reste jusqu'à voir un <code class="inline">\n</code> ou la fin du fichier. Une deuxième recopie la ligne, <code class="inline">\n</code> compris. Une troisième construit le nouveau reste et libère l'ancien ; à la fin du fichier, tout est libéré. Ce découpage tient dans la Norme et se teste morceau par morceau. Si <code class="inline">read</code> échoue, je libère le reste et je rends <code class="inline">NULL</code>. Pour le bonus, j'ai gardé les mêmes fonctions : la variable statique devient un tableau de pointeurs de taille fixe, indexé par le descripteur, si bien que chaque fichier retrouve son propre reste.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 À retenir (défense d'éval)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>Le contrat.</b> <code class="inline">char *get_next_line(int fd)</code> rend la ligne lue, avec son <code class="inline">\n</code> (sauf la dernière d'un fichier qui n'en a pas), ou <code class="inline">NULL</code> s'il n'y a plus rien ou en cas d'erreur.</div></li>
+        <li><span class="chk">✓</span><div><b>Pourquoi <code class="inline">static</code>.</b> <code class="inline">read()</code> lit des blocs qui dépassent la ligne : ce surplus doit survivre entre deux appels, sans variable globale ni <code class="inline">lseek</code> (interdits).</div></li>
+        <li><span class="chk">✓</span><div><b>BUFFER_SIZE.</b> Défini par <code class="inline">-D BUFFER_SIZE=n</code>, avec une valeur par défaut quand le drapeau manque. Ça doit marcher avec 1, 9999 et 10000000 : le buffer de lecture est alloué avec <code class="inline">malloc</code>, jamais sur la stack.</div></li>
+        <li><span class="chk">✓</span><div><b>La boucle de lecture.</b> Tant que le reste n'a pas de <code class="inline">\n</code> : <code class="inline">read</code>. Retour &gt; 0 : on ajoute. 0 : fin du fichier. -1 : on libère et on rend <code class="inline">NULL</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Lire le moins possible.</b> Dès qu'un <code class="inline">\n</code> est là, on rend la ligne. On ne lit jamais tout le fichier d'avance.</div></li>
+        <li><span class="chk">✓</span><div><b>Mémoire.</b> Chaque <code class="inline">malloc</code> a son <code class="inline">free</code> sur tous les chemins. Le reste est libéré à la fin du fichier et sur erreur ; la ligne rendue est libérée par l'appelant.</div></li>
+        <li><span class="chk">✓</span><div><b>Les cas limites.</b> Fichier vide, sans <code class="inline">\n</code> final, lignes vides, très longue ligne, descripteur invalide, entrée standard.</div></li>
+        <li><span class="chk">✓</span><div><b>Fonctions et fichiers.</b> <code class="inline">read</code>, <code class="inline">malloc</code>, <code class="inline">free</code> seulement. Pas de libft. Rendus : <code class="inline">get_next_line.c</code>, <code class="inline">get_next_line_utils.c</code>, <code class="inline">get_next_line.h</code>, et le <code class="inline">README.md</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Bonus.</b> Une seule variable statique : un tableau de restes indexé par <code class="inline">fd</code> (interprétation courante, à confirmer avec ton évaluateur). Fichiers <code class="inline">_bonus</code>, évalués seulement si l'obligatoire est parfait.</div></li>
+        <li><span class="chk">✓</span><div><b>Questions de défense.</b> Pourquoi <code class="inline">static</code> ? Que se passe-t-il avec <code class="inline">BUFFER_SIZE=1</code> ? Avec 10000000 ? Quand rends-tu <code class="inline">NULL</code> ? Qui libère la ligne ?</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

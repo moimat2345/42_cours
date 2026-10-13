@@ -1,0 +1,270 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>Projet C · Fonctions variadiques</span>
+  <h1 class="title">ft_<span class="g">printf</span></h1>
+  <p class="lead">Recoder <b>printf</b> : comprendre comment une fonction reçoit un nombre variable d'arguments, puis comment elle les affiche en décimal, en hexadécimal et en pointeur.</p>
+  <p class="subj">sujet : ft_printf · libftprintf.a · c s p d i u x X % · -Wall -Wextra -Werror · Norme</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>Le projet en <span class="accent">bref</span></h2></div>
+    <p class="body">Tu écris une fonction <code class="inline">ft_printf</code> qui imite le <code class="inline">printf</code> de la libc : elle reçoit une <b>chaîne de format</b> suivie d'un nombre d'arguments qu'elle ne connaît pas à l'avance, écrit le résultat avec <code class="inline">write</code>, et <b>renvoie le nombre de caractères écrits</b>.</p>
+    <p class="body">Le travail tient en trois idées : lire des arguments en nombre variable (<code class="inline">stdarg.h</code>), parcourir le format en distinguant le texte des conversions, puis afficher chaque valeur dans la bonne base avec pour seul outil <code class="inline">write</code>. Le reste (le <code class="inline">Makefile</code>, la bibliothèque <code class="inline">libftprintf.a</code>) est de l'outillage.</p>
+    <div class="callout"><span class="bulb">💡</span><p><b>Ton arbitre, c'est le vrai printf.</b> Le sujet te demande d'imiter <code class="inline">printf</code> : pour chaque cas, compare sa <b>sortie</b> et sa <b>valeur de retour</b> avec les tiennes.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>La carte du <span class="accent">projet</span></h2></div>
+    <div class="map">
+      <div class="map-item"><span class="ex">Rendu</span><div><h4>La bibliothèque</h4><p><code class="inline">libftprintf.a</code>, construite avec <code class="inline">ar</code> par ton <code class="inline">Makefile</code> (<code class="inline">libtool</code> est interdit). Elle fournit <code class="inline">int ft_printf(const char *, ...);</code></p></div></div>
+      <div class="map-item"><span class="ex">Fichiers</span><div><h4>Ce que tu rends</h4><p><code class="inline">Makefile</code>, <code class="inline">*.h</code>, <code class="inline">*.c</code>, et la bibliothèque <code class="inline">libftprintf.a</code> à la racine du dépôt. À vérifier dans ton sujet.</p></div></div>
+      <div class="map-item"><span class="ex">Partie 1</span><div><h4>Les conversions</h4><p><code class="inline">c s p d i u x X %</code> : neuf cas à gérer pour la partie obligatoire.</p></div></div>
+      <div class="map-item"><span class="ex">Autorisé</span><div><h4>Les fonctions</h4><p><code class="inline">malloc</code>, <code class="inline">free</code>, <code class="inline">write</code>, <code class="inline">va_start</code>, <code class="inline">va_arg</code>, <code class="inline">va_copy</code>, <code class="inline">va_end</code>. Ta libft est autorisée ; si tu l'utilises, ton <code class="inline">Makefile</code> doit aussi la construire (à vérifier dans ton sujet).</p></div></div>
+      <div class="map-item"><span class="ex">Retour</span><div><h4>La valeur de retour</h4><p><code class="inline">ft_printf</code> renvoie le nombre de caractères écrits, comme <code class="inline">printf</code>.</p></div></div>
+      <div class="map-item"><span class="ex">Règle</span><div><h4>Pas de buffer</h4><p>Tu n'as pas à reproduire la gestion de buffer du vrai <code class="inline">printf</code> : tu peux écrire directement avec <code class="inline">write</code>.</p></div></div>
+      <div class="map-item"><span class="ex">Bonus</span><div><h4>Flags et largeur</h4><p>Les flags <code class="inline">-</code>, <code class="inline">0</code> et <code class="inline">.</code> avec la largeur minimale de champ, puis <code class="inline">#</code>, l'espace et <code class="inline">+</code>. Évalués seulement si la partie obligatoire est parfaite.</p></div></div>
+      <div class="map-item"><span class="ex">Contraintes</span><div><h4>Compilation et Norme</h4><p>Compile avec <code class="inline">-Wall -Wextra -Werror</code>, respecte la Norme, ne plante pas (segfault, double free…) hors comportement indéfini.</p></div></div>
+    </div>
+
+    <p class="body" style="margin-top:22px">Les neuf conversions, avec le type que <code class="inline">va_arg</code> doit lire pour chacune :</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Conversion</th><th>Type lu par va_arg</th><th>Ce qu'elle affiche</th></tr></thead>
+        <tbody>
+          <tr><td>%c</td><td><code class="inline">int</code></td><td>un caractère</td></tr>
+          <tr><td>%s</td><td><code class="inline">char *</code></td><td>une chaîne de caractères</td></tr>
+          <tr><td>%p</td><td><code class="inline">void *</code></td><td>une adresse en hexadécimal minuscule, précédée de <code class="inline">0x</code></td></tr>
+          <tr><td>%d</td><td><code class="inline">int</code></td><td>un entier décimal signé</td></tr>
+          <tr><td>%i</td><td><code class="inline">int</code></td><td>un entier décimal signé (pour printf, comme <code class="inline">%d</code>)</td></tr>
+          <tr><td>%u</td><td><code class="inline">unsigned int</code></td><td>un entier décimal non signé</td></tr>
+          <tr><td>%x</td><td><code class="inline">unsigned int</code></td><td>un entier en hexadécimal, lettres minuscules</td></tr>
+          <tr><td>%X</td><td><code class="inline">unsigned int</code></td><td>un entier en hexadécimal, lettres majuscules</td></tr>
+          <tr><td>%%</td><td>aucun</td><td>un seul <code class="inline">%</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="variadic">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Les arguments <span class="accent">variables</span></h2></div>
+    <p class="body">Dans le prototype <code class="inline">int ft_printf(const char *, ...);</code>, les trois points disent au compilateur : « il peut y avoir n'importe quoi ensuite ». Il ne vérifie rien, et ta fonction ne sait pas non plus combien d'arguments elle a reçus, ni de quel type. <b>C'est le format qui sert de contrat</b> : chaque <code class="inline">%</code> annonce un argument et son type.</p>
+    <p class="body">Pour lire ces arguments, <code class="inline">&lt;stdarg.h&gt;</code> fournit un type et quatre macros :</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Élément</th><th>Rôle</th></tr></thead>
+        <tbody>
+          <tr><td>va_list ap;</td><td>Le « curseur » : une variable qui retient où tu en es dans les arguments.</td></tr>
+          <tr><td>va_start(ap, dernier)</td><td>Place le curseur juste après le dernier paramètre nommé de ta fonction (ici, le format).</td></tr>
+          <tr><td>va_arg(ap, type)</td><td>Renvoie l'argument suivant, lu <b>comme un <code class="inline">type</code></b>, et avance le curseur.</td></tr>
+          <tr><td>va_copy(dst, src)</td><td>Copie un curseur dans son état actuel, si tu dois parcourir les arguments deux fois.</td></tr>
+          <tr><td>va_end(ap)</td><td>Ferme le curseur. Chaque <code class="inline">va_start</code> (ou <code class="inline">va_copy</code>) doit avoir son <code class="inline">va_end</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:22px">Un exemple sans rapport avec ft_printf, pour voir les macros ensemble : une fonction qui additionne <code class="inline">n</code> entiers.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">somme.c</span></div>
+<pre><span class="cm">// n : combien d'entiers suivent</span>
+<span class="ty">int</span>	<span class="fn">somme</span>(<span class="ty">int</span> n, ...)
+{
+	<span class="ty">va_list</span>	ap;
+	<span class="ty">int</span>		total;
+
+	<span class="fn">va_start</span>(ap, n);
+	total = <span class="nm">0</span>;
+	<span class="k">while</span> (n-- &gt; <span class="nm">0</span>)
+		total += <span class="fn">va_arg</span>(ap, <span class="ty">int</span>);
+	<span class="fn">va_end</span>(ap);
+	<span class="k">return</span> (total);
+}</pre>
+    </div>
+
+    <div class="duo" style="margin-top:18px">
+      <div class="card">
+        <span class="ic">🧭</span>
+        <h3>Ce que va_arg sait</h3>
+        <ul>
+          <li><span class="m">→</span><span>où en est le curseur : il avance d'une case à chaque appel ;</span></li>
+          <li><span class="m">→</span><span>le type <b>que tu lui demandes</b>, rien d'autre.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">🕳️</span>
+        <h3>Ce qu'il ne sait pas</h3>
+        <ul>
+          <li><span class="m">→</span><span>combien d'arguments ont été passés ;</span></li>
+          <li><span class="m">→</span><span>de quel type ils sont vraiment ;</span></li>
+          <li><span class="m">→</span><span>si tu es déjà passé après le dernier.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="body" style="margin-top:22px">Trois règles découlent de là. On <b>ne revient pas en arrière</b> : un argument lu est consommé (à moins d'avoir fait un <code class="inline">va_copy</code> avant). Le type donné à <code class="inline">va_arg</code> est <b>une promesse</b> : si l'appelant a passé autre chose, le comportement est indéfini. Enfin, les petits types sont <b>promus</b> : un <code class="inline">char</code> ou un <code class="inline">short</code> passé à une fonction variadique arrive comme un <code class="inline">int</code> (et un <code class="inline">float</code> comme un <code class="inline">double</code>). Pour <code class="inline">%c</code>, tu lis donc un <code class="inline">int</code>.</p>
+
+    <p class="body">Suis le curseur dans la démo. Chaque conversion appelle <code class="inline">va_arg</code> et fait avancer <code class="inline">ap</code> d'une case. Puis clique sur « Mauvais type » : on demande <code class="inline">%s</code> alors que l'argument est un entier.</p>
+    <div class="demo" data-demo="ft_printf-va-arg-walk">
+      <div class="demo-static"><p class="body">Démo : une file d'arguments et un curseur <code class="inline">ap</code>. Avec le format <code class="inline">%c%s%d</code> et les arguments <code class="inline">A</code>, <code class="inline">hi</code>, <code class="inline">7</code>, chaque conversion lit une case et avance : la sortie est <code class="inline">Ahi7</code> et la valeur de retour 4. Si on demande <code class="inline">%s</code> sur l'entier 42, <code class="inline">va_arg</code> lit 42 comme une adresse : le comportement est indéfini (souvent un segfault).</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Suis le curseur va_arg dans la file des arguments","formatLabel":"Format","argsLabel":"Arguments passés à ft_printf (séparés par |)","hint":"Types déduits : 42 donne un int, A ou 'A' un char (promu en int), hi un char *, NULL ou 0x… un void *. %c lit un int : 65 donne A. Entrée lance tout.","step":"Conversion suivante","run":"Tout exécuter","reset":"Recommencer","wrong":"Mauvais type","queueLabel":"Les arguments, dans l'ordre où l'appelant les a passés","endOfQueue":"fin de file","fmtLabel":"Le format","traceLabel":"Appels à stdarg","output":"Sortie","counter":"Compteur","ret":"Valeur de retour","retUndef":"Retour indéfini","typeChar":"char (promu en int)","idle":"va_start vient d'être appelé : le curseur ap est sur la première case. Chaque conversion appelle va_arg. Lance « Conversion suivante ».","msgLits":"Le texte « {text} » est copié tel quel : le curseur ne bouge pas.","msgEnd":"Un % tout seul en fin de format : rien à convertir, aucun va_arg.","msgBad":"« {raw} » n'est pas une des neuf conversions : la démo l'écrit tel quel, sans va_arg.","msgPercent":"« %% » n'appelle pas va_arg : un seul % est écrit et le curseur ne bouge pas.","msgConsume":"« {raw} » appelle va_arg(ap, {want}) : il lit la case #{n} ({val}), le curseur avance et « {text} » est écrit.","done":"{last} Plus rien à lire dans le format : va_end(ap) ferme le curseur. ft_printf renvoie {n}.","doneExtra":"{last} Plus rien à lire dans le format : va_end(ap) ferme le curseur. ft_printf renvoie {n}. Il reste {left} argument(s) non lu(s) : ils sont ignorés, ce n'est pas une erreur.","ubEmpty":"Comportement indéfini : « {raw} » appelle va_arg(ap, {want}) alors que la file est vide. va_arg lit au-delà des arguments passés : une valeur laissée au hasard dans les registres ou sur la pile.","ubStrInt":"Comportement indéfini : « {raw} » appelle va_arg(ap, char *), mais la case #{n} contient {val} (type {got}). La valeur 0x{hex} est lue comme une adresse, et il n'y a pas de chaîne à cet endroit. Un vrai programme plante souvent (segfault) ou affiche n'importe quoi.","ubIntPtr":"Comportement indéfini : « {raw} » appelle va_arg(ap, {want}), mais la case #{n} contient {val} (type {got}). Tu lis une partie de l'adresse, pas la chaîne : un nombre sans rapport avec ce que tu voulais.","ubPtrInt":"Comportement indéfini : « {raw} » appelle va_arg(ap, void *), mais la case #{n} contient {val} (type {got}) : l'entier est lu comme une adresse.","ubGeneric":"Comportement indéfini : « {raw} » appelle va_arg(ap, {want}), mais la case #{n} contient {val} (type {got}). Le compilateur ne vérifie rien et ft_printf ne peut pas le détecter : ça peut planter, afficher n'importe quoi ou sembler marcher."}</script>
+    </div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Passer la va_list à une sous-fonction.</b> Dès que tu découpes ton code, tu seras tenté de passer <code class="inline">ap</code> à une autre fonction. Le standard C dit qu'après un <code class="inline">va_arg</code> fait là-bas, la valeur de <code class="inline">ap</code> chez l'appelant est <b>indéterminée</b>. Sur Linux x86-64 le curseur avance quand même (la <code class="inline">va_list</code> y est un tableau, donc passée par adresse). Sur d'autres plateformes, dont macOS sur puce Apple, l'appelant ne voit rien avancer et relit la même case. Deux solutions portables : passer un <b>pointeur sur la va_list</b> (<code class="inline">va_list *</code>, puis <code class="inline">va_arg(*ap, …)</code>), ou garder tous les <code class="inline">va_arg</code> dans la fonction qui possède la liste.</p></div>
+  </section>
+
+  <section id="parsing">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>Parcourir le <span class="accent">format</span></h2></div>
+    <p class="body">Tu lis le format caractère par caractère, avec deux modes. Ce qui compte, c'est de savoir dans lequel tu es.</p>
+    <div class="duo">
+      <div class="card">
+        <span class="ic">✍️</span>
+        <h3>Mode texte</h3>
+        <ul>
+          <li><span class="m">→</span><span>Le caractère n'est pas <code class="inline">%</code>.</span></li>
+          <li><span class="m">→</span><span>Tu l'écris tel quel avec <code class="inline">write</code>.</span></li>
+          <li><span class="m">→</span><span>Tu comptes 1 caractère.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">🔀</span>
+        <h3>Mode conversion</h3>
+        <ul>
+          <li><span class="m">→</span><span>Tu viens de lire <code class="inline">%</code> : le caractère <b>suivant</b> est le spécificateur.</span></li>
+          <li><span class="m">→</span><span>Tu choisis l'action d'après lui (<code class="inline">c s p d i u x X %</code>).</span></li>
+          <li><span class="m">→</span><span>Tu lis l'argument avec <code class="inline">va_arg</code> (sauf pour <code class="inline">%%</code>) et tu l'écris.</span></li>
+          <li><span class="m">→</span><span>Tu ajoutes au compteur ce qui a été écrit, puis tu <b>sautes les deux caractères</b>.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="editor" style="margin-top:18px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">pseudo-code</span></div>
+<pre><span class="k">pour</span> chaque caractère c du format :
+    <span class="k">si</span> c n'est pas '%' :
+        écrire c ; compteur + 1
+    <span class="k">sinon</span> :
+        s = le caractère suivant
+        <span class="cm">// une action par s : c s p d i u x X %</span>
+        compteur + ce qui est écrit
+        avancer d'un cran de plus</pre>
+    </div>
+
+    <p class="body" style="margin-top:18px">La <b>valeur de retour</b> se construit en additionnant. Une bonne habitude : que chacune de tes petites fonctions d'affichage <b>renvoie le nombre de caractères qu'elle a écrits</b>, plutôt que de laisser la fonction principale les recompter. Tu additionnes ensuite ces retours et tu renvoies le total à la fin.</p>
+
+    <div class="callout"><span class="bulb">🧩</span><p><b>Choisir l'action.</b> Pour passer du spécificateur à la bonne fonction, tu peux enchaîner des <code class="inline">if</code> / <code class="inline">else if</code>, ou ranger les fonctions dans un tableau. Relis la Norme avant de choisir : <code class="inline">switch</code> et <code class="inline">for</code> y sont interdits. Pour l'opérateur ternaire, selon la version de la Norme il est interdit ou limité aux cas simples non imbriqués : vérifie la Norme en vigueur.</p></div>
+
+    <p class="body" style="margin-top:22px">Teste la lecture dans la démo : tape un format et ses arguments (séparés par <code class="inline">|</code>), puis avance pas à pas. Le cas préchargé est <code class="inline">%d items%%\n</code> avec <code class="inline">42</code>. Essaie aussi <code class="inline">%s</code> avec <code class="inline">NULL</code>, <code class="inline">%c</code> avec <code class="inline">\0</code>, ou un <code class="inline">%</code> tout seul à la fin du format.</p>
+    <div class="demo" data-demo="ft_printf-format-parser">
+      <div class="demo-static"><p class="body">Démo : le format <code class="inline">%d items%%\n</code> avec l'argument <code class="inline">42</code>. Chaque caractère est classé « littéral » ou « conversion » : <code class="inline">%d</code> consomme l'argument et écrit <code class="inline">42</code> (2 caractères), <code class="inline">" items"</code> est copié tel quel (6), <code class="inline">%%</code> écrit un seul <code class="inline">%</code> (1), le <code class="inline">\n</code> final compte 1. La sortie est <code class="inline">42 items%</code> suivie d'un saut de ligne, et la valeur de retour est <b>10</b>.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Lis un format comme le fait ft_printf","formatLabel":"Format","argsLabel":"Arguments (séparés par |)","hint":"Écris \\n pour un saut de ligne, \\0 pour un octet nul, NULL pour un pointeur nul. Pour %c : un caractère (A, 'A', \\n) ou son code (65). Entrée lance tout.","step":"Caractère suivant","run":"Tout exécuter","reset":"Recommencer","tokensLabel":"Le format, caractère par caractère","legend":"↵ saut de ligne · ␣ espace · ⇥ tabulation · ␀ octet nul · ␇ ␛ … autres codes de contrôle · ∅ rien d'écrit","kindLit":"littéral","kindConv":"conversion","kindBad":"non géré","output":"Sortie","counter":"Compteur","ret":"Valeur de retour","idle":"Appuie sur « Caractère suivant » : chaque pas lit un caractère du format et le classe.","emptyFormat":"Format vide : rien n'est écrit, la valeur de retour est 0.","msgLit":"« {ch} » n'est pas un % : c'est un littéral, il est écrit tel quel (+{n}).","msgEnd":"Un % tout seul en fin de format : il n'y a rien à convertir. Le comportement est indéfini : ne lis surtout pas après le \\0.","msgBad":"« {raw} » n'est pas une des neuf conversions (c s p d i u x X %), les seules de la partie obligatoire. La démo l'écrit tel quel (+{n}) : dans ton code, le comportement est à toi de choisir.","msgPercent":"« %% » : conversion %. Elle ne consomme aucun argument et n'écrit qu'un seul % (+1, pas +2).","msgConv":"« {raw} » : conversion {spec}. Elle consomme l'argument « {arg} » et écrit « {text} » (+{n}).{note}","done":"{last} Fin du format : ft_printf renvoie {n}.","doneExtra":"{last} Fin du format : ft_printf renvoie {n}. {left} argument(s) en trop ont été ignorés : ce n'est pas une erreur.","errMissing":"Il n'y a plus d'argument pour « {raw} » : va_arg lirait au-delà de la liste (comportement indéfini). Ajoute un argument après un |.","errInt":"« {arg} » n'est pas un entier pour « {raw} » : écris des chiffres, avec un signe éventuel.","errRange":"« {arg} » est hors limites pour « {raw} » : un int va de -2147483648 à 2147483647 (jusqu'à 4294967295 pour u, x et X).","errChar":"« {raw} » attend un caractère ASCII (A, 'A', \\n, \\0) ou un entier (son code), pas « {arg} ».","errPtr":"« {raw} » attend NULL ou une adresse en hexadécimal comme 0x7ffe1234, pas « {arg} ».","noteNullStr":"Un pointeur NULL donne (null).","noteNilPtr":"Pointeur nul : (nil) sur Linux, 0x0 sur macOS (voir la démo suivante)."}</script>
+    </div>
+  </section>
+
+  <section id="bases">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>Afficher dans une <span class="accent">base</span></h2></div>
+    <p class="body">Afficher un nombre, c'est le découper en chiffres. Dans une base <code class="inline">b</code>, le <b>dernier</b> chiffre est <code class="inline">n % b</code> et le reste du nombre est <code class="inline">n / b</code>. Problème : tu obtiens les chiffres à l'envers, alors qu'il faut écrire le premier d'abord. Sans <code class="inline">malloc</code>, il y a deux façons de s'en sortir : écrire d'abord <code class="inline">n / b</code> (récursion) puis le dernier chiffre, ou remplir un petit tableau local de la fin vers le début avant de l'écrire.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Conversion</th><th>Lit</th><th>Base et chiffres</th></tr></thead>
+        <tbody>
+          <tr><td>%d  %i</td><td><code class="inline">int</code></td><td>10 : 0-9, avec <code class="inline">-</code> devant si négatif</td></tr>
+          <tr><td>%u</td><td><code class="inline">unsigned int</code></td><td>10 : 0-9</td></tr>
+          <tr><td>%x</td><td><code class="inline">unsigned int</code></td><td>16 : 0-9 puis a-f</td></tr>
+          <tr><td>%X</td><td><code class="inline">unsigned int</code></td><td>16 : 0-9 puis A-F</td></tr>
+          <tr><td>%p</td><td><code class="inline">void *</code></td><td>16 : <code class="inline">0x</code>, puis 0-9 et a-f</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" style="margin-top:22px"><span class="bulb">🔁</span><p><b>Le même nombre, plusieurs lectures.</b> En mémoire, <code class="inline">-1</code> est un entier de 32 bits qui ne contient que des 1. <code class="inline">%d</code> lit ces bits en complément à deux et donne <code class="inline">-1</code> ; <code class="inline">%u</code> les lit comme un entier positif et donne <code class="inline">4294967295</code> ; <code class="inline">%x</code> donne <code class="inline">ffffffff</code>. Rien n'est converti : ce sont les mêmes bits, relus. C'est pourquoi <code class="inline">%u</code>, <code class="inline">%x</code> et <code class="inline">%X</code> lisent un <code class="inline">unsigned int</code>.</p></div>
+
+    <p class="body" style="margin-top:22px">Trois détails à ne pas rater. <b>Le zéro</b> : <code class="inline">0</code> s'écrit <code class="inline">0</code>, donc ta fonction doit toujours écrire au moins un chiffre. <b>Le signe</b> : pour <code class="inline">%d</code>, si <code class="inline">n</code> est négatif, tu écris <code class="inline">-</code> puis la valeur absolue (attention à <code class="inline">INT_MIN</code>, voir les pièges). <b>Le pointeur</b> : sur les machines 64 bits (Linux, macOS), un pointeur fait 64 bits. Range-le dans un <code class="inline">unsigned long</code> avant de le convertir en base 16, sinon tu coupes l'adresse. Le préfixe <code class="inline">0x</code> s'écrit à part, et le pointeur nul demande un traitement spécial.</p>
+
+    <p class="body">Entre un entier et choisis une conversion. Tu vois les 32 bits, les lectures possibles, les divisions successives et la sortie. À essayer : <code class="inline">-1</code> en <code class="inline">%u</code>, <code class="inline">%x</code> et <code class="inline">%X</code>, <code class="inline">255</code> en <code class="inline">%x</code>, et <code class="inline">0</code> en <code class="inline">%p</code>, avec les deux libc.</p>
+    <div class="demo" data-demo="ft_printf-base-convert">
+      <div class="demo-static"><p class="body">Démo : un entier signé 32 bits et une conversion. Les mêmes 32 bits donnent <code class="inline">-1</code> en <code class="inline">%d</code>, <code class="inline">4294967295</code> en <code class="inline">%u</code>, <code class="inline">ffffffff</code> en <code class="inline">%x</code> et <code class="inline">FFFFFFFF</code> en <code class="inline">%X</code>. <code class="inline">255</code> en <code class="inline">%x</code> donne <code class="inline">ff</code>. Pour <code class="inline">%p</code> avec un pointeur nul, glibc (Linux) affiche <code class="inline">(nil)</code> et la libc de macOS affiche <code class="inline">0x0</code> : ce cas dépend de la libc.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Les mêmes 32 bits, lus de plusieurs façons","numberLabel":"Un entier signé 32 bits (int)","presetsLabel":"Exemples","presetAria":"Essayer {v}","presetAriaNamed":"{label} : essayer {v}","convLabel":"Conversion demandée à ft_printf","envLabel":"Libc de référence (ne joue que pour un pointeur nul)","envLinux":"Linux (glibc)","envMac":"macOS","bitsLabel":"Les 32 bits en mémoire, par groupes de 4 (le chiffre hexadécimal est dessous)","bitsAria":"Valeur {v}, bits : {bits}","tableLabel":"Divisions successives : un chiffre par ligne, le dernier chiffre en premier","colDigit":"chiffre","errEmpty":"Entre un entier.","errNotInt":"Ce n'est pas un entier : écris des chiffres, avec un signe - ou + éventuel.","errRange":"Hors limites : un int sur 32 bits va de -2147483648 à 2147483647.","result":"Sortie : {text}, soit une valeur de retour de {n}.","order":"On lit les chiffres de bas en haut : {digits}. Sortie complète : {text}","nullPtrOrder":"Pointeur nul : il n'y a aucun chiffre à calculer, c'est un cas à traiter à part.","warnIntMin":"INT_MIN : en faisant -n, tu obtiens 2147483648, qui ne tient pas dans un int (le maximum est 2147483647). Passe par un long, ou traite ce cas à part.","intMinLiteral":"Dans ton fichier de test, écris INT_MIN (de <limits.h>) et pas -2147483648 : ce littéral est un long, et -Wall -Werror refuse de le passer à %d.","negSign":"Valeur négative : le signe - s'écrit à part, puis on convertit la valeur absolue.","nilNote":"Ce cas dépend de la libc : glibc (Linux) affiche (nil), celle de macOS affiche 0x0. Le sujet te demande d'imiter printf : compare avec celui de la machine où tu seras évalué.","ptrNote":"Avec %p, les 32 bits sont lus comme une adresse. Une vraie adresse en fait 64 : range-la dans un unsigned long."}</script>
+    </div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>Étape par <span class="accent">étape</span></h2></div>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Prépare l'outillage.</b> Un <code class="inline">ft_printf.h</code> (le prototype, <code class="inline">&lt;stdarg.h&gt;</code>, <code class="inline">&lt;unistd.h&gt;</code>), un <code class="inline">Makefile</code> qui range les objets dans <code class="inline">libftprintf.a</code> avec <code class="inline">ar rcs</code>, et une <code class="inline">main</code> de test que tu gardes hors de la bibliothèque. Fais compiler une <code class="inline">ft_printf</code> vide avec les flags du sujet.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Écris le texte seul.</b> Un affichage d'un caractère qui renvoie ce qu'il a écrit, et la boucle qui parcourt le format. Sans aucun <code class="inline">%</code>, ta fonction doit déjà afficher le bon texte et renvoyer la bonne valeur.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Ajoute <code class="inline">%c</code>, <code class="inline">%s</code> et <code class="inline">%%</code>.</b> C'est là que <code class="inline">va_start</code>, <code class="inline">va_arg</code> et <code class="inline">va_end</code> entrent en jeu. Teste <code class="inline">%s</code> avec <code class="inline">NULL</code> (mets-le dans une variable <code class="inline">char *s = NULL;</code> : écrit en littéral, le compilateur le refuse avec <code class="inline">-Wall -Werror</code>) et <code class="inline">%c</code> avec <code class="inline">0</code>.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>Ajoute <code class="inline">%d</code>, <code class="inline">%i</code> et <code class="inline">%u</code>.</b> La conversion en base 10 d'abord, puis le signe. Teste <code class="inline">0</code>, un négatif, <code class="inline">INT_MAX</code> et <code class="inline">INT_MIN</code>.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>Ajoute <code class="inline">%x</code> et <code class="inline">%X</code>.</b> Même fonction que pour la base 10, avec une autre base et un autre alphabet. Teste <code class="inline">0</code>, <code class="inline">255</code> et <code class="inline">-1</code>.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>Ajoute <code class="inline">%p</code>.</b> Un pointeur dans un <code class="inline">unsigned long</code>, le préfixe <code class="inline">0x</code>, puis le pointeur nul.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>Soigne les erreurs.</b> Bonne pratique : si un <code class="inline">write</code> échoue, renvoie -1 plutôt qu'un total faux, comme le fait <code class="inline">printf</code> (vérifie dans ton sujet si c'est exigé). Vérifie aussi qu'un <code class="inline">%</code> en fin de format ne fait pas lire au-delà du <code class="inline">\0</code>.</span></div>
+      <div class="step on"><span class="n">8</span><span class="txt"><b>Compare avec le vrai printf, cas par cas.</b> Sortie et valeur de retour, comme ci-dessous. Redirige les deux sorties vers des fichiers et compare-les avec <code class="inline">diff</code> pour voir les octets invisibles.</span></div>
+    </div>
+
+    <div class="editor" style="margin-top:18px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">test.c</span></div>
+<pre><span class="ty">int</span>	a = <span class="fn">printf</span>(<span class="st">"%d items%%\n"</span>, <span class="nm">42</span>);
+<span class="ty">int</span>	b = <span class="fn">ft_printf</span>(<span class="st">"%d items%%\n"</span>, <span class="nm">42</span>);
+<span class="cm">// a et b valent 10, et les deux lignes affichées sont identiques</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Makefile</span></div>
+<pre>$(NAME): $(OBJ)
+	ar rcs $(NAME) $(OBJ)</pre>
+    </div>
+
+    <div class="callout"><span class="bulb">🎁</span><p><b>Les bonus.</b> Ils ne comptent que si tout le reste est parfait. Si tu les tentes, la forme d'une conversion devient <code class="inline">%[flags][largeur][.précision]spécificateur</code> : lis les flags, puis la largeur, puis la précision, et seulement après le spécificateur. Une petite structure pour stocker ce que tu as lu t'évitera de passer dix paramètres à chaque fonction.</p></div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Pièges <span class="accent">classiques</span></h2></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">%s</code> avec <code class="inline">NULL</code>.</b> Le vrai <code class="inline">printf</code> affiche <code class="inline">(null)</code>, six caractères qui comptent dans la valeur de retour. Si ton affichage de chaîne fait un <code class="inline">strlen</code> ou lit <code class="inline">*s</code> sans tester le pointeur, c'est un segfault. Teste d'abord, puis écris <code class="inline">(null)</code> à la place. Pour ton test, mets le pointeur nul dans une variable (<code class="inline">char *s = NULL;</code>) : <code class="inline">printf("%s", NULL)</code> écrit en littéral ne compile pas avec <code class="inline">-Wall -Werror</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">%c</code> avec le caractère <code class="inline">0</code>.</b> <code class="inline">ft_printf("%c", 0)</code> doit écrire <b>un octet nul</b> et renvoyer 1. Si tu passes par une chaîne ou un <code class="inline">strlen</code>, le <code class="inline">\0</code> est pris pour une fin de chaîne et rien n'est écrit. Écris le caractère lui-même avec <code class="inline">write</code>. Pour voir l'octet : <code class="inline">./a.out | od -c</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">INT_MIN</code>.</b> <code class="inline">-2147483648</code> s'écrit sur 11 caractères. Si tu fais <code class="inline">n = -n</code> sur un <code class="inline">int</code>, tu obtiens <code class="inline">2147483648</code>, qui ne tient pas : c'est un débordement d'entier signé, donc un comportement indéfini. Convertis d'abord dans un type plus large (<code class="inline">long</code>), ou traite ce cas à part. Dans ton fichier de test, écris <code class="inline">INT_MIN</code> (de <code class="inline">&lt;limits.h&gt;</code>) et pas <code class="inline">-2147483648</code> : ce littéral est un <code class="inline">long</code>, et <code class="inline">-Wall -Werror</code> refuse de le passer à <code class="inline">%d</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">%p</code> avec un pointeur nul.</b> La libc décide : glibc (Linux) affiche <code class="inline">(nil)</code>, celle de macOS affiche <code class="inline">0x0</code>. Ce n'est ni la même sortie ni la même valeur de retour (5 contre 3). Compare avec le <code class="inline">printf</code> de la machine où tu seras évalué et choisis en connaissance de cause (la démo sur les bases montre les deux).</p></div>
+
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Le <code class="inline">%%</code> compté deux fois (ou qui consomme un argument).</b> Dans le format, <code class="inline">%%</code> occupe deux caractères, mais il n'en écrit qu'<b>un</b> et ne consomme <b>aucun</b> argument. Compter 2, ou appeler <code class="inline">va_arg</code> par réflexe, décale tout le reste. <code class="inline">ft_printf("%d items%%\n", 42)</code> doit renvoyer <b>10</b>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">-1</code> en <code class="inline">%u</code> (et en <code class="inline">%x</code>).</b> <code class="inline">ft_printf("%u", -1)</code> affiche <code class="inline">4294967295</code>, <code class="inline">%x</code> affiche <code class="inline">ffffffff</code> et <code class="inline">%X</code> affiche <code class="inline">FFFFFFFF</code>. Si tu lis l'argument avec <code class="inline">va_arg(ap, int)</code> puis que tu le passes à ta fonction de <code class="inline">%d</code>, tu affiches <code class="inline">-1</code>. Pire : un reste négatif donne un index négatif dans ta chaîne de chiffres. Lis un <code class="inline">unsigned int</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Un <code class="inline">%</code> en fin de format.</b> Avec <code class="inline">ft_printf("100%")</code>, le caractère qui suit le <code class="inline">%</code> est le <code class="inline">\0</code>. Si tu sautes les deux caractères sans tester, tu lis après la fin de la chaîne. Le comportement est indéfini pour le vrai <code class="inline">printf</code> aussi : choisis ce que tu fais, mais ne plante pas.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Une adresse tronquée.</b> Ranger un pointeur dans un <code class="inline">int</code> ou un <code class="inline">unsigned int</code> perd les 32 bits de poids fort : sur une adresse de pile, tu affiches une valeur qui n'est plus la bonne. Utilise un <code class="inline">unsigned long</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">va_arg(ap, char)</code>.</b> Un <code class="inline">char</code> est promu en <code class="inline">int</code> quand on l'envoie à une fonction variadique : demander un <code class="inline">char</code> à <code class="inline">va_arg</code> est incorrect (le compilateur te le signale, et avec <code class="inline">-Werror</code> ça ne compile pas). Lis un <code class="inline">int</code> et convertis ensuite.</p></div>
+
+    <div class="callout"><span class="bulb">💡</span><p><b>Bonne pratique : la valeur de retour quand <code class="inline">write</code> échoue.</b> <code class="inline">write</code> renvoie -1 en cas d'erreur (sortie fermée, disque plein…), et le C dit que <code class="inline">printf</code> renvoie alors une valeur négative. Si tu additionnes les retours sans les regarder, tu renvoies un total faux au lieu de -1. Propager le -1 jusqu'à ta fonction principale est plus sûr ; vérifie dans ton sujet si c'est exigé. Pour le provoquer : <code class="inline">./a.out &gt;&amp;-</code> ferme la sortie standard (bash, zsh). Le vrai <code class="inline">printf</code> met sa sortie en buffer et ne s'en aperçoit qu'à l'envoi : ce test sert surtout à vérifier que <b>ta</b> fonction renvoie -1 sans planter.</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Comment je <span class="accent">l'ai fait</span></h2></div>
+    <div class="how"><p class="body">J'ai découpé le projet en petites fonctions qui font chacune une seule chose et renvoient toutes le nombre de caractères qu'elles ont écrits. La fonction principale parcourt le format : un caractère ordinaire part directement avec <code class="inline">write</code>, et un <code class="inline">%</code> suivi d'une des neuf conversions est confié à une fonction de dispatch, une simple suite de <code class="inline">if</code> sur le spécificateur. Les nombres s'écrivent par récursion, sans buffer ni <code class="inline">malloc</code> : d'abord les chiffres de poids fort, puis le dernier. <code class="inline">%x</code> et <code class="inline">%X</code> partagent la même fonction, seul l'alphabet change. Pour <code class="inline">%p</code>, j'écris <code class="inline">0x</code> puis l'adresse en hexadécimal, lue dans un entier 64 bits, et je traite à part le pointeur nul. Je n'ai pas fait les bonus. Le Makefile assemble la bibliothèque avec <code class="inline">ar</code>.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 À retenir (défense d'éval)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>La valeur de retour compte.</b> <code class="inline">ft_printf</code> renvoie le nombre de caractères écrits, et <code class="inline">%%</code> n'en compte qu'un. Compare toujours avec le vrai <code class="inline">printf</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Neuf conversions.</b> <code class="inline">c s p d i u x X %</code>. <code class="inline">%i</code> se comporte comme <code class="inline">%d</code>, et <code class="inline">%%</code> ne consomme aucun argument.</div></li>
+        <li><span class="chk">✓</span><div><b>Comment <code class="inline">va_arg</code> sait quoi lire ?</b> Il ne sait pas : c'est le format qui le dit. Un type qui ne correspond pas à l'argument passé donne un comportement indéfini.</div></li>
+        <li><span class="chk">✓</span><div><b>Pourquoi un <code class="inline">int</code> pour <code class="inline">%c</code> ?</b> Un <code class="inline">char</code> passé à une fonction variadique est promu en <code class="inline">int</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Chaque <code class="inline">va_start</code> a son <code class="inline">va_end</code>.</b> Un argument lu est consommé : pour relire, il faut un <code class="inline">va_copy</code> fait avant.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">unsigned int</code> pour <code class="inline">%u</code>, <code class="inline">%x</code>, <code class="inline">%X</code>.</b> <code class="inline">-1</code> donne <code class="inline">4294967295</code>, <code class="inline">ffffffff</code> et <code class="inline">FFFFFFFF</code> : les mêmes bits, relus.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">%p</code>.</b> <code class="inline">0x</code> suivi de l'hexadécimal d'un <code class="inline">unsigned long</code>. Pointeur nul : <code class="inline">(nil)</code> chez glibc, <code class="inline">0x0</code> chez macOS ; sache justifier ton choix.</div></li>
+        <li><span class="chk">✓</span><div><b>Cas limites.</b> <code class="inline">%s</code> avec <code class="inline">NULL</code> donne <code class="inline">(null)</code> ; <code class="inline">%c</code> avec <code class="inline">0</code> écrit un octet nul et compte 1 ; <code class="inline">INT_MIN</code> ; <code class="inline">0</code> s'écrit <code class="inline">0</code> en hexadécimal.</div></li>
+        <li><span class="chk">✓</span><div><b>Échec de <code class="inline">write</code> (bonne pratique).</b> <code class="inline">printf</code> renvoie une valeur négative ; renvoyer -1 plutôt qu'un total faux est plus sûr. Vérifie dans ton sujet si c'est exigé.</div></li>
+        <li><span class="chk">✓</span><div><b>Rendu.</b> <code class="inline">libftprintf.a</code> construite avec <code class="inline">ar</code> (pas <code class="inline">libtool</code>), Makefile qui ne relink pas, <code class="inline">-Wall -Wextra -Werror</code>, Norme respectée.</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

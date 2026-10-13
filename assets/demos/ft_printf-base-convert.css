@@ -1,0 +1,36 @@
+[data-demo="ft_printf-base-convert"] .bc-title{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+[data-demo="ft_printf-base-convert"] .bc-field{display:flex;flex-direction:column;gap:6px;max-width:360px}
+[data-demo="ft_printf-base-convert"] .bc-field input{width:100%;min-width:0}
+[data-demo="ft_printf-base-convert"] .bc-lbl{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:16px}
+[data-demo="ft_printf-base-convert"] .demo-actions{margin-top:8px}
+[data-demo="ft_printf-base-convert"] .demo-actions button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);font-weight:700}
+[data-demo="ft_printf-base-convert"] .demo-actions button[aria-pressed="true"]::before{content:"\2713\00a0";content:"\2713\00a0" / ""}
+[data-demo="ft_printf-base-convert"] .bc-bits{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;margin-top:8px}
+[data-demo="ft_printf-base-convert"] .bc-nib{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px 5px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);min-width:0}
+[data-demo="ft_printf-base-convert"] .bc-nibbits{display:flex;width:100%;justify-content:center}
+[data-demo="ft_printf-base-convert"] .bc-bit{flex:1 1 0;min-width:0;text-align:center;font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+[data-demo="ft_printf-base-convert"] .bc-bit.on{color:var(--text);font-weight:700}
+[data-demo="ft_printf-base-convert"] .bc-bit.sign{color:var(--ptr);text-decoration:underline;text-underline-offset:3px;font-weight:700}
+[data-demo="ft_printf-base-convert"] .bc-hex{font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--accent);line-height:1.1}
+[data-demo="ft_printf-base-convert"] .bc-reads{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+[data-demo="ft_printf-base-convert"] .bc-read{display:flex;gap:8px;align-items:baseline;padding:6px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);font-family:var(--mono);font-size:.82rem;min-width:0}
+[data-demo="ft_printf-base-convert"] .bc-read code{color:var(--muted);font-family:var(--mono)}
+[data-demo="ft_printf-base-convert"] .bc-read span{color:var(--text);overflow-wrap:anywhere}
+[data-demo="ft_printf-base-convert"] .bc-read.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+[data-demo="ft_printf-base-convert"] .bc-read.on code{color:var(--accent)}
+[data-demo="ft_printf-base-convert"] .bc-code{margin:16px 0 0;overflow-x:auto;white-space:pre}
+[data-demo="ft_printf-base-convert"] .bc-code:empty{display:none}
+[data-demo="ft_printf-base-convert"] .bc-table{margin-top:8px}
+[data-demo="ft_printf-base-convert"] .bc-table th,[data-demo="ft_printf-base-convert"] .bc-table td{padding:8px 12px;font-family:var(--mono);font-size:.8rem;text-transform:none;letter-spacing:0}
+[data-demo="ft_printf-base-convert"] .bc-table thead th{color:var(--muted);white-space:nowrap}
+[data-demo="ft_printf-base-convert"] .bc-table td.bc-digit{color:var(--accent);font-weight:700}
+[data-demo="ft_printf-base-convert"] .bc-order{font-family:var(--mono);font-size:.82rem;color:var(--text);margin-top:10px;overflow-wrap:anywhere}
+[data-demo="ft_printf-base-convert"] .bc-warn{font-size:.88rem;color:var(--err);margin-top:10px}
+[data-demo="ft_printf-base-convert"] .bc-warn:empty,[data-demo="ft_printf-base-convert"] .bc-note:empty,[data-demo="ft_printf-base-convert"] .bc-order:empty{display:none}
+[data-demo="ft_printf-base-convert"] .bc-note{font-size:.88rem;color:var(--amber);margin-top:10px;border-left:3px solid var(--amber);padding-left:12px}
+@media (max-width:560px){
+  [data-demo="ft_printf-base-convert"] .bc-bits{gap:3px}
+  [data-demo="ft_printf-base-convert"] .bc-bit{font-size:.62rem}
+  [data-demo="ft_printf-base-convert"] .bc-hex{font-size:.8rem}
+  [data-demo="ft_printf-base-convert"] .bc-table th,[data-demo="ft_printf-base-convert"] .bc-table td{padding:7px 8px;font-size:.74rem}
+}

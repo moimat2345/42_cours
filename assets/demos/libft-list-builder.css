@@ -1,0 +1,17 @@
+[data-demo="libft-list-builder"] .lb-title{color:var(--muted);font-size:.9rem;margin-bottom:12px}
+[data-demo="libft-list-builder"] .lb-value{display:flex;flex-direction:column;gap:5px;width:120px}
+[data-demo="libft-list-builder"] .lb-value input{width:100%;text-align:center;font-size:1rem}
+[data-demo="libft-list-builder"] .lb-actions button{min-height:40px}
+[data-demo="libft-list-builder"] .lb-free{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.78rem;cursor:pointer}
+[data-demo="libft-list-builder"] .lb-free input{width:18px;height:18px;padding:0;accent-color:var(--accent)}
+[data-demo="libft-list-builder"] .lb-nodes{display:flex;flex-wrap:wrap;align-items:center;gap:6px 4px;margin-top:16px;padding:14px;border:1px solid var(--border);border-radius:12px;background:#0c0f15;min-height:72px}
+[data-demo="libft-list-builder"] .lb-ptr{font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:4px 8px}
+[data-demo="libft-list-builder"] .lb-arrow{font-family:var(--mono);color:var(--faint)}
+[data-demo="libft-list-builder"] .lb-node{display:inline-flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden;font-family:var(--mono);background:var(--surface-2)}
+[data-demo="libft-list-builder"] .lb-content{padding:6px 10px;font-size:.95rem;color:var(--text);border-right:1px solid var(--border-strong)}
+[data-demo="libft-list-builder"] .lb-next{padding:6px 8px;font-size:.66rem;font-style:normal;color:var(--muted);display:flex;align-items:center}
+[data-demo="libft-list-builder"] .lb-null{font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--err)}
+[data-demo="libft-list-builder"] .lb-text{margin-top:12px;font-family:var(--mono);font-size:.92rem;color:var(--text);word-break:break-word}
+[data-demo="libft-list-builder"] .lb-stats{margin-top:6px;font-family:var(--mono);font-size:.76rem;color:var(--muted)}
+[data-demo="libft-list-builder"] .lb-stats.leak{color:var(--err);font-weight:700}
+[data-demo="libft-list-builder"] .lb-log{margin-top:6px;font-size:.84rem;color:var(--muted);font-weight:300;min-height:1.6em}
