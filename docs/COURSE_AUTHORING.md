@@ -94,4 +94,6 @@ Dans le fragment :
 - Même structure, **mêmes ids**, mêmes classes, mêmes `data-demo`, mêmes clés dans `demo-i18n`.
 - Traduire le texte, les valeurs du JSON `demo-i18n` et les commentaires de code. Ne pas traduire les identifiants C/C++, les noms de fichiers, ni les sorties exactes imposées par le sujet.
 - Exception : les noms de fichiers d'exemple et de sujet du gabarit (ex. `exemple.c` / `example.c`, `fichier.pdf` / `file.pdf`) sont des libellés d'illustration et peuvent être traduits ; les vrais noms de fichiers du sujet ne se traduisent pas.
+- Les `{placeholders}` des valeurs `demo-i18n` sont conservés un à un, sauf les marqueurs de **pluriel** (`{s}`, `{sNa}`…) : la grammaire anglaise peut en demander moins (« met » / « not met » ne s'accordent pas). Les règles propres à une langue (pluriel du 0, séparateurs, virgule ou point décimal, unité) ne se codent JAMAIS en dur dans le JS : elles passent par des clés du JSON, ajoutées dans les DEUX fragments (voir `born2beroot-policy-checker.js`, clés `pluralSuffix`, `pluralZeroSuffix`, `ruleSep`).
+- Orthographe : anglais **américain** partout (behavior, defense, optimization, gray, uncheck…). Les noms d'exemple inventés par le cours (`compteur`, `fichier.txt`) se traduisent ; ceux qui viennent du sujet ne se traduisent jamais.
 - `node scripts/check.mjs` contrôle la parité FR/EN.

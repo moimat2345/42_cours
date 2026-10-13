@@ -1,0 +1,240 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C project · get_next_line</span>
+  <h1 class="title">get_next_line, <span class="g">line by line</span></h1>
+  <p class="lead">Understand the <b>static variable</b>, <code class="inline">read()</code> and <code class="inline">BUFFER_SIZE</code> so you can return <b>one line per call</b>, whatever the buffer size, without losing any text and without a memory leak.</p>
+  <p class="subj">subject: Get Next Line · version 14.0 · cc -Wall -Wextra -Werror -D BUFFER_SIZE=n · read, malloc, free</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>The project in <span class="accent">short</span></h2></div>
+    <p class="body">You write <code class="inline">get_next_line</code>: a function that, on each call, returns <b>the next line</b> of a file descriptor. Called in a loop, it reads a whole file line by line; when there is nothing left to read, it returns <code class="inline">NULL</code>. The subject presents it as a useful function to keep in your collection (you can add it to your libft once the project is validated) and as the moment to learn an important C concept: <b>static variables</b>.</p>
+    <p class="body">Here is how a test program uses it. This <code class="inline">main</code> is not to be turned in: the subject encourages you to write your own tests, which are not graded.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">main.c (your test, not turned in)</span></div>
+<pre><span class="ty">int</span>	<span class="fn">main</span>(<span class="ty">void</span>)
+{
+	<span class="ty">int</span>	fd;
+	<span class="ty">char</span>	*line;
+
+	fd = <span class="fn">open</span>(<span class="st">"file.txt"</span>, O_RDONLY);
+	<span class="k">while</span> ((line = <span class="fn">get_next_line</span>(fd)) != <span class="nm">NULL</span>)
+	{
+		<span class="fn">printf</span>(<span class="st">"%s"</span>, line);	<span class="cm">// the line already contains its \n</span>
+		<span class="fn">free</span>(line);		<span class="cm">// the caller must free it</span>
+	}
+	<span class="fn">close</span>(fd);
+	<span class="k">return</span> (<span class="nm">0</span>);
+}</pre>
+    </div>
+    <p class="body">Three questions sum up the whole project. The rest of the course answers them one by one.</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Where do you keep what you read past the end of the line?</b> <code class="inline">read()</code> reads blocks, not lines: it almost always goes past the end of the line. The surplus must survive until the next call.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>When do you stop reading?</b> As soon as a <code class="inline">\n</code> is in what you have read, or when <code class="inline">read()</code> reports the end of the file or an error.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Who frees what?</b> The subject tolerates no memory leaks. Every allocation must be freed, on every path.</span></div>
+    </div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>The project <span class="accent">map</span></h2></div>
+    <div class="map">
+      <div class="map-item"><span class="ex">Function</span><div><h4>get_next_line</h4><p>Prototype: <code class="inline">char *get_next_line(int fd);</code> Returns the line read from <code class="inline">fd</code>, or <code class="inline">NULL</code> if there is nothing left to read or if an error occurred.</p></div></div>
+      <div class="map-item"><span class="ex">Files</span><div><h4>To turn in</h4><p><code class="inline">get_next_line.c</code>, <code class="inline">get_next_line_utils.c</code>, <code class="inline">get_next_line.h</code>. The header contains at least the prototype; your helper functions go in the <code class="inline">_utils</code> file. No Makefile in the list.</p></div></div>
+      <div class="map-item"><span class="ex">Allowed</span><div><h4>External functions</h4><p><code class="inline">read</code>, <code class="inline">malloc</code>, <code class="inline">free</code>. Everything else, you write yourself.</p></div></div>
+      <div class="map-item"><span class="ex">Forbidden</span><div><h4>What would make you fail</h4><p>Your <code class="inline">libft</code>, <code class="inline">lseek()</code> and global variables.</p></div></div>
+      <div class="map-item"><span class="ex">Compile</span><div><h4>-D BUFFER_SIZE=n</h4><p>With <code class="inline">cc -Wall -Wextra -Werror</code>. The project must also compile <b>without</b> this flag: you choose the default value.</p></div></div>
+      <div class="map-item"><span class="ex">Bonus</span><div><h4>Multiple file descriptors</h4><p>A single static variable and several <code class="inline">fd</code> read in alternation. Files <code class="inline">get_next_line_bonus.c</code>, <code class="inline">get_next_line_bonus.h</code>, <code class="inline">get_next_line_utils_bonus.c</code>. Only assessed if the mandatory part is perfect.</p></div></div>
+      <div class="map-item"><span class="ex">README</span><div><h4>README.md at the root</h4><p>First line in italics: <i>This project has been created as part of the 42 curriculum by &lt;login&gt;</i>. Sections “Description”, “Instructions”, “Resources” (including how AI was used), plus the explanation and justification of your algorithm.</p></div></div>
+      <div class="map-item"><span class="ex">Norm</span><div><h4>Common rules</h4><p>The Norm applies to all files, bonus included: a Norm error gives 0. A crash (segfault, double free…) gives 0. No memory leak is tolerated.</p></div></div>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">compilation</span></div>
+<pre>cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c main.c
+<span class="cm"># the 42 in -D is an example: your evaluators and the Moulinette will change the value</span></pre>
+    </div>
+    <p class="body">The subject also defines the expected behavior. Keep this table in front of you while you code.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rule</th><th>What it means for you</th></tr></thead>
+        <tbody>
+          <tr><td>One line per call</td><td>Repeated calls (a loop) must let you read the whole file, one line at a time.</td></tr>
+          <tr><td>The \n is included</td><td>The returned line contains its final <code class="inline">\n</code>, unless the end of the file is reached and the file does not end with a <code class="inline">\n</code>.</td></tr>
+          <tr><td>NULL</td><td>Nothing to read (or nothing left) or an error: <code class="inline">NULL</code>.</td></tr>
+          <tr><td>File and stdin</td><td>The function must work as well on a file as on standard input.</td></tr>
+          <tr><td>Read as little as possible</td><td>As soon as you meet a <code class="inline">\n</code>, you return the line. Reading the whole file and then splitting it is not allowed.</td></tr>
+          <tr><td>BUFFER_SIZE</td><td>Set by your evaluators and the Moulinette. The subject asks whether it works with 9999, with 1, with 10000000, and whether you know why.</td></tr>
+          <tr><td>Undefined behavior</td><td>File modified after the last call while <code class="inline">read()</code> has not reached the end; binary file (you may handle it if you want, it is not required).</td></tr>
+          <tr><td>Descriptors</td><td>An <code class="inline">fd</code> does not always point to a regular file: plan varied tests.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="static">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Why a <span class="accent">static</span> variable</h2></div>
+    <p class="body">A call to <code class="inline">get_next_line</code> returns <b>a single line</b>. But <code class="inline">read()</code> has no idea where your lines end: it reads a block of bytes, period. Almost always, that block contains the end of one line <b>and the start of the next</b>. You have read this surplus: it is no longer in the file, the descriptor has moved on. And <code class="inline">lseek()</code> is forbidden, so there is no going back. If you throw the surplus away at the end of the call, it is lost for good.</p>
+    <p class="body">So you need a place where this “leftover” <b>survives between two calls</b>. An ordinary local variable disappears when the function returns. A global variable would solve the problem, but they are forbidden. The subject's answer: the <code class="inline">static</code> variable.</p>
+    <div class="duo">
+      <div class="card">
+        <h3>Local variable</h3>
+        <ul>
+          <li><span class="m">•</span><span>Created on every call of the function</span></li>
+          <li><span class="m">•</span><span>Destroyed at the <code class="inline">return</code></span></li>
+          <li><span class="m">•</span><span>Indeterminate starting value until you initialize it</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Static variable</h3>
+        <ul>
+          <li><span class="m">•</span><span>Created only once, it exists for the whole program</span></li>
+          <li><span class="m">•</span><span>Keeps its value from one call to the next</span></li>
+          <li><span class="m">•</span><span>Starts at zero (so <code class="inline">NULL</code> for a pointer) if you don't initialize it</span></li>
+          <li><span class="m">•</span><span>Visible only inside the function that declares it</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="body" style="margin-top:18px">A tiny example, unrelated to the project, to see the difference:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">counter.c</span></div>
+<pre><span class="ty">int</span>	<span class="fn">counter</span>(<span class="ty">void</span>)
+{
+	<span class="k">static</span> <span class="ty">int</span>	n;	<span class="cm">// is 0 on the first call, then keeps its value</span>
+
+	n++;
+	<span class="k">return</span> (n);
+}
+<span class="cm">// counter() returns 1, then 2, then 3... Without static, n would restart from an indeterminate value on every call.</span></pre>
+    </div>
+    <div class="callout"><span class="bulb">💡</span><p><b>What survives is the pointer. The text too, if it is on the heap.</b> Your static variable will typically be a <code class="inline">char *</code> pointing to a string allocated with <code class="inline">malloc</code>: the string stays there as long as you don't free it, and the static variable is the handle that lets you find it again on the next call. So it is up to you to free this leftover, at the right time.</p></div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">get_next_line.c (skeleton)</span></div>
+<pre><span class="ty">char</span>	*<span class="fn">get_next_line</span>(<span class="ty">int</span> fd)
+{
+	<span class="k">static</span> <span class="ty">char</span>	*stash;	<span class="cm">// the leftover from previous reads (NULL at the start)</span>
+
+	<span class="cm">// 1. fill the leftover until it contains a \n (or the end of the file)</span>
+	<span class="cm">// 2. extract the line from it</span>
+	<span class="cm">// 3. keep in the leftover only what follows the line</span>
+}</pre>
+    </div>
+    <p class="body">Where should you declare it? <b>Inside the function.</b> A static variable placed outside any function is visible to the whole file: an evaluator may judge it equivalent to a global variable.</p>
+  </section>
+
+  <section id="read">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2><span class="accent">read()</span> and BUFFER_SIZE</h2></div>
+    <p class="body"><code class="inline">read(fd, buf, count)</code> (manual page <code class="inline">man 2 read</code>, header <code class="inline">&lt;unistd.h&gt;</code>) reads <b>at most</b> <code class="inline">count</code> bytes from <code class="inline">fd</code> and writes them into <code class="inline">buf</code>. Its return value matters:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>read() returns</th><th>Meaning</th><th>What you do</th></tr></thead>
+        <tbody>
+          <tr><td>n &gt; 0</td><td>n bytes were read (sometimes fewer than requested)</td><td>You append them to the leftover and check whether there is a <code class="inline">\n</code></td></tr>
+          <tr><td>0</td><td>End of file</td><td>Text waiting? You return it as is. Nothing? <code class="inline">NULL</code></td></tr>
+          <tr><td>-1</td><td>Error</td><td>You free what you hold and return <code class="inline">NULL</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px"><code class="inline">read</code> does <b>not</b> put a <code class="inline">'\0'</code> at the end: your buffer is a block of bytes, not a C string. Allow one more byte than <code class="inline">BUFFER_SIZE</code> and terminate it yourself before calling a string function.</p>
+    <p class="body"><code class="inline">BUFFER_SIZE</code> is the block size requested on each <code class="inline">read()</code>. It is not in your code: it comes from the compile command (<code class="inline">-D BUFFER_SIZE=n</code>) and your evaluators change it. Since the project must also compile without the flag, you give a default value in the header:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">get_next_line.h</span></div>
+<pre><span class="op">#ifndef</span> BUFFER_SIZE
+<span class="op"># define</span> BUFFER_SIZE <span class="nm">42</span>	<span class="cm">// the default value is up to you</span>
+<span class="op">#endif</span></pre>
+    </div>
+    <p class="body">The method fits in one loop: <b>as long as the leftover contains no <code class="inline">\n</code>, read a block and append it to the leftover</b>. As soon as there is a <code class="inline">\n</code> (or <code class="inline">read</code> returns 0), you cut: the line is returned, what follows stays in <code class="inline">static</code>. Play with the demo below. The “file” is a simple string, and each click calls <code class="inline">get_next_line</code> once.</p>
+    <div class="demo" data-demo="get_next_line-buffer">
+      <div class="demo-static">
+        <p class="body"><b>Demo (requires JavaScript):</b> a text “file”, a <code class="inline">BUFFER_SIZE</code> slider from 1 to 16 and a button to call <code class="inline">get_next_line</code>. On each call, the demo shows every <code class="inline">read()</code>, the content of the static variable before and after, the line returned and the cumulative number of <code class="inline">read()</code> calls.</p>
+        <p class="body">Example without JavaScript: file <code class="inline">ab\ncd\nef</code> (no final <code class="inline">\n</code>), <code class="inline">BUFFER_SIZE=4</code>.</p>
+        <p class="body"><b>Call 1.</b> <code class="inline">read</code> reads <code class="inline">"ab\nc"</code>, the function returns <code class="inline">"ab\n"</code>, the leftover is <code class="inline">"c"</code>.<br><b>Call 2.</b> <code class="inline">read</code> reads <code class="inline">"d\nef"</code>, returns <code class="inline">"cd\n"</code>, leftover <code class="inline">"ef"</code>.<br><b>Call 3.</b> <code class="inline">read</code> reads 0 bytes (end of file), returns <code class="inline">"ef"</code>, <code class="inline">static</code> goes back to <code class="inline">NULL</code>.<br><b>Call 4.</b> <code class="inline">read</code> again reads 0 bytes, returns <code class="inline">NULL</code>.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"On each click, get_next_line reads only what it needs to return one line.","file_label":"Content of the “file” (120 characters max., ASCII, one character = one byte)","sample":"ab\ncd\nef","bs_label":"BUFFER_SIZE","call":"Call get_next_line","restart":"Start over","empty":"No call yet. If you change the file or BUFFER_SIZE, the demo starts again from zero, as after recompiling.","legend_done":"already returned","legend_stash":"in the static variable","legend_unread":"not read yet","legend_eof":"end of file reached (read returned 0)","log_label":"get_next_line calls, most recent first","call_n":"Call #{n}","k_before":"static before","k_reads":"read() in this call","k_after":"static after","k_ret":"get_next_line returns","k_total":"cumulative read()","read_n":"read #{i}","bytes":"bytes read: {n}","eof":"end of file","no_read":"no read(): the leftover was enough","more_reads":"… {n} more read() …","note_noread":"The leftover already contained a \\n: no read() was needed. We return the line and keep what follows.","note_found":"A \\n showed up in what was just read: we stop reading, return the line and keep what follows in static.","note_eofline":"read() returned 0 (end of file) and some text without a \\n was left: we return it as is, it is the last line, and static goes back to NULL.","note_null":"read() returned 0 and nothing is left in static (NULL): there is nothing left to return, so NULL (not an empty string).","warn_ascii":"Ignored characters (not printable ASCII): {n}."}</script>
+    </div>
+    <p class="body">What the demo shows you, to reproduce in your own code:</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>The leftover bridges the calls.</b> With the sample file and <code class="inline">BUFFER_SIZE=4</code>, the 1<sup>st</sup> call reads <code class="inline">"ab\nc"</code>: it returns <code class="inline">"ab\n"</code> and keeps <code class="inline">"c"</code>, which the 2<sup>nd</sup> call completes.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>A call may not read at all.</b> Set <code class="inline">BUFFER_SIZE</code> to 16: the whole file arrives on the first call, then as long as the leftover contains a <code class="inline">\n</code>, the lines come out without any new <code class="inline">read()</code>.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>With 1, everything works too, but slowly.</b> As many <code class="inline">read()</code> calls as bytes: the “cumulative” counter climbs fast.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>The end is read in two steps.</b> File without a final <code class="inline">\n</code>: a <code class="inline">read()</code> returning 0 makes the function return the last line, and the next call returns <code class="inline">NULL</code>. File ending with a <code class="inline">\n</code>: after the last line, the next <code class="inline">read()</code> returns 0 and the function returns <code class="inline">NULL</code>.</span></div>
+    </div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>Step by <span class="accent">step</span></h2></div>
+    <p class="body">A working order that avoids debugging everything at once. Splitting into functions is a suggestion, not a requirement: the subject only fixes the prototype and the files. Don't take it for a ready-made solution, every step is still yours to write.</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Set up the header.</b> The prototype of <code class="inline">get_next_line</code>, an include guard, the includes you need (<code class="inline">&lt;stdlib.h&gt;</code> for <code class="inline">malloc</code> and <code class="inline">free</code>, <code class="inline">&lt;unistd.h&gt;</code> for <code class="inline">read</code>) and the default value of <code class="inline">BUFFER_SIZE</code>.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Write your tools in <code class="inline">get_next_line_utils.c</code>.</b> libft is forbidden: you only rewrite what you need. Typically the length of a string, the search for a character, the concatenation of two strings (into a new allocation) and copying a portion. The Norm limits the size of functions and their number per file: these small tools will help you stay within the limits. Test each one separately.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Start with the safeguards.</b> Negative <code class="inline">fd</code>: <code class="inline">NULL</code> right away. A <code class="inline">BUFFER_SIZE</code> value that makes no sense (zero, negative) also deserves a <code class="inline">NULL</code> rather than undefined behavior.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>Fill the leftover.</b> Allocate a read buffer (with <code class="inline">malloc</code>, of <code class="inline">BUFFER_SIZE</code> + 1 bytes). As long as the leftover has no <code class="inline">\n</code>: <code class="inline">read</code>, terminate the block with a <code class="inline">'\0'</code> and append it to the leftover. If <code class="inline">read</code> returns 0, leave the loop. If it returns -1, free everything and return <code class="inline">NULL</code>. Free the read buffer on every exit.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>Extract the line.</b> If there is a <code class="inline">\n</code>, copy up to it, <code class="inline">\n</code> included. Otherwise (end of file without a <code class="inline">\n</code>), copy everything that is left. If the leftover is empty or does not exist: nothing to return, so <code class="inline">NULL</code>.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>Recompute the leftover.</b> What follows the <code class="inline">\n</code> becomes the new leftover (new allocation), then you free the old one. If nothing is left, don't keep an empty string alive: free it and set the pointer back to <code class="inline">NULL</code>.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>Test methodically.</b> <code class="inline">BUFFER_SIZE</code> at 1, 2, 42, 9999, 10000000. Empty file, a single line without <code class="inline">\n</code>, only <code class="inline">\n</code> characters, a very long line. Standard input. An invalid descriptor. Run every test under <code class="inline">valgrind</code> (or <code class="inline">leaks</code> on macOS) to hunt leaks.</span></div>
+    </div>
+    <p class="body" style="margin-top:22px"><b>Bonus: multiple file descriptors.</b> The bonus changes just one thing: instead of <b>one</b> leftover, you need <b>one per descriptor</b>, and the subject requires <b>a single static variable</b>. The common interpretation is that an array declared <code class="inline">static</code> counts as a single variable: you index it by <code class="inline">fd</code>. The subject does not say so in so many words: confirm it with your evaluator. Try the demo by alternating the two buttons, first with a single shared leftover, then with one leftover per descriptor.</p>
+    <div class="demo" data-demo="get_next_line-multi-fd">
+      <div class="demo-static">
+        <p class="body"><b>Demo (requires JavaScript):</b> two “files”, open on <code class="inline">fd 3</code> and <code class="inline">fd 4</code>, and two buttons to call <code class="inline">get_next_line(3)</code> or <code class="inline">get_next_line(4)</code> in alternation. Two modes: a single leftover for all descriptors, or one leftover per descriptor.</p>
+        <p class="body">Example without JavaScript: <code class="inline">fd 3</code> contains <code class="inline">a1\na2\na3</code>, <code class="inline">fd 4</code> contains <code class="inline">b1\nb2\nb3</code>, <code class="inline">BUFFER_SIZE=4</code>, calls in the order fd 3, fd 4, fd 3, fd 4.</p>
+        <p class="body"><b>A single shared leftover:</b> <code class="inline">"a1\n"</code>, <code class="inline">"ab1\n"</code>, <code class="inline">"b2\n"</code>, <code class="inline">"a32\n"</code>. Only the first call is right.<br><b>One leftover per descriptor:</b> <code class="inline">"a1\n"</code>, <code class="inline">"b1\n"</code>, <code class="inline">"a2\n"</code>, <code class="inline">"b2\n"</code>. Every line is right.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"mode_label":"How the function keeps its leftover","mode_shared":"One leftover for all fds","mode_perfd":"One leftover per fd (bonus)","hint_shared":"A single static variable holds the leftover, whatever the descriptor. Alternate the calls: the leftover of one file ends up glued in front of the other file's line.","hint_perfd":"A single static array, indexed by the descriptor: each fd finds its own leftover again. Alternate the calls: the lines no longer get mixed.","file_label":"“File” open on fd {fd} (60 characters max., ASCII)","file3":"a1\na2\na3","file4":"b1\nb2\nb3","call_fd":"Call get_next_line({fd})","bs_label":"BUFFER_SIZE","restart":"Start over","empty":"No call yet. Alternate get_next_line(3) and get_next_line(4), then switch mode to compare.","log_label":"Calls, most recent first","stash_shared":"stash (shared)","stash_fd":"stash[{fd}]","progress":"bytes read by read(): {a} / {b}","call_head":"Call #{n} · fd {fd}","k_before":"before · {name}","k_after":"after · {name}","k_reads":"read() in this call","k_ret":"get_next_line returns","k_want":"expected line for fd {fd}","read_n":"read #{i} on fd {fd}","eof":"end of file","no_read":"no read(): the leftover was enough","more_reads":"… {n} more read() …","verdict_ok":"✓ correct line","verdict_bad":"✗ not the expected line: the shared leftover mixed the two files","warn_ascii":"Ignored characters (not printable ASCII): {n}."}</script>
+    </div>
+    <div class="callout"><span class="bulb">💡</span><p><b>The size of the array is your choice.</b> The subject does not say how many descriptors to handle. Pick a reasonable constant (1024, for example) rather than the value of <code class="inline">ulimit -n</code>: that limit can be huge in a container. Return <code class="inline">NULL</code> for a negative <code class="inline">fd</code> or one greater than or equal to that constant. Your bonus files carry the <code class="inline">_bonus</code> suffix and are added to the mandatory files.</p></div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>Classic <span class="accent">pitfalls</span></h2></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>BUFFER_SIZE = 1.</b> One <code class="inline">read</code> per byte: your function must stay correct, and not absurdly slow. Beware of code that assumes several bytes per block, and of a search for the <code class="inline">\n</code> that restarts from the beginning of the whole leftover on every loop iteration.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>BUFFER_SIZE = 10000000.</b> Never declare your read buffer as a local array: <code class="inline">char buf[BUFFER_SIZE + 1]</code> asks the <i>stack</i> for about 10 MB, more than its usual size (8 MB on many systems, <code class="inline">ulimit -s</code>). Result: segfault, so 0. Allocate it with <code class="inline">malloc</code> and free it.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>File without a final <code class="inline">\n</code>.</b> The last line has no <code class="inline">\n</code>: you still return it, as is, then <code class="inline">NULL</code> on the next call. Don't lose it, and don't add one of your own: the subject is precise on this point.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A line that starts with <code class="inline">\n</code>.</b> An empty line in the file is the string <code class="inline">"\n"</code>: one character, not an empty string. A test like “if the line is empty, it's the end” makes you lose the empty lines. Only <code class="inline">NULL</code> signals the end.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Returning <code class="inline">""</code> at the end instead of <code class="inline">NULL</code>.</b> At the end of the file, you return <code class="inline">NULL</code>, not an allocated empty string. With <code class="inline">""</code>, a <code class="inline">while (line)</code> loop would never stop, and each allocated empty string would be one more leak.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>read() returns -1.</b> Invalid or closed descriptor, directory opened instead of a file: <code class="inline">read</code> fails and returns -1 (this is the case for <code class="inline">-1</code>, for a descriptor that is not open and for a directory). Test <code class="inline">&lt; 0</code> explicitly: a <code class="inline">while (read(...))</code> loop treats -1 as “keep going”. On error, free the leftover and the buffer, then return <code class="inline">NULL</code>. The subject asks for this on any error.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Leaks, in the three classic places.</b> The read buffer (to free on every exit, errors included), the old leftover (to free as soon as a new one replaces it) and the final leftover (to free and set back to <code class="inline">NULL</code> as soon as the last line has gone). The returned line belongs to the caller. Also think about <code class="inline">malloc</code> failing: every path must free what it holds.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Concatenation that copies everything.</b> If, for each block read, you copy the whole leftover into a new string, and if, for each line returned, you copy everything that follows, a large file or a very long line costs quadratic time. With a big <code class="inline">BUFFER_SIZE</code>, the leftover is huge from the first <code class="inline">read</code>, and each returned line copies almost all of it. Avoiding these copies is an optimization, not a requirement of the subject. To see where you stand, don't use an absolute duration: on <b>the same</b> file of 100 to 500 KB, compare <code class="inline">BUFFER_SIZE=1</code> and <code class="inline">BUFFER_SIZE=10000000</code> with a reasonable <code class="inline">BUFFER_SIZE</code> such as 42. With 1, even linear code stays slow (one system call per byte): what should alert you is a running time that blows up when you double the size of the file. Look for the <code class="inline">\n</code> only in the last block added.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Standard input.</b> The subject requires it to work with <code class="inline">get_next_line(0)</code> too. Test with a redirection (<code class="inline">./a.out &lt; file</code>), with a pipe (<code class="inline">printf 'a\nb' | ./a.out</code>) and at the keyboard (Ctrl-D at the start of a line sends the end of file). At the keyboard, <code class="inline">read</code> returns at most one line at a time, even with a large <code class="inline">BUFFER_SIZE</code>: your code must never assume that <code class="inline">read</code> fills the buffer.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Bonus: an fd outside the array.</b> A negative or too large <code class="inline">fd</code> writes outside the array of leftovers. Check the index before touching it. And remember: a single static variable, not one per descriptor (an array counts as one, according to the common interpretation; the subject does not specify it, check with your evaluator).</p></div>
+    <p class="body" style="margin-top:22px">A minimal test battery, with what your function must return, call after call, whatever the <code class="inline">BUFFER_SIZE</code>:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>File content</th><th>Values returned, in order</th></tr></thead>
+        <tbody>
+          <tr><td>(empty)</td><td><code class="inline">NULL</code></td></tr>
+          <tr><td>a</td><td><code class="inline">"a"</code> then <code class="inline">NULL</code></td></tr>
+          <tr><td>a\n</td><td><code class="inline">"a\n"</code> then <code class="inline">NULL</code></td></tr>
+          <tr><td>\n</td><td><code class="inline">"\n"</code> then <code class="inline">NULL</code></td></tr>
+          <tr><td>a\n\nb</td><td><code class="inline">"a\n"</code>, <code class="inline">"\n"</code>, <code class="inline">"b"</code> then <code class="inline">NULL</code></td></tr>
+          <tr><td>ab\ncd\nef</td><td><code class="inline">"ab\n"</code>, <code class="inline">"cd\n"</code>, <code class="inline">"ef"</code> then <code class="inline">NULL</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>How <span class="accent">I did it</span></h2></div>
+    <div class="how"><p class="body">I kept all the text that was read but not yet returned in a single static variable: a pointer to an allocated string. On each call, a first function reads blocks of <code class="inline">BUFFER_SIZE</code> bytes into a temporary buffer and appends them to the leftover until it sees a <code class="inline">\n</code> or the end of the file. A second one copies the line, <code class="inline">\n</code> included. A third one builds the new leftover and frees the old one; at the end of the file, everything is freed. This split fits within the Norm and can be tested piece by piece. If <code class="inline">read</code> fails, I free the leftover and return <code class="inline">NULL</code>. For the bonus, I kept the same functions: the static variable becomes a fixed-size array of pointers, indexed by the descriptor, so each file finds its own leftover again.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 Key takeaways (for your defense)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>The contract.</b> <code class="inline">char *get_next_line(int fd)</code> returns the line read, with its <code class="inline">\n</code> (except the last one of a file that has none), or <code class="inline">NULL</code> if there is nothing left or on error.</div></li>
+        <li><span class="chk">✓</span><div><b>Why <code class="inline">static</code>.</b> <code class="inline">read()</code> reads blocks that go past the end of the line: this surplus must survive between two calls, without a global variable or <code class="inline">lseek</code> (both forbidden).</div></li>
+        <li><span class="chk">✓</span><div><b>BUFFER_SIZE.</b> Defined by <code class="inline">-D BUFFER_SIZE=n</code>, with a default value when the flag is missing. It must work with 1, 9999 and 10000000: the read buffer is allocated with <code class="inline">malloc</code>, never on the stack.</div></li>
+        <li><span class="chk">✓</span><div><b>The reading loop.</b> As long as the leftover has no <code class="inline">\n</code>: <code class="inline">read</code>. Return value &gt; 0: append. 0: end of file. -1: free and return <code class="inline">NULL</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Read as little as possible.</b> As soon as a <code class="inline">\n</code> is there, return the line. Never read the whole file in advance.</div></li>
+        <li><span class="chk">✓</span><div><b>Memory.</b> Every <code class="inline">malloc</code> has its <code class="inline">free</code> on every path. The leftover is freed at the end of the file and on error; the returned line is freed by the caller.</div></li>
+        <li><span class="chk">✓</span><div><b>The edge cases.</b> Empty file, no final <code class="inline">\n</code>, empty lines, very long line, invalid descriptor, standard input.</div></li>
+        <li><span class="chk">✓</span><div><b>Functions and files.</b> <code class="inline">read</code>, <code class="inline">malloc</code>, <code class="inline">free</code> only. No libft. To turn in: <code class="inline">get_next_line.c</code>, <code class="inline">get_next_line_utils.c</code>, <code class="inline">get_next_line.h</code>, and the <code class="inline">README.md</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Bonus.</b> A single static variable: an array of leftovers indexed by <code class="inline">fd</code> (common interpretation, to confirm with your evaluator). <code class="inline">_bonus</code> files, assessed only if the mandatory part is perfect.</div></li>
+        <li><span class="chk">✓</span><div><b>Defense questions.</b> Why <code class="inline">static</code>? What happens with <code class="inline">BUFFER_SIZE=1</code>? With 10000000? When do you return <code class="inline">NULL</code>? Who frees the line?</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

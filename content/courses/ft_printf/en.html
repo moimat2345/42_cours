@@ -1,0 +1,270 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C project · Variadic functions</span>
+  <h1 class="title">ft_<span class="g">printf</span></h1>
+  <p class="lead">Recode <b>printf</b>: understand how a function receives a variable number of arguments, then how it prints them in decimal, in hexadecimal and as a pointer.</p>
+  <p class="subj">subject: ft_printf · libftprintf.a · c s p d i u x X % · -Wall -Wextra -Werror · Norm</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>The project in <span class="accent">brief</span></h2></div>
+    <p class="body">You write an <code class="inline">ft_printf</code> function that imitates the libc's <code class="inline">printf</code>: it receives a <b>format string</b> followed by a number of arguments it does not know in advance, writes the result with <code class="inline">write</code>, and <b>returns the number of characters written</b>.</p>
+    <p class="body">The work comes down to three ideas: reading a variable number of arguments (<code class="inline">stdarg.h</code>), walking through the format while telling plain text from conversions, then printing each value in the right base with <code class="inline">write</code> as your only tool. The rest (the <code class="inline">Makefile</code>, the <code class="inline">libftprintf.a</code> library) is tooling.</p>
+    <div class="callout"><span class="bulb">💡</span><p><b>Your referee is the real printf.</b> The subject asks you to imitate <code class="inline">printf</code>: for each case, compare its <b>output</b> and its <b>return value</b> with yours.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>The project <span class="accent">map</span></h2></div>
+    <div class="map">
+      <div class="map-item"><span class="ex">Turn-in</span><div><h4>The library</h4><p><code class="inline">libftprintf.a</code>, built with <code class="inline">ar</code> by your <code class="inline">Makefile</code> (<code class="inline">libtool</code> is forbidden). It provides <code class="inline">int ft_printf(const char *, ...);</code></p></div></div>
+      <div class="map-item"><span class="ex">Files</span><div><h4>What you turn in</h4><p><code class="inline">Makefile</code>, <code class="inline">*.h</code>, <code class="inline">*.c</code>, and the <code class="inline">libftprintf.a</code> library at the root of the repository. To check in your subject.</p></div></div>
+      <div class="map-item"><span class="ex">Part 1</span><div><h4>The conversions</h4><p><code class="inline">c s p d i u x X %</code>: nine cases to handle for the mandatory part.</p></div></div>
+      <div class="map-item"><span class="ex">Allowed</span><div><h4>The functions</h4><p><code class="inline">malloc</code>, <code class="inline">free</code>, <code class="inline">write</code>, <code class="inline">va_start</code>, <code class="inline">va_arg</code>, <code class="inline">va_copy</code>, <code class="inline">va_end</code>. Your libft is allowed; if you use it, your <code class="inline">Makefile</code> must also build it (to check in your subject).</p></div></div>
+      <div class="map-item"><span class="ex">Return</span><div><h4>The return value</h4><p><code class="inline">ft_printf</code> returns the number of characters written, like <code class="inline">printf</code>.</p></div></div>
+      <div class="map-item"><span class="ex">Rule</span><div><h4>No buffer</h4><p>You do not have to reproduce the buffer management of the real <code class="inline">printf</code>: you can write directly with <code class="inline">write</code>.</p></div></div>
+      <div class="map-item"><span class="ex">Bonus</span><div><h4>Flags and width</h4><p>The flags <code class="inline">-</code>, <code class="inline">0</code> and <code class="inline">.</code> with the minimum field width, then <code class="inline">#</code>, space and <code class="inline">+</code>. Only evaluated if the mandatory part is perfect.</p></div></div>
+      <div class="map-item"><span class="ex">Constraints</span><div><h4>Compilation and Norm</h4><p>Compile with <code class="inline">-Wall -Wextra -Werror</code>, follow the Norm, and do not crash (segfault, double free…) outside of undefined behavior.</p></div></div>
+    </div>
+
+    <p class="body" style="margin-top:22px">The nine conversions, with the type <code class="inline">va_arg</code> must read for each:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Conversion</th><th>Type read by va_arg</th><th>What it prints</th></tr></thead>
+        <tbody>
+          <tr><td>%c</td><td><code class="inline">int</code></td><td>a character</td></tr>
+          <tr><td>%s</td><td><code class="inline">char *</code></td><td>a string</td></tr>
+          <tr><td>%p</td><td><code class="inline">void *</code></td><td>an address in lowercase hexadecimal, preceded by <code class="inline">0x</code></td></tr>
+          <tr><td>%d</td><td><code class="inline">int</code></td><td>a signed decimal integer</td></tr>
+          <tr><td>%i</td><td><code class="inline">int</code></td><td>a signed decimal integer (for printf, same as <code class="inline">%d</code>)</td></tr>
+          <tr><td>%u</td><td><code class="inline">unsigned int</code></td><td>an unsigned decimal integer</td></tr>
+          <tr><td>%x</td><td><code class="inline">unsigned int</code></td><td>an integer in hexadecimal, lowercase letters</td></tr>
+          <tr><td>%X</td><td><code class="inline">unsigned int</code></td><td>an integer in hexadecimal, uppercase letters</td></tr>
+          <tr><td>%%</td><td>none</td><td>a single <code class="inline">%</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="variadic">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Variable <span class="accent">arguments</span></h2></div>
+    <p class="body">In the prototype <code class="inline">int ft_printf(const char *, ...);</code>, the three dots tell the compiler: “anything can follow”. It checks nothing, and nor does your function know how many arguments it received, or of what type. <b>The format is the contract</b>: each <code class="inline">%</code> announces an argument and its type.</p>
+    <p class="body">To read these arguments, <code class="inline">&lt;stdarg.h&gt;</code> provides one type and four macros:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Element</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>va_list ap;</td><td>The “cursor”: a variable that remembers where you are in the arguments.</td></tr>
+          <tr><td>va_start(ap, last)</td><td>Puts the cursor right after the last named parameter of your function (here, the format).</td></tr>
+          <tr><td>va_arg(ap, type)</td><td>Returns the next argument, read <b>as a <code class="inline">type</code></b>, and advances the cursor.</td></tr>
+          <tr><td>va_copy(dst, src)</td><td>Copies a cursor in its current state, in case you need to go through the arguments twice.</td></tr>
+          <tr><td>va_end(ap)</td><td>Closes the cursor. Every <code class="inline">va_start</code> (or <code class="inline">va_copy</code>) must have its <code class="inline">va_end</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:22px">An example unrelated to ft_printf, to see the macros together: a function that adds up <code class="inline">n</code> integers.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">sum.c</span></div>
+<pre><span class="cm">// n: how many integers follow</span>
+<span class="ty">int</span>	<span class="fn">sum</span>(<span class="ty">int</span> n, ...)
+{
+	<span class="ty">va_list</span>	ap;
+	<span class="ty">int</span>		total;
+
+	<span class="fn">va_start</span>(ap, n);
+	total = <span class="nm">0</span>;
+	<span class="k">while</span> (n-- &gt; <span class="nm">0</span>)
+		total += <span class="fn">va_arg</span>(ap, <span class="ty">int</span>);
+	<span class="fn">va_end</span>(ap);
+	<span class="k">return</span> (total);
+}</pre>
+    </div>
+
+    <div class="duo" style="margin-top:18px">
+      <div class="card">
+        <span class="ic">🧭</span>
+        <h3>What va_arg knows</h3>
+        <ul>
+          <li><span class="m">→</span><span>where the cursor is: it moves forward by one slot at each call;</span></li>
+          <li><span class="m">→</span><span>the type <b>you ask for</b>, nothing else.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">🕳️</span>
+        <h3>What it does not know</h3>
+        <ul>
+          <li><span class="m">→</span><span>how many arguments were passed;</span></li>
+          <li><span class="m">→</span><span>what type they really are;</span></li>
+          <li><span class="m">→</span><span>whether you have already gone past the last one.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="body" style="margin-top:22px">Three rules follow. You <b>cannot go back</b>: an argument that was read is consumed (unless you made a <code class="inline">va_copy</code> beforehand). The type you give to <code class="inline">va_arg</code> is <b>a promise</b>: if the caller passed something else, the behavior is undefined. Finally, small types are <b>promoted</b>: a <code class="inline">char</code> or a <code class="inline">short</code> passed to a variadic function arrives as an <code class="inline">int</code> (and a <code class="inline">float</code> as a <code class="inline">double</code>). For <code class="inline">%c</code>, you therefore read an <code class="inline">int</code>.</p>
+
+    <p class="body">Follow the cursor in the demo. Each conversion calls <code class="inline">va_arg</code> and moves <code class="inline">ap</code> forward by one slot. Then click “Wrong type”: we ask for <code class="inline">%s</code> while the argument is an integer.</p>
+    <div class="demo" data-demo="ft_printf-va-arg-walk">
+      <div class="demo-static"><p class="body">Demo: a queue of arguments and a cursor <code class="inline">ap</code>. With the format <code class="inline">%c%s%d</code> and the arguments <code class="inline">A</code>, <code class="inline">hi</code>, <code class="inline">7</code>, each conversion reads one slot and moves on: the output is <code class="inline">Ahi7</code> and the return value is 4. If we ask for <code class="inline">%s</code> on the integer 42, <code class="inline">va_arg</code> reads 42 as an address: the behavior is undefined (often a segfault).</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Follow the va_arg cursor through the queue of arguments","formatLabel":"Format","argsLabel":"Arguments passed to ft_printf (separated by |)","hint":"Inferred types: 42 gives an int, A or 'A' a char (promoted to int), hi a char *, NULL or 0x… a void *. %c reads an int: 65 gives A. Enter runs everything.","step":"Next conversion","run":"Run all","reset":"Start over","wrong":"Wrong type","queueLabel":"The arguments, in the order the caller passed them","endOfQueue":"end of queue","fmtLabel":"The format","traceLabel":"stdarg calls","output":"Output","counter":"Counter","ret":"Return value","retUndef":"Undefined return","typeChar":"char (promoted to int)","idle":"va_start has just been called: the cursor ap is on the first slot. Each conversion calls va_arg. Press “Next conversion”.","msgLits":"The text “{text}” is copied as is: the cursor does not move.","msgEnd":"A lone % at the end of the format: nothing to convert, no va_arg.","msgBad":"“{raw}” is not one of the nine conversions: the demo writes it as is, without va_arg.","msgPercent":"“%%” does not call va_arg: a single % is written and the cursor does not move.","msgConsume":"“{raw}” calls va_arg(ap, {want}): it reads slot #{n} ({val}), the cursor advances and “{text}” is written.","done":"{last} Nothing left to read in the format: va_end(ap) closes the cursor. ft_printf returns {n}.","doneExtra":"{last} Nothing left to read in the format: va_end(ap) closes the cursor. ft_printf returns {n}. {left} argument(s) left unread: they are ignored, this is not an error.","ubEmpty":"Undefined behavior: “{raw}” calls va_arg(ap, {want}) but the queue is empty. va_arg reads past the arguments that were passed: an arbitrary leftover value in the registers or on the stack.","ubStrInt":"Undefined behavior: “{raw}” calls va_arg(ap, char *), but slot #{n} contains {val} (type {got}). The value 0x{hex} is read as an address, and there is no string there. A real program often crashes (segfault) or prints garbage.","ubIntPtr":"Undefined behavior: “{raw}” calls va_arg(ap, {want}), but slot #{n} contains {val} (type {got}). You read part of the address, not the string: a number unrelated to what you wanted.","ubPtrInt":"Undefined behavior: “{raw}” calls va_arg(ap, void *), but slot #{n} contains {val} (type {got}): the integer is read as an address.","ubGeneric":"Undefined behavior: “{raw}” calls va_arg(ap, {want}), but slot #{n} contains {val} (type {got}). The compiler checks nothing and ft_printf cannot detect it: it may crash, print garbage or seem to work."}</script>
+    </div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Passing the va_list to a helper function.</b> As soon as you split up your code, you will be tempted to pass <code class="inline">ap</code> to another function. The C standard says that after a <code class="inline">va_arg</code> performed there, the value of <code class="inline">ap</code> in the caller is <b>indeterminate</b>. On Linux x86-64 the cursor does advance (the <code class="inline">va_list</code> is an array there, so it is passed by address). On other platforms, including macOS on Apple silicon, the caller sees nothing advance and reads the same slot again. Two portable solutions: pass a <b>pointer to the va_list</b> (<code class="inline">va_list *</code>, then <code class="inline">va_arg(*ap, …)</code>), or keep every <code class="inline">va_arg</code> in the function that owns the list.</p></div>
+  </section>
+
+  <section id="parsing">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>Walking through the <span class="accent">format</span></h2></div>
+    <p class="body">You read the format character by character, with two modes. What matters is knowing which one you are in.</p>
+    <div class="duo">
+      <div class="card">
+        <span class="ic">✍️</span>
+        <h3>Text mode</h3>
+        <ul>
+          <li><span class="m">→</span><span>The character is not <code class="inline">%</code>.</span></li>
+          <li><span class="m">→</span><span>You write it as is with <code class="inline">write</code>.</span></li>
+          <li><span class="m">→</span><span>You count 1 character.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">🔀</span>
+        <h3>Conversion mode</h3>
+        <ul>
+          <li><span class="m">→</span><span>You have just read <code class="inline">%</code>: the <b>next</b> character is the specifier.</span></li>
+          <li><span class="m">→</span><span>You pick the action based on it (<code class="inline">c s p d i u x X %</code>).</span></li>
+          <li><span class="m">→</span><span>You read the argument with <code class="inline">va_arg</code> (except for <code class="inline">%%</code>) and write it.</span></li>
+          <li><span class="m">→</span><span>You add what was written to the counter, then you <b>skip both characters</b>.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="editor" style="margin-top:18px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">pseudocode</span></div>
+<pre><span class="k">for</span> each character c of the format:
+    <span class="k">if</span> c is not '%':
+        write c; counter + 1
+    <span class="k">else</span>:
+        s = the next character
+        <span class="cm">// one action per s: c s p d i u x X %</span>
+        counter + whatever was written
+        advance one more step</pre>
+    </div>
+
+    <p class="body" style="margin-top:18px">The <b>return value</b> is built by summing. A good habit: have each of your small printing functions <b>return the number of characters it wrote</b>, rather than letting the top-level ft_printf function recount them. You then add up these returns and return the total at the end.</p>
+
+    <div class="callout"><span class="bulb">🧩</span><p><b>Choosing the action.</b> To go from the specifier to the right function, you can chain <code class="inline">if</code> / <code class="inline">else if</code>, or store the functions in an array. Reread the Norm before choosing: <code class="inline">switch</code> and <code class="inline">for</code> are forbidden there. The ternary operator is, depending on the Norm version, forbidden or limited to simple, non-nested cases — check the current Norm.</p></div>
+
+    <p class="body" style="margin-top:22px">Try the parsing in the demo: type a format and its arguments (separated by <code class="inline">|</code>), then advance step by step. The preloaded case is <code class="inline">%d items%%\n</code> with <code class="inline">42</code>. Also try <code class="inline">%s</code> with <code class="inline">NULL</code>, <code class="inline">%c</code> with <code class="inline">\0</code>, or a lone <code class="inline">%</code> at the end of the format.</p>
+    <div class="demo" data-demo="ft_printf-format-parser">
+      <div class="demo-static"><p class="body">Demo: the format <code class="inline">%d items%%\n</code> with the argument <code class="inline">42</code>. Each character is classified as “literal” or “conversion”: <code class="inline">%d</code> consumes the argument and writes <code class="inline">42</code> (2 characters), <code class="inline">" items"</code> is copied as is (6), <code class="inline">%%</code> writes a single <code class="inline">%</code> (1), and the final <code class="inline">\n</code> counts 1. The output is <code class="inline">42 items%</code> followed by a newline, and the return value is <b>10</b>.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Read a format the way ft_printf does","formatLabel":"Format","argsLabel":"Arguments (separated by |)","hint":"Write \\n for a newline, \\0 for a null byte, NULL for a null pointer. For %c: a character (A, 'A', \\n) or its code (65). Enter runs everything.","step":"Next character","run":"Run all","reset":"Start over","tokensLabel":"The format, character by character","legend":"↵ newline · ␣ space · ⇥ tab · ␀ null byte · ␇ ␛ … other control codes · ∅ nothing written","kindLit":"literal","kindConv":"conversion","kindBad":"unhandled","output":"Output","counter":"Counter","ret":"Return value","idle":"Press “Next character”: each step reads one character of the format and classifies it.","emptyFormat":"Empty format: nothing is written, the return value is 0.","msgLit":"“{ch}” is not a %: it is a literal, written as is (+{n}).","msgEnd":"A lone % at the end of the format: there is nothing to convert. The behavior is undefined: above all, do not read past the \\0.","msgBad":"“{raw}” is not one of the nine conversions (c s p d i u x X %), the only ones in the mandatory part. The demo writes it as is (+{n}): in your code, it is up to you to decide what happens.","msgPercent":"“%%”: conversion %. It consumes no argument and writes a single % (+1, not +2).","msgConv":"“{raw}”: conversion {spec}. It consumes the argument “{arg}” and writes “{text}” (+{n}).{note}","done":"{last} End of the format: ft_printf returns {n}.","doneExtra":"{last} End of the format: ft_printf returns {n}. Extra arguments ignored: {left}. This is not an error.","errMissing":"There is no argument left for “{raw}”: va_arg would read past the list (undefined behavior). Add an argument after a |.","errInt":"“{arg}” is not an integer for “{raw}”: write digits, with an optional sign.","errRange":"“{arg}” is out of range for “{raw}”: an int goes from -2147483648 to 2147483647 (up to 4294967295 for u, x and X).","errChar":"“{raw}” expects an ASCII character (A, 'A', \\n, \\0) or an integer (its code), not “{arg}”.","errPtr":"“{raw}” expects NULL or a hexadecimal address like 0x7ffe1234, not “{arg}”.","noteNullStr":"A NULL pointer gives (null).","noteNilPtr":"Null pointer: (nil) on Linux, 0x0 on macOS (see the next demo)."}</script>
+    </div>
+  </section>
+
+  <section id="bases">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>Printing in a <span class="accent">base</span></h2></div>
+    <p class="body">Printing a number means cutting it into digits. In a base <code class="inline">b</code>, the <b>last</b> digit is <code class="inline">n % b</code> and the rest of the number is <code class="inline">n / b</code>. Problem: you get the digits backwards, while the first one must be written first. Without <code class="inline">malloc</code>, there are two ways out: write <code class="inline">n / b</code> first (recursion) and then the last digit, or fill a small local array from the end to the start before writing it.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Conversion</th><th>Reads</th><th>Base and digits</th></tr></thead>
+        <tbody>
+          <tr><td>%d  %i</td><td><code class="inline">int</code></td><td>10: 0-9, with <code class="inline">-</code> in front if negative</td></tr>
+          <tr><td>%u</td><td><code class="inline">unsigned int</code></td><td>10: 0-9</td></tr>
+          <tr><td>%x</td><td><code class="inline">unsigned int</code></td><td>16: 0-9 then a-f</td></tr>
+          <tr><td>%X</td><td><code class="inline">unsigned int</code></td><td>16: 0-9 then A-F</td></tr>
+          <tr><td>%p</td><td><code class="inline">void *</code></td><td>16: <code class="inline">0x</code>, then 0-9 and a-f</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" style="margin-top:22px"><span class="bulb">🔁</span><p><b>The same number, several readings.</b> In memory, <code class="inline">-1</code> is a 32-bit integer made only of 1s. <code class="inline">%d</code> reads those bits as two's complement and gives <code class="inline">-1</code>; <code class="inline">%u</code> reads them as a positive integer and gives <code class="inline">4294967295</code>; <code class="inline">%x</code> gives <code class="inline">ffffffff</code>. Nothing is converted: these are the same bits, reinterpreted. This is why <code class="inline">%u</code>, <code class="inline">%x</code> and <code class="inline">%X</code> read an <code class="inline">unsigned int</code>.</p></div>
+
+    <p class="body" style="margin-top:22px">Three details not to miss. <b>Zero</b>: <code class="inline">0</code> is written <code class="inline">0</code>, so your function must always write at least one digit. <b>The sign</b>: for <code class="inline">%d</code>, if <code class="inline">n</code> is negative, you write <code class="inline">-</code> and then the absolute value (watch out for <code class="inline">INT_MIN</code>, see the pitfalls). <b>The pointer</b>: on 64-bit machines (Linux, macOS), a pointer is 64 bits wide. Store it in an <code class="inline">unsigned long</code> before converting it to base 16, otherwise you cut off part of the address. The <code class="inline">0x</code> prefix is written separately, and the null pointer needs special handling.</p>
+
+    <p class="body">Enter an integer and choose a conversion. You see the 32 bits, the possible readings, the successive divisions and the output. Things to try: <code class="inline">-1</code> as <code class="inline">%u</code>, <code class="inline">%x</code> and <code class="inline">%X</code>, <code class="inline">255</code> as <code class="inline">%x</code>, and <code class="inline">0</code> as <code class="inline">%p</code>, with both libcs.</p>
+    <div class="demo" data-demo="ft_printf-base-convert">
+      <div class="demo-static"><p class="body">Demo: a signed 32-bit integer and a conversion. The same 32 bits give <code class="inline">-1</code> as <code class="inline">%d</code>, <code class="inline">4294967295</code> as <code class="inline">%u</code>, <code class="inline">ffffffff</code> as <code class="inline">%x</code> and <code class="inline">FFFFFFFF</code> as <code class="inline">%X</code>. <code class="inline">255</code> as <code class="inline">%x</code> gives <code class="inline">ff</code>. For <code class="inline">%p</code> with a null pointer, glibc (Linux) prints <code class="inline">(nil)</code> and the macOS libc prints <code class="inline">0x0</code>: this case depends on the libc.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"The same 32 bits, read in several ways","numberLabel":"A signed 32-bit integer (int)","presetsLabel":"Examples","presetAria":"Try {v}","presetAriaNamed":"{label}: try {v}","convLabel":"Conversion requested from ft_printf","envLabel":"Reference libc (only matters for a null pointer)","envLinux":"Linux (glibc)","envMac":"macOS","bitsLabel":"The 32 bits in memory, in groups of 4 (the hexadecimal digit is below)","bitsAria":"Value {v}, bits: {bits}","tableLabel":"Successive divisions: one digit per row, the last digit first","colDigit":"digit","errEmpty":"Enter an integer.","errNotInt":"That is not an integer: write digits, with an optional - or + sign.","errRange":"Out of range: a 32-bit int goes from -2147483648 to 2147483647.","result":"Output: {text}, i.e. a return value of {n}.","order":"The digits are read from bottom to top: {digits}. Full output: {text}","nullPtrOrder":"Null pointer: there is no digit to compute, this is a case to handle separately.","warnIntMin":"INT_MIN: by doing -n, you get 2147483648, which does not fit in an int (the maximum is 2147483647). Go through a long, or handle this case separately.","intMinLiteral":"In your test file, write INT_MIN (from <limits.h>) and not -2147483648: that literal is a long, and -Wall -Werror refuses to pass it to %d.","negSign":"Negative value: the - sign is written separately, then the absolute value is converted.","nilNote":"This case depends on the libc: glibc (Linux) prints (nil), macOS prints 0x0. The subject asks you to imitate printf: compare with the one on the machine where you will be evaluated.","ptrNote":"With %p, the 32 bits are read as an address. A real address is 64 bits wide: store it in an unsigned long."}</script>
+    </div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>Step by <span class="accent">step</span></h2></div>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Set up the tooling.</b> An <code class="inline">ft_printf.h</code> (the prototype, <code class="inline">&lt;stdarg.h&gt;</code>, <code class="inline">&lt;unistd.h&gt;</code>), a <code class="inline">Makefile</code> that puts the objects into <code class="inline">libftprintf.a</code> with <code class="inline">ar rcs</code>, and a test <code class="inline">main</code> that you keep outside the library. Get an empty <code class="inline">ft_printf</code> to compile with the flags from the subject.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Write plain text only.</b> A function that prints one character and returns what it wrote, and the loop that walks through the format. With no <code class="inline">%</code> at all, your function must already print the right text and return the right value.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Add <code class="inline">%c</code>, <code class="inline">%s</code> and <code class="inline">%%</code>.</b> This is where <code class="inline">va_start</code>, <code class="inline">va_arg</code> and <code class="inline">va_end</code> come into play. Test <code class="inline">%s</code> with <code class="inline">NULL</code> (put it in a variable <code class="inline">char *s = NULL;</code>: written as a literal, the compiler refuses it with <code class="inline">-Wall -Werror</code>) and <code class="inline">%c</code> with <code class="inline">0</code>.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>Add <code class="inline">%d</code>, <code class="inline">%i</code> and <code class="inline">%u</code>.</b> The base 10 conversion first, then the sign. Test <code class="inline">0</code>, a negative number, <code class="inline">INT_MAX</code> and <code class="inline">INT_MIN</code>.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>Add <code class="inline">%x</code> and <code class="inline">%X</code>.</b> Same function as for base 10, with another base and another alphabet. Test <code class="inline">0</code>, <code class="inline">255</code> and <code class="inline">-1</code>.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>Add <code class="inline">%p</code>.</b> A pointer in an <code class="inline">unsigned long</code>, the <code class="inline">0x</code> prefix, then the null pointer.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>Handle errors.</b> Good practice: if a <code class="inline">write</code> fails, return -1 rather than a wrong total, as <code class="inline">printf</code> does (check in your subject whether this is required). Also check that a <code class="inline">%</code> at the end of the format does not make you read past the <code class="inline">\0</code>.</span></div>
+      <div class="step on"><span class="n">8</span><span class="txt"><b>Compare with the real printf, case by case.</b> Output and return value, as below. Redirect both outputs to files and compare them with <code class="inline">diff</code> to see the invisible bytes.</span></div>
+    </div>
+
+    <div class="editor" style="margin-top:18px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">test.c</span></div>
+<pre><span class="ty">int</span>	a = <span class="fn">printf</span>(<span class="st">"%d items%%\n"</span>, <span class="nm">42</span>);
+<span class="ty">int</span>	b = <span class="fn">ft_printf</span>(<span class="st">"%d items%%\n"</span>, <span class="nm">42</span>);
+<span class="cm">// a and b are both 10, and the two printed lines are identical</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Makefile</span></div>
+<pre>$(NAME): $(OBJ)
+	ar rcs $(NAME) $(OBJ)</pre>
+    </div>
+
+    <div class="callout"><span class="bulb">🎁</span><p><b>The bonuses.</b> They only count if everything else is perfect. If you attempt them, the shape of a conversion becomes <code class="inline">%[flags][width][.precision]specifier</code>: read the flags, then the width, then the precision, and only after that the specifier. A small struct to store what you have read will save you from passing ten parameters to every function.</p></div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Classic <span class="accent">pitfalls</span></h2></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">%s</code> with <code class="inline">NULL</code>.</b> The real <code class="inline">printf</code> prints <code class="inline">(null)</code>, six characters that count in the return value. If your string printing does a <code class="inline">strlen</code> or reads <code class="inline">*s</code> without testing the pointer, it is a segfault. Test first, then write <code class="inline">(null)</code> instead. For your test, put the null pointer in a variable (<code class="inline">char *s = NULL;</code>): <code class="inline">printf("%s", NULL)</code> written as a literal does not compile with <code class="inline">-Wall -Werror</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">%c</code> with the character <code class="inline">0</code>.</b> <code class="inline">ft_printf("%c", 0)</code> must write <b>a null byte</b> and return 1. If you go through a string or a <code class="inline">strlen</code>, the <code class="inline">\0</code> is taken for the end of the string and nothing is written. Write the character itself with <code class="inline">write</code>. To see the byte: <code class="inline">./a.out | od -c</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">INT_MIN</code>.</b> <code class="inline">-2147483648</code> takes 11 characters. If you do <code class="inline">n = -n</code> on an <code class="inline">int</code>, you get <code class="inline">2147483648</code>, which does not fit: it is a signed integer overflow, hence undefined behavior. Convert to a wider type first (<code class="inline">long</code>), or handle this case separately. In your test file, write <code class="inline">INT_MIN</code> (from <code class="inline">&lt;limits.h&gt;</code>) and not <code class="inline">-2147483648</code>: that literal is a <code class="inline">long</code>, and <code class="inline">-Wall -Werror</code> refuses to pass it to <code class="inline">%d</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">%p</code> with a null pointer.</b> The libc decides: glibc (Linux) prints <code class="inline">(nil)</code>, macOS prints <code class="inline">0x0</code>. Neither the output nor the return value is the same (5 versus 3). Compare with the <code class="inline">printf</code> of the machine where you will be evaluated and make an informed choice (the demo on bases shows both).</p></div>
+
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>The <code class="inline">%%</code> counted twice (or consuming an argument).</b> In the format, <code class="inline">%%</code> takes two characters, but it writes only <b>one</b> and consumes <b>no</b> argument. Counting 2, or calling <code class="inline">va_arg</code> by reflex, shifts everything after it. <code class="inline">ft_printf("%d items%%\n", 42)</code> must return <b>10</b>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">-1</code> as <code class="inline">%u</code> (and as <code class="inline">%x</code>).</b> <code class="inline">ft_printf("%u", -1)</code> prints <code class="inline">4294967295</code>, <code class="inline">%x</code> prints <code class="inline">ffffffff</code> and <code class="inline">%X</code> prints <code class="inline">FFFFFFFF</code>. If you read the argument with <code class="inline">va_arg(ap, int)</code> and then pass it to your <code class="inline">%d</code> function, you print <code class="inline">-1</code>. Worse: a negative remainder gives a negative index into your string of digits. Read an <code class="inline">unsigned int</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A <code class="inline">%</code> at the end of the format.</b> With <code class="inline">ft_printf("100%")</code>, the character after the <code class="inline">%</code> is the <code class="inline">\0</code>. If you skip both characters without testing, you read past the end of the string. The behavior is undefined for the real <code class="inline">printf</code> too: choose what you do, but do not crash.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A truncated address.</b> Storing a pointer in an <code class="inline">int</code> or an <code class="inline">unsigned int</code> loses the 32 high-order bits: on a stack address, you print a value that is no longer the right one. Use an <code class="inline">unsigned long</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">va_arg(ap, char)</code>.</b> A <code class="inline">char</code> is promoted to <code class="inline">int</code> when it is passed to a variadic function: asking <code class="inline">va_arg</code> for a <code class="inline">char</code> is incorrect (the compiler warns you, and with <code class="inline">-Werror</code> it does not compile). Read an <code class="inline">int</code> and convert afterwards.</p></div>
+
+    <div class="callout"><span class="bulb">💡</span><p><b>Good practice: the return value when <code class="inline">write</code> fails.</b> <code class="inline">write</code> returns -1 on error (closed output, full disk…), and C says that <code class="inline">printf</code> then returns a negative value. If you add up the returns without looking at them, you return a wrong total instead of -1. Propagating the -1 up to your top-level ft_printf function is safer; check in your subject whether it is required. To trigger it: <code class="inline">./a.out &gt;&amp;-</code> closes standard output (bash, zsh). The real <code class="inline">printf</code> buffers its output and only notices when it flushes: this test is mainly useful to check that <b>your</b> function returns -1 without crashing.</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>How <span class="accent">I did it</span></h2></div>
+    <div class="how"><p class="body">I split the project into small functions that each do one thing and all return the number of characters they wrote. The top-level ft_printf function walks through the format: an ordinary character goes straight out with <code class="inline">write</code>, and a <code class="inline">%</code> followed by one of the nine conversions is handed to a dispatch function, a simple chain of <code class="inline">if</code> on the specifier. Numbers are written recursively, with no buffer and no <code class="inline">malloc</code>: the high-order digits first, then the last one. <code class="inline">%x</code> and <code class="inline">%X</code> share the same function, only the alphabet changes. For <code class="inline">%p</code>, I write <code class="inline">0x</code> and then the address in hexadecimal, read into a 64-bit integer, and I handle the null pointer separately. I did not do the bonuses. The Makefile builds the library with <code class="inline">ar</code>.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 Key takeaways (evaluation defense)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>The return value matters.</b> <code class="inline">ft_printf</code> returns the number of characters written, and <code class="inline">%%</code> counts only one. Always compare with the real <code class="inline">printf</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Nine conversions.</b> <code class="inline">c s p d i u x X %</code>. <code class="inline">%i</code> behaves like <code class="inline">%d</code>, and <code class="inline">%%</code> consumes no argument.</div></li>
+        <li><span class="chk">✓</span><div><b>How does <code class="inline">va_arg</code> know what to read?</b> It does not: the format says so. A type that does not match the argument passed gives undefined behavior.</div></li>
+        <li><span class="chk">✓</span><div><b>Why an <code class="inline">int</code> for <code class="inline">%c</code>?</b> A <code class="inline">char</code> passed to a variadic function is promoted to <code class="inline">int</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Every <code class="inline">va_start</code> has its <code class="inline">va_end</code>.</b> An argument that was read is consumed: to read it again, you need a <code class="inline">va_copy</code> made beforehand.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">unsigned int</code> for <code class="inline">%u</code>, <code class="inline">%x</code>, <code class="inline">%X</code>.</b> <code class="inline">-1</code> gives <code class="inline">4294967295</code>, <code class="inline">ffffffff</code> and <code class="inline">FFFFFFFF</code>: the same bits, reinterpreted.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">%p</code>.</b> <code class="inline">0x</code> followed by the hexadecimal of an <code class="inline">unsigned long</code>. Null pointer: <code class="inline">(nil)</code> with glibc, <code class="inline">0x0</code> with macOS; be ready to justify your choice.</div></li>
+        <li><span class="chk">✓</span><div><b>Edge cases.</b> <code class="inline">%s</code> with <code class="inline">NULL</code> gives <code class="inline">(null)</code>; <code class="inline">%c</code> with <code class="inline">0</code> writes a null byte and counts 1; <code class="inline">INT_MIN</code>; <code class="inline">0</code> is written <code class="inline">0</code> in hexadecimal.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">write</code> failure (good practice).</b> <code class="inline">printf</code> returns a negative value; returning -1 rather than a wrong total is safer. Check in your subject whether it is required.</div></li>
+        <li><span class="chk">✓</span><div><b>Turn-in.</b> <code class="inline">libftprintf.a</code> built with <code class="inline">ar</code> (not <code class="inline">libtool</code>), a Makefile that does not relink, <code class="inline">-Wall -Wextra -Werror</code>, Norm respected.</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

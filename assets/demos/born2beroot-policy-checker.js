@@ -18,8 +18,14 @@
   function fill(text, values) {
     return text.replace(/\{(\w+)\}/g, function (m, k) { return Object.prototype.hasOwnProperty.call(values, k) ? String(values[k]) : m; });
   }
-  // French singular for 0 and 1: T strings carry a {s} placeholder where the plural "s" goes.
-  function pl(n) { return n >= 2 ? 's' : ''; }
+  // Plural suffix for the {s} placeholders of the T strings. The grammar comes from the JSON, not from this script:
+  // 1 is always singular, pluralSuffix is used from 2 up, pluralZeroSuffix for 0. French: "" (0 is singular, "0 caractère"),
+  // English: "s" ("0 characters"). Without those keys the French rule applies.
+  var PLURAL = typeof T.pluralSuffix === 'string' ? T.pluralSuffix : 's';
+  var PLURAL_ZERO = typeof T.pluralZeroSuffix === 'string' ? T.pluralZeroSuffix : '';
+  function pl(n) { return n === 1 ? '' : (n === 0 ? PLURAL_ZERO : PLURAL); }
+  // Separator between the names of the failed rules in the verdict (French: " ; ", with a space before the semicolon).
+  var RULE_SEP = typeof T.ruleSep === 'string' && T.ruleSep ? T.ruleSep : ' ; ';
   function el(tag, cls, text) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -179,7 +185,7 @@
       verdict.textContent = tr('empty');
     } else if (counts.ko > 0) {
       verdict.classList.add('bad');
-      verdict.textContent = fill(tr('bad'), { n: counts.ko, s: pl(counts.ko), rules: failed.join(' ; ') });
+      verdict.textContent = fill(tr('bad'), { n: counts.ko, s: pl(counts.ko), rules: failed.join(RULE_SEP) });
     } else {
       verdict.classList.add('good');
       // when some rules could not be evaluated (empty optional fields), say that "conforme" only covers the evaluated ones

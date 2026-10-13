@@ -1,0 +1,349 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>System administration · Born2beRoot</span>
+  <h1 class="title">The basics of <span class="g">Born2beRoot</span></h1>
+  <p class="lead">Install a Linux server in a virtual machine, lock it down with strict rules, then be able to <b>explain every setting</b> in your defense.</p>
+  <p class="subj">subject: Born2beRoot · version 4 · VirtualBox (or UTM) · Debian or Rocky · submission: signature.txt</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>The project in <span class="accent">short</span></h2></div>
+    <p class="body">Born2beRoot is your <b>first server</b>. You install a minimal Linux in a virtual machine, with no graphical interface, then you lock it down: an encrypted disk split with LVM, SSH on port <code class="inline">4242</code>, a firewall, strict passwords, a constrained <code class="inline">sudo</code>, and a monitoring script that prints the state of the system on every terminal.</p>
+    <p class="body">You hand in only <b>one file</b>: <code class="inline">signature.txt</code>, the SHA1 signature of your VM's disk. Everything else is judged in the defense: you will be asked to create a user, change the hostname, stop your script… The subject says it itself: <b>understand what you use</b> (p. 8).</p>
+    <div class="callout"><span class="bulb">📖</span><p>The page numbers in parentheses, like <b>(p. 8)</b>, are the ones printed at the bottom of the subject's pages (version 4). Keep the PDF open next to this page: this course explains the subject, it does not replace it.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>The project <span class="accent">map</span></h2></div>
+    <div class="map">
+      <div class="map-item"><span class="ex">VM</span><div><h4>The virtual machine</h4><p>VirtualBox, or UTM if you cannot use VirtualBox (p. 4). Debian stable (neither testing nor unstable) or Rocky stable; Debian is recommended if you are new to system administration (p. 7).</p></div></div>
+      <div class="map-item"><span class="ex">GUI</span><div><h4>No graphical interface</h4><p>Installing X.org or any equivalent means a grade of 0. You install the minimum of services (p. 7).</p></div></div>
+      <div class="map-item"><span class="ex">LVM</span><div><h4>Encrypted disk + LVM</h4><p>At least 2 encrypted partitions using LVM; the sizes are up to you (p. 7 and 8).</p></div></div>
+      <div class="map-item"><span class="ex">SSH</span><div><h4>Port 4242, no root</h4><p>The SSH service listens on port 4242 and refuses root login. It will be tested in the defense by setting up a new account (p. 8).</p></div></div>
+      <div class="map-item"><span class="ex">FW</span><div><h4>Active firewall</h4><p>UFW (Debian) or firewalld (Rocky). Only port 4242 stays open, and the firewall is active when the VM starts (p. 8).</p></div></div>
+      <div class="map-item"><span class="ex">Users</span><div><h4>Hostname and users</h4><p>Hostname = your login + 42 (e.g. <code class="inline">wil42</code>), which you will modify in the defense. A user named after your login, in the groups <code class="inline">user42</code> and <code class="inline">sudo</code>, in addition to root (p. 8).</p></div></div>
+      <div class="map-item"><span class="ex">Pwd</span><div><h4>Password policy</h4><p>Expiration, minimum delay, warning, length, complexity, repeats, username, difference from the old password (p. 8 and 9).</p></div></div>
+      <div class="map-item"><span class="ex">sudo</span><div><h4>sudo under strict rules</h4><p>3 attempts, custom message, inputs and outputs archived in <code class="inline">/var/log/sudo/</code>, TTY mode, restricted paths (p. 9).</p></div></div>
+      <div class="map-item"><span class="ex">cron</span><div><h4>monitoring.sh</h4><p>A bash script broadcast to all terminals with <code class="inline">wall</code>, at startup then every 10 minutes. You must be able to interrupt it without modifying it (p. 10).</p></div></div>
+      <div class="map-item" style="border-style:dashed"><span class="ex" style="background:var(--amber)">Bonus</span><div><h4>Partitions, WordPress, a service</h4><p>A 7-volume partition layout, a WordPress website (lighttpd, MariaDB, PHP) and a useful service of your choice, NGINX and Apache2 excluded. Only evaluated if the mandatory part is PERFECT (p. 12 and 13).</p></div></div>
+      <div class="map-item" style="border-style:dashed"><span class="ex" style="background:var(--amber)">Submit</span><div><h4>signature.txt, nothing else</h4><p>At the root of the Git repository. The VM is never submitted (p. 14). Snapshots are forbidden: a grade of 0 if there is one (p. 15).</p></div></div>
+    </div>
+
+    <p class="body" style="margin-top:22px">The subject's figures, in one place so you can find your way:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rule</th><th>Subject value</th><th>Page</th></tr></thead>
+        <tbody>
+          <tr><td>SSH port</td><td>4242</td><td>p. 8</td></tr>
+          <tr><td>hostname</td><td>your login + 42</td><td>p. 8</td></tr>
+          <tr><td>password expiration</td><td>every 30 days</td><td>p. 8</td></tr>
+          <tr><td>minimum delay before a change</td><td>2 days</td><td>p. 8</td></tr>
+          <tr><td>warning before expiration</td><td>7 days</td><td>p. 9</td></tr>
+          <tr><td>minimum length</td><td>10 characters</td><td>p. 9</td></tr>
+          <tr><td>consecutive identical characters</td><td>no more than 3</td><td>p. 9</td></tr>
+          <tr><td>characters not in the old password</td><td>at least 7 (except for root)</td><td>p. 9</td></tr>
+          <tr><td>sudo authentication attempts</td><td>3</td><td>p. 9</td></tr>
+          <tr><td>sudo log</td><td><code class="inline">/var/log/sudo/</code></td><td>p. 9</td></tr>
+          <tr><td>monitoring frequency</td><td>every 10 minutes</td><td>p. 10</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:22px">The subject also announces questions about the system you chose (p. 8). Two classics to prepare:</p>
+    <div class="duo">
+      <div class="card">
+        <span class="ic">📦</span><h3>apt vs aptitude</h3>
+        <ul>
+          <li><span class="m">⌨️</span><span><code class="inline">apt</code>: the everyday command-line tool to install and update.</span></li>
+          <li><span class="m">🧭</span><span><code class="inline">aptitude</code>: another package manager, with an interactive text-mode interface and a more advanced dependency resolver.</span></li>
+          <li><span class="m">🧱</span><span>Both rely on the same package system, <code class="inline">dpkg</code>. Try them and put the difference into your own words.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">🛡️</span><h3>AppArmor vs SELinux</h3>
+        <ul>
+          <li><span class="m">🔒</span><span>Two kernel security modules: they limit what each program is allowed to do, even when it runs as root.</span></li>
+          <li><span class="m">🐧</span><span><b>AppArmor</b> (Debian): one profile per program, written around file paths.</span></li>
+          <li><span class="m">🏷️</span><span><b>SELinux</b> (Rocky): labels on files and processes, plus a policy that says who can do what.</span></li>
+          <li><span class="m">🚦</span><span>The subject requires them to be running at startup (p. 7). On Rocky, you do not have to set up KDump (p. 7).</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="partitions">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Encrypted partitions and <span class="accent">LVM</span></h2></div>
+    <p class="body">The subject requires <b>at least 2 encrypted partitions using LVM</b> (p. 7) and sets no size: it is up to you to choose them so that everything works without wasting space (p. 8). Its example stacks four layers, which <code class="inline">lsblk</code> prints as a tree:</p>
+    <div class="map">
+      <div class="map-item"><span class="ex">disk</span><div><h4><code class="inline">sda</code></h4><p>Your VM's virtual disk.</p></div></div>
+      <div class="map-item"><span class="ex">part</span><div><h4><code class="inline">sda1</code>, <code class="inline">sda2</code>, <code class="inline">sda5</code></h4><p><code class="inline">sda1</code> is mounted on <code class="inline">/boot</code> and is not encrypted: the boot process has to read the kernel before you have typed your passphrase. <code class="inline">sda2</code> (1K) is the extended partition, a simple container; <code class="inline">sda5</code> is the logical partition that gets encrypted.</p></div></div>
+      <div class="map-item"><span class="ex">crypt</span><div><h4><code class="inline">sda5_crypt</code></h4><p>The content of <code class="inline">sda5</code> once unlocked with the passphrase. For <code class="inline">lsblk</code>, its type is <code class="inline">crypt</code>.</p></div></div>
+      <div class="map-item"><span class="ex">lvm</span><div><h4>The logical volumes</h4><p>LVM cuts the encrypted space into volumes (<code class="inline">root</code>, <code class="inline">swap</code>, <code class="inline">home</code>…), which <code class="inline">lsblk</code> files under the type <code class="inline">lvm</code>.</p></div></div>
+    </div>
+    <p class="body" style="margin-top:18px">LVM rests on three terms: a <b>physical volume</b> (here <code class="inline">sda5_crypt</code>), a <b>volume group</b> that pools this space (<code class="inline">LVMGroup</code> in the bonus screenshot), and <b>logical volumes</b> that you mount like partitions. Its benefit: a volume can be resized later without repartitioning the disk. Play with the simulator: without the bonus, three volumes; with the bonus, seven (p. 7 and 12).</p>
+
+    <div class="demo" data-demo="born2beroot-lvm-builder">
+      <div class="demo-static">
+        <p class="body">Demo: the simulator draws the <code class="inline">lsblk</code> tree of your VM according to the disk size and the bonus, then warns you when the volumes add up to more than the encrypted space. Without JavaScript, here are the subject's two examples.</p>
+        <div class="editor">
+          <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">subject example, mandatory part (p. 7)</span></div>
+<pre>NAME                         SIZE TYPE  MOUNTPOINT
+sda                            8G disk
+├─sda1                       487M part  /boot
+├─sda2                         1K part
+└─sda5                       7.5G part
+  └─sda5_crypt               7.5G crypt
+    ├─wil--vg-root           2.8G lvm   /
+    ├─wil--vg-swap_1         976M lvm   [SWAP]
+    └─wil--vg-home           3.8G lvm   /home</pre>
+        </div>
+        <div class="editor">
+          <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">subject example, bonus part (p. 12)</span></div>
+<pre>NAME                         SIZE TYPE  MOUNTPOINT
+sda                         30.8G disk
+├─sda1                       500M part  /boot
+├─sda2                         1K part
+└─sda5                      30.3G part
+  └─sda5_crypt              30.3G crypt
+    ├─LVMGroup-root           10G lvm   /
+    ├─LVMGroup-swap          2.3G lvm   [SWAP]
+    ├─LVMGroup-home            5G lvm   /home
+    ├─LVMGroup-var             3G lvm   /var
+    ├─LVMGroup-srv             3G lvm   /srv
+    ├─LVMGroup-tmp             3G lvm   /tmp
+    └─LVMGroup-var--log        4G lvm   /var/log</pre>
+        </div>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Choose the disk size, turn the bonus on or off, adjust the volumes: the tree updates like an lsblk.","disk":"VM disk size","bonus":"Bonus (7 logical volumes)","on":"on","off":"off","sizes":"Logical volume sizes (editable)","volLabel":"Size of volume {name} ({mnt}), in GB","resetSizes":"Subject sizes","subjectDisk":"Subject disk size","treeLabel":"Partition tree, lsblk style","legend":"{n} logical volumes: {names}","barNote":"Bar: the whole disk. Solid gray: /boot; colors: one per volume; gray hatching: free space; red hatching: overflow.","freeLabel":"free","barLabel":"{used} of volumes out of {avail} available","invalid":"✗ Invalid value: a size is a number of GB between {min} and {max}.","over":"✗ Over capacity: {used} of volumes for {avail} available, {excess} too much. Enlarge the disk or shrink a volume.","fit":"✓ It fits: {used} of volumes for {avail} available ({free} free).","hint":"Available space = disk size minus 0.5 GB for /boot (487M and 500M in the subject's screenshots); the extended partition sda2 (1K) is ignored. Starting sizes: those of the subject's screenshots (p. 7 and 12), with the 976M swap brought down to 0.9 GB so that the 8 GB example fits exactly.","dec":".","unit":"GB"}</script>
+    </div>
+
+    <p class="body">What the tree teaches you:</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Mandatory part.</b> <code class="inline">root</code> on <code class="inline">/</code>, <code class="inline">swap</code> on <code class="inline">[SWAP]</code>, <code class="inline">home</code> on <code class="inline">/home</code> (p. 7).</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Bonus.</b> Four volumes are added to the first three: <code class="inline">var</code>, <code class="inline">srv</code>, <code class="inline">tmp</code> and <code class="inline">var-log</code>, mounted on <code class="inline">/var</code>, <code class="inline">/srv</code>, <code class="inline">/tmp</code> and <code class="inline">/var/log</code>. Seven volumes in total (p. 12).</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>The double dash.</b> The <code class="inline">var-log</code> volume is displayed as <code class="inline">LVMGroup-var--log</code>: the device name doubles the dashes of the volume name. It is not a typo (screenshot p. 12).</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>The sizes are arbitrary.</b> The subject repeats it (p. 8 and 12): work out what each volume needs, and check that the total fits in the encrypted space, like the demo's indicator.</span></div>
+    </div>
+    <div class="callout"><span class="bulb">💡</span><p>For the bonus, look at what the guided partitioning assistant offers: its preset layouts (for example <b>/home</b>, <b>/var</b> and <b>/tmp</b> separate) do not give the seven volumes requested. Plan on manual partitioning, and check the result with <code class="inline">lsblk</code>, the command of the subject's example (p. 7).</p></div>
+  </section>
+
+  <section id="ssh-firewall">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>SSH and <span class="accent">firewall</span></h2></div>
+    <p class="body"><b>SSH</b> gives you remote access to the server. The subject sets two requirements: the service listens on port <code class="inline">4242</code> and you <b>cannot log in as root</b> over SSH (p. 8). The evaluator will test SSH by setting up a new account: you must understand how it works (p. 8).</p>
+    <p class="body">The file to read is the <b>server</b>'s, <code class="inline">/etc/ssh/sshd_config</code> (do not confuse it with <code class="inline">ssh_config</code>, the client's). Look in <code class="inline">man sshd_config</code> for the directives that deal with the port and root login. Two practical reminders: a change is only read when the <b>service is reloaded</b>, and to connect from your own machine, a VM on a NAT network needs a port forwarding rule in the hypervisor's settings.</p>
+    <p class="body">On Rocky, the subject asks you to adapt SELinux's configuration to the project's needs (p. 7). For SSH, that means this: by default, SELinux only lets <code class="inline">sshd</code> listen on the ports it knows, and <code class="inline">semanage</code> is how you declare the new one to it.</p>
+    <p class="body">The <b>firewall</b> is UFW on Debian, firewalld on Rocky (p. 8). Subject rule: only port 4242 stays open, and the firewall must be active when the VM starts (p. 8). Allow the port <i>before</i> enabling the firewall: otherwise, if you are connected over SSH, you lock yourself out.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>To check</th><th>Debian</th><th>Rocky</th></tr></thead>
+        <tbody>
+          <tr><td>OS version</td><td><code class="inline">head -n 2 /etc/os-release</code></td><td><code class="inline">head -n 2 /etc/os-release</code></td></tr>
+          <tr><td>security module</td><td>AppArmor: <code class="inline">/usr/sbin/aa-status</code></td><td>SELinux: <code class="inline">sestatus</code></td></tr>
+          <tr><td>SSH listens on 4242</td><td><code class="inline">ss -tunlp</code></td><td><code class="inline">ss -tunlp</code></td></tr>
+          <tr><td>firewall active, port open</td><td><code class="inline">/usr/sbin/ufw status</code></td><td><code class="inline">firewall-cmd --state</code>, <code class="inline">--list-port</code>, <code class="inline">--list-service</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:12px">This table reuses the subject's two check screenshots (p. 11). Compare what <i>your</i> VM prints with them.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">checks (Debian)</span></div>
+<pre><span class="fn">ss</span> -tunlp               <span class="cm"># sshd must listen on 4242, and nowhere else</span>
+<span class="fn">sudo ufw</span> status           <span class="cm"># Status: active, and one ALLOW line for 4242 (two with IPv6)</span></pre>
+    </div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Check what stays open.</b> With firewalld, the <code class="inline">ssh</code> service stands for port 22; the subject's Rocky screenshot still lists it (p. 11), whereas the instruction is to open only 4242 (p. 8). Compare <code class="inline">--list-service</code> and <code class="inline">--list-port</code> with your reading of the instruction, and be ready to justify what you leave open.</p></div>
+  </section>
+
+  <section id="sudo">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>sudo <span class="accent">under control</span></h2></div>
+    <p class="body"><code class="inline">sudo</code> lets a user run a command with the privileges of another user, usually root. The subject asks you to install it and configure it according to five rules (p. 9). Each one is set in the <code class="inline">sudoers</code> file; edit it with <code class="inline">visudo</code>, which checks the syntax before saving (a mistake in this file can lock you out of <code class="inline">sudo</code>).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Subject rule (p. 9)</th><th>Where to look in <code class="inline">man sudoers</code></th></tr></thead>
+        <tbody>
+          <tr><td>3 attempts at most in case of a wrong password</td><td>the password-related options, look for “passwd”</td></tr>
+          <tr><td>a custom message of your choice when the password is wrong</td><td>look for “badpass”</td></tr>
+          <tr><td>every action archived, inputs <i>and</i> outputs, in <code class="inline">/var/log/sudo/</code></td><td>look for “log_input” and “log_output” for inputs and outputs, and “iolog_dir” for their folder (the default folder is not <code class="inline">/var/log/sudo/</code>). “logfile” only logs the commands typed, in a file whose folder must exist</td></tr>
+          <tr><td>TTY mode enabled</td><td>look for “tty”</td></tr>
+          <tr><td>paths usable by sudo restricted</td><td>look for “path”; the subject gives an example list of paths (p. 9)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">Do not just read: <b>test each rule</b>. Get the password wrong three times and look at your message; run a command with <code class="inline">sudo</code> and look at what appears in <code class="inline">/var/log/sudo/</code>. Your user must also belong to the <code class="inline">sudo</code> group (p. 8). Keep in mind that the <code class="inline">#Sudo</code> line of the monitoring script counts the commands run with <code class="inline">sudo</code> (p. 10): look at what your log lets you count.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">checks</span></div>
+<pre><span class="fn">groups</span> your_login         <span class="cm"># user42 and sudo must show up</span>
+<span class="fn">sudo ls</span> /var/log/sudo     <span class="cm"># new files after a sudo command?</span></pre>
+    </div>
+  </section>
+
+  <section id="passwords">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2><span class="accent">Strong</span> passwords</h2></div>
+    <p class="body">The policy has two parts, which are not set in the same place.</p>
+    <div class="duo">
+      <div class="card">
+        <span class="ic">⏳</span><h3>The lifetime</h3>
+        <ul>
+          <li><span class="m">📅</span><span>The password expires every <b>30 days</b> (p. 8).</span></li>
+          <li><span class="m">⏱️</span><span>You must wait at least <b>2 days</b> between two changes (p. 8).</span></li>
+          <li><span class="m">🔔</span><span>The user is warned <b>7 days</b> before expiration (p. 9).</span></li>
+          <li><span class="m">📚</span><span>Pitfall: <code class="inline">/etc/login.defs</code> sets the values for accounts created <i>afterwards</i>. For accounts that already exist, aging is read and set with <code class="inline">chage</code> (<code class="inline">man chage</code>).</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">🔑</span><h3>The quality</h3>
+        <ul>
+          <li><span class="m">🧩</span><span>It is checked on every password change, thanks to a PAM module: <code class="inline">pam_pwquality</code> (package <code class="inline">libpam-pwquality</code> on Debian).</span></li>
+          <li><span class="m">📄</span><span>Its settings go in <code class="inline">/etc/security/pwquality.conf</code> (or in the matching PAM line): one option per rule, to be found in <code class="inline">man pwquality.conf</code>.</span></li>
+          <li><span class="m">👤</span><span>The old-password rule does not apply to root (p. 9).</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">check</span></div>
+<pre><span class="fn">sudo chage</span> -l your_login  <span class="cm"># the delays of an existing account: read them and compare with the subject</span></pre>
+    </div>
+
+    <p class="body" style="margin-top:18px">The seven quality rules written in the subject (p. 9) fit in the checker below. Try the examples, then invent your own: find a password that fails only one rule.</p>
+    <div class="demo" data-demo="born2beroot-policy-checker">
+      <div class="demo-static">
+        <p class="body">Demo: you type a password (and, if you want, a username and an old password); each rule of the subject turns ✓ or ✗. Here is what the demo's five examples give.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Password</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>Abcdefgh1</td><td>✗ 9 characters (minimum 10)</td></tr>
+              <tr><td>abcdefghij1</td><td>✗ no uppercase letter</td></tr>
+              <tr><td>Aaaaabcdef1</td><td>✗ 4 consecutive “a” (maximum 3)</td></tr>
+              <tr><td>Tr0ub4dor&amp;3x</td><td>✓ compliant</td></tr>
+              <tr><td>Mateo12345678 (user mateo)</td><td>✗ contains the username</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Type a password: each rule of the subject (p. 9) turns ✓ or ✗.","password":"Password to test","user":"Username","old":"Old password","optional":"optional","presets":"Examples","asUser":"user","clear":"Clear","rLength":"At least 10 characters","rUpper":"Contains an uppercase letter","rLower":"Contains a lowercase letter","rDigit":"Contains a digit","rRepeat":"No more than 3 consecutive identical characters","rUser":"Does not contain the username","rOld":"At least 7 characters not in the old password (not for root)","dLength":"{n} character{s} (minimum {min})","dRepeat":"longest run: {n} × “{ch}” (maximum {max})","dUserNa":"not evaluated: enter a username","dUserFound":"contains “{user}” (case ignored)","dOldNa":"not evaluated: empty field (first password, or root account)","dOld":"{n} character{s} not in the old one (minimum {min})","stOk":"met","stKo":"not met","stNa":"not evaluated","empty":"Type a password to evaluate the rules.","bad":"✗ Rejected: {n} rule{s} not met: {rules}.","good":"✓ Compliant: all {n} rules are met.","goodPart":"✓ Compliant (on the evaluated rules): {n} met, {na} not evaluated.","legend":"✓ met · ✗ not met · – not evaluated (optional field empty)","warn":"Everything happens in your browser, but never type a real password into a demo.","pluralSuffix":"s","pluralZeroSuffix":"s","ruleSep":"; "}</script>
+    </div>
+
+    <div class="callout"><span class="bulb">🔎</span><p><b>What the demo assumes.</b> It only follows the rules written in the subject. The username is searched for regardless of case; “characters not in the old password” is read as “characters of the new one that do not appear in the old one”. The real module does its own checks on top (a dictionary, for example).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>All accounts, root included.</b> Once the configuration files are in place, you must change the passwords of <b>all</b> the accounts on the VM, root included (p. 9). And root's password must follow the policy too (p. 9).</p></div>
+  </section>
+
+  <section id="monitoring">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>The <span class="accent">monitoring.sh</span> script</h2></div>
+    <p class="body">A <b>bash</b> script that prints information on <b>all terminals</b>, when the server starts and then every 10 minutes. No error must be visible, and the banner is optional (p. 10). It must always be able to display the twelve pieces of information below; the subject's example shows the expected format.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Line</th><th>What the subject asks for (p. 10)</th><th>Where to look</th></tr></thead>
+        <tbody>
+          <tr><td>#Architecture</td><td>architecture of the OS and kernel version</td><td><code class="inline">uname</code></td></tr>
+          <tr><td>#CPU physical</td><td>number of physical processors</td><td><code class="inline">/proc/cpuinfo</code></td></tr>
+          <tr><td>#vCPU</td><td>number of virtual processors</td><td><code class="inline">/proc/cpuinfo</code></td></tr>
+          <tr><td>#Memory Usage</td><td>available RAM and its utilization rate, as a percentage</td><td><code class="inline">free</code></td></tr>
+          <tr><td>#Disk Usage</td><td>available storage and its utilization rate, as a percentage</td><td><code class="inline">df</code></td></tr>
+          <tr><td>#CPU load</td><td>utilization rate of the processors, as a percentage</td><td><code class="inline">top</code>, <code class="inline">vmstat</code></td></tr>
+          <tr><td>#Last boot</td><td>date and time of the last reboot</td><td><code class="inline">who -b</code></td></tr>
+          <tr><td>#LVM use</td><td>whether LVM is active or not</td><td><code class="inline">lsblk</code></td></tr>
+          <tr><td>#Connections TCP</td><td>number of active connections</td><td><code class="inline">ss</code></td></tr>
+          <tr><td>#User log</td><td>number of users on the server</td><td><code class="inline">who</code>, <code class="inline">users</code></td></tr>
+          <tr><td>#Network</td><td>IPv4 address and MAC address</td><td><code class="inline">hostname</code>, <code class="inline">ip</code></td></tr>
+          <tr><td>#Sudo</td><td>number of commands run with sudo</td><td>the log of your sudo config</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="editor" style="margin-top:14px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">example output from the subject (p. 10)</span></div>
+<pre>Broadcast message from root@wil (tty1) (Sun Apr 25 15:45:00 2021):
+
+#Architecture: Linux wil 4.19.0-16-amd64 #1 SMP Debian 4.19.181-1 (2021-03-19) x86_64 GNU/Linux
+#CPU physical : 1
+#vCPU : 1
+#Memory Usage: 74/987MB (7.50%)
+#Disk Usage: 1009/2Gb (49%)
+#CPU load: 6.7%
+#Last boot: 2021-04-25 14:45
+#LVM use: yes
+#Connections TCP : 1 ESTABLISHED
+#User log: 1
+#Network: IP 10.0.2.15 (08:00:27:51:9b:a5)
+#Sudo : 42 cmd</pre>
+    </div>
+    <p class="body" style="margin-top:14px"><b>wall</b> sends a message to all logged-in users. By default, it adds the “Broadcast message from …” line of the example above: that is the banner the subject calls optional. Read <code class="inline">man wall</code> to find out how to remove it.</p>
+    <p class="body"><b>cron</b> runs a command at recurring times. A <code class="inline">crontab</code> line has five time fields; how you read them makes the difference between “every 10 minutes” and “once an hour”:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">crontab: reading the five fields</span></div>
+<pre><span class="cm"># minute  hour   day   month day-of-week</span>
+<span class="nm">*/10</span>      *      *     *     *        <span class="cm"># at minutes 0, 10, 20, 30, 40 and 50 of every hour</span>
+<span class="nm">10</span>        *      *     *     *        <span class="cm"># only once an hour, at minute 10</span></pre>
+    </div>
+    <p class="body" style="margin-top:14px">For the startup, <code class="inline">man 5 crontab</code> describes a special trigger: look for “reboot”. Finally, the defense will ask you to <b>interrupt the script without modifying it</b> (p. 10): <code class="inline">cron</code> is what launches it, so that is the one you must know how to stop or disable.</p>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Step by <span class="accent">step</span></h2></div>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Choose your system.</b> Debian stable (recommended if you are new) or Rocky stable, under VirtualBox or UTM (p. 4 and 7). No graphical server.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Partition.</b> Encrypted disk, LVM, logical volumes; seven volumes if you are going for the bonus. Check with <code class="inline">lsblk</code> (p. 7 and 12).</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Name and create.</b> Hostname = your login + 42; a user named after your login in the groups <code class="inline">user42</code> and <code class="inline">sudo</code> (p. 8). Know how to make another one: you will be asked.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>SSH.</b> Port 4242, root login refused, service reloaded, listening checked with <code class="inline">ss -tunlp</code> (p. 8 and 11).</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>Firewall.</b> Allow 4242, then enable the firewall, which must start with the VM (p. 8). AppArmor or SELinux runs at startup (p. 7).</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>Passwords.</b> Aging for new accounts <i>and</i> existing ones, quality through PAM; then change all the passwords, root included (p. 8 and 9).</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>sudo.</b> The five rules, each one tested by hand (p. 9).</span></div>
+      <div class="step on"><span class="n">8</span><span class="txt"><b>monitoring.sh.</b> Write the script, run it by hand, then let cron do it: check that it prints at the right time (p. 10).</span></div>
+      <div class="step on"><span class="n">9</span><span class="txt"><b>Bonus (only if everything else is perfect).</b> WordPress with lighttpd, MariaDB and PHP, plus a service of your choice that you can justify; open the necessary ports and adapt the firewall (p. 12 and 13).</span></div>
+      <div class="step on"><span class="n">10</span><span class="txt"><b>Signature.</b> Shut down the VM, compute the SHA1 of its disk, paste it into <code class="inline">signature.txt</code> at the root of the repository, then never turn the VM on again (p. 14). Make your copy before any defense.</span></div>
+      <div class="step on"><span class="n">11</span><span class="txt"><b>Prepare the defense.</b> Create a user and assign it to a group, change the hostname, stop the monitoring, explain <code class="inline">apt</code> versus <code class="inline">aptitude</code> and AppArmor or SELinux (p. 8 and 10).</span></div>
+    </div>
+    <p class="body" style="margin-top:18px">For the signature, the subject gives one command per operating system, applied to a <code class="inline">.vdi</code> (VirtualBox) or <code class="inline">.qcow2</code> (UTM) file in SHA1 format (p. 14):</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>System</th><th>Command</th></tr></thead>
+        <tbody>
+          <tr><td>Windows</td><td><code class="inline">certUtil -hashfile disk.vdi sha1</code></td></tr>
+          <tr><td>Linux</td><td><code class="inline">sha1sum disk.vdi</code></td></tr>
+          <tr><td>macOS (VirtualBox)</td><td><code class="inline">shasum disk.vdi</code></td></tr>
+          <tr><td>Mac M1 (UTM)</td><td><code class="inline">shasum name.utm/Images/disk-0.qcow2</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">09</span><h2>Classic <span class="accent">pitfalls</span></h2></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A defense modifies your VM.</b> During the evaluation, you change the hostname and create a user (p. 8), and merely booting already writes to the disk. The signature can therefore change after the first evaluation; if it no longer matches the one in <code class="inline">signature.txt</code>, the grade is 0 (p. 14). The subject advises you to duplicate the VM or use <i>save state</i> (p. 14).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Cloning without checking.</b> Make the copy <i>before</i> starting the VM for a defense, keep a disk that you never turn on again, and compare the hash of the copy with the original's. A clone made by VirtualBox is in principle given a new disk identifier (UUID), hence a different hash (to check on your setup); a plain copy of the disk file, made with the VM off, should keep the same hash (also to check). A <i>snapshot</i> is not a copy: snapshots are forbidden and a single one detected means 0 (p. 15).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Touching the VM after the signature.</b> An update “just to check”, a configuration fixed at the last minute: the disk changes, and the signature is worth nothing. If you have to change something, recompute the signature and update <code class="inline">signature.txt</code> before the defense.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>sudo without logging.</b> The subject asks you to archive <b>every action</b>, inputs <i>and</i> outputs, in <code class="inline">/var/log/sudo/</code> (p. 9). Keeping only a record of the commands typed is not enough, and the default folder for input and output logs is not the one the subject requires: run a command with <code class="inline">sudo</code> and check that files really appear in <code class="inline">/var/log/sudo/</code>.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>SSH port not reloaded.</b> You edited <code class="inline">sshd_config</code> but the service is still running with the old configuration: it still listens on its old port. Reload the service, then prove it with <code class="inline">ss -tunlp</code> (p. 11). On Rocky, think about SELinux (p. 7).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Non-compliant root passwords.</b> The subject spells it out: root's password follows the policy (p. 9), and all existing passwords are changed once the configuration is in place (p. 9). Trap: by default, <code class="inline">pam_pwquality</code> merely warns when root changes a password, without blocking it (<code class="inline">man pwquality.conf</code> or <code class="inline">man pam_pwquality</code>, depending on the version). Check every password yourself, yours and root's.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>cron that does not run at an exact interval.</b> <code class="inline">10 * * * *</code> is not “every 10 minutes”: it is once an hour. And <code class="inline">*/10</code> follows the clock (minutes 0, 10, 20…), not the startup time, whereas the subject's example shows 15:45:00 for a last boot at 14:45 (p. 10). Check that the <code class="inline">cron</code> service is active, watch the time the messages arrive, and be ready to justify your choice. Also test with cron, not only by hand.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>What the subject forbids or penalizes.</b> A graphical server (X.org or equivalent): 0 (p. 7). A signature different from the disk's: 0 (p. 14). The VM in the repository: forbidden (p. 14). A bonus added to an imperfect mandatory part: it is not evaluated at all (p. 13). On the system side, the subject requires the latest stable version of Debian or Rocky, neither testing nor unstable (p. 7).</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">10</span><h2>How <span class="accent">I did it</span></h2></div>
+    <div class="how"><p class="body">I installed Debian in VirtualBox, with no graphical interface. I kept my notes as tables, one per topic (passwords, sudo, SSH, firewall), with the required value next to each rule. I added the list of commands that check each requirement: lsblk for the partitions, chage for the password delays, ufw status for the firewall, crontab for the scheduled task, hostnamectl for the machine name. To stop the monitoring without touching the script, I learned that it is enough to stop cron. I did not do the bonus. My repository contains only signature.txt and these notes: the VM is not in it, as the subject requires.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 Key takeaways (evaluation defense)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>System.</b> Debian or Rocky, latest stable version, no graphical interface. AppArmor or SELinux active at startup.</div></li>
+        <li><span class="chk">✓</span><div><b>Disk.</b> At least 2 encrypted partitions using LVM; you can read <code class="inline">lsblk</code>: partition, <code class="inline">crypt</code>, then <code class="inline">lvm</code> volumes.</div></li>
+        <li><span class="chk">✓</span><div><b>SSH and firewall.</b> Port 4242, root login refused, only 4242 open, firewall active at startup. You can create an account and log in with it.</div></li>
+        <li><span class="chk">✓</span><div><b>Identity.</b> Hostname login + 42, user in <code class="inline">user42</code> and <code class="inline">sudo</code>. You can create a user and assign it to a group, and change the hostname.</div></li>
+        <li><span class="chk">✓</span><div><b>Passwords.</b> 30 days, 2 days, 7 days. At least 10 characters, uppercase, lowercase, digit, no more than 3 identical in a row, not the username, 7 new characters (except root). All changed, root included.</div></li>
+        <li><span class="chk">✓</span><div><b>sudo.</b> 3 attempts, custom message, inputs and outputs archived in <code class="inline">/var/log/sudo/</code>, TTY, restricted paths.</div></li>
+        <li><span class="chk">✓</span><div><b>monitoring.sh.</b> Twelve pieces of information, <code class="inline">wall</code>, every 10 minutes and at startup. You explain it line by line and you stop it without modifying it.</div></li>
+        <li><span class="chk">✓</span><div><b>Questions.</b> <code class="inline">apt</code> versus <code class="inline">aptitude</code>; AppArmor or SELinux: what it is, why.</div></li>
+        <li><span class="chk">✓</span><div><b>Submission.</b> Only <code class="inline">signature.txt</code>, at the root of the repository. No snapshot, never the VM in Git. A copy of the VM kept intact.</div></li>
+        <li><span class="chk">✓</span><div><b>Bonus.</b> Only evaluated if everything else is perfect: 7 volumes, WordPress (lighttpd, MariaDB, PHP), a justified service.</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>
