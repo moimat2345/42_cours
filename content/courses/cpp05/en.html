@@ -1,0 +1,1057 @@
+<style>
+:root{
+    --bg:#0a0c10; --surface:#12151d; --surface-2:#171b25;
+    --border:rgba(150,170,200,.12); --border-strong:rgba(150,170,200,.22);
+    --text:#e9ebf0; --muted:#8a93a6; --faint:#5b6475;
+    --green:#3ee6b0; --green-glow:rgba(62,230,176,.14); --green-line:rgba(62,230,176,.35);
+    --blue:#5b9dff; --blue-glow:rgba(91,157,255,.14); --blue-line:rgba(91,157,255,.38);
+    --purple:#c79bff; --purple-glow:rgba(199,155,255,.14); --purple-line:rgba(199,155,255,.38);
+    --orange:#ff9d54; --orange-glow:rgba(255,157,84,.14); --orange-line:rgba(255,157,84,.38);
+    --err:#ff5d73; --err-glow:rgba(255,93,115,.12); --err-line:rgba(255,93,115,.38);
+    --amber:#ffb454;
+    --display:'Chakra Petch',system-ui,sans-serif; --body:'Sora',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --maxw:980px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;position:relative}
+  body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);opacity:.5;pointer-events:none;z-index:0}
+  body::after{content:"";position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:120vw;height:60vh;background:radial-gradient(closest-side,var(--green-glow),transparent 70%),radial-gradient(closest-side,var(--purple-glow),transparent 70%);background-position:30% 0,70% 0;background-size:60% 100%,60% 100%;background-repeat:no-repeat;filter:blur(20px);pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* ---------- nav ---------- */
+
+  header.hero{padding:76px 24px 30px;text-align:center;position:relative;z-index:1}
+  .kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;display:inline-flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:100px;padding:7px 16px;background:rgba(255,255,255,.02)}
+  .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+  h1.title{font-family:var(--display);font-weight:700;font-size:clamp(2.3rem,7vw,4.4rem);line-height:1;letter-spacing:-.01em;margin-bottom:20px}
+  h1.title .g{background:linear-gradient(120deg,var(--green),var(--blue) 40%,var(--purple) 70%,var(--orange));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .lead{max-width:640px;margin:0 auto;color:var(--muted);font-size:1.06rem;font-weight:300}
+  .lead b{color:var(--text);font-weight:500}
+  .subj{margin-top:18px;font-family:var(--mono);font-size:.74rem;color:var(--faint);letter-spacing:.04em}
+
+  section{padding:34px 0}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+  .sec-num{font-family:var(--mono);font-size:.8rem;border:1px solid;border-radius:6px;padding:3px 9px;flex:none}
+  .c-green .sec-num{color:var(--green);border-color:var(--green-line)}
+  .c-blue .sec-num{color:var(--blue);border-color:var(--blue-line)}
+  .c-purple .sec-num{color:var(--purple);border-color:var(--purple-line)}
+  .c-orange .sec-num{color:var(--orange);border-color:var(--orange-line)}
+  .c-err .sec-num{color:var(--err);border-color:var(--err-line)}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,4vw,2rem);letter-spacing:-.01em;line-height:1.15}
+  h2 small{display:block;font-family:var(--mono);font-size:.78rem;font-weight:400;color:var(--faint);letter-spacing:.02em;margin-top:6px}
+  h3.sub{font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px;display:flex;align-items:center;gap:10px}
+  h3.sub .tag{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted)}
+  p.body{color:#c3c8d4;font-weight:300;margin-bottom:14px}
+  p.body b{color:var(--text);font-weight:500}
+  code.i{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:.1em .4em;color:#dfe3ec;white-space:nowrap}
+  hr.sep{border:none;height:1px;background:linear-gradient(90deg,transparent,var(--border-strong),transparent);margin:26px 0}
+
+  /* ---------- map ---------- */
+  .map{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .map-item{border:1px solid var(--border);border-radius:14px;padding:18px 20px;background:var(--surface);display:flex;gap:14px;align-items:flex-start;transition:.25s;text-decoration:none;color:inherit}
+  .map-item:hover{border-color:var(--border-strong);transform:translateY(-2px)}
+  .map-item .ex{font-family:var(--mono);font-size:.72rem;font-weight:700;color:#0a0c10;border-radius:6px;padding:3px 7px;flex:none;margin-top:2px}
+  .map-item h4{font-family:var(--display);font-size:1rem;font-weight:600;margin-bottom:3px}
+  .map-item p{color:var(--muted);font-size:.84rem;font-weight:300}
+
+  /* ---------- callouts ---------- */
+  .callout{border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:14px 18px;background:rgba(255,180,84,.05);margin:16px 0;font-size:.92rem;color:#d3d7e0;font-weight:300}
+  .callout b{color:var(--text);font-weight:500}
+  .callout.err{border-left-color:var(--err);background:var(--err-glow)}
+  .callout.info{border-left-color:var(--blue);background:var(--blue-glow)}
+  .callout.ok{border-left-color:var(--green);background:var(--green-glow)}
+  .callout .t{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:6px;color:var(--amber)}
+  .callout.err .t{color:var(--err)} .callout.info .t{color:var(--blue)} .callout.ok .t{color:var(--green)}
+
+  /* ---------- cards / lists ---------- */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{border:1px solid var(--border);border-radius:16px;padding:22px;background:linear-gradient(180deg,var(--surface),var(--surface-2))}
+  .card h4{font-family:var(--mono);font-size:.95rem;font-weight:700;margin-bottom:12px}
+  .card ul,.checks{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .card li,.checks li{display:flex;gap:10px;color:#c3c8d4;font-weight:300;font-size:.92rem}
+  .card li .m,.checks li .m{flex:none;font-family:var(--mono)}
+  .card li b,.checks li b{color:var(--text);font-weight:500}
+  .files{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 16px}
+  .files span{font-family:var(--mono);font-size:.78rem;padding:5px 10px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);color:#dfe3ec}
+  .files span.new{border-color:var(--green-line);color:var(--green)}
+
+  /* ---------- editor ---------- */
+  .editor{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#0c0f15;margin:10px 0 16px;box-shadow:0 30px 60px -40px rgba(0,0,0,.8)}
+  .editor .bar{display:flex;align-items:center;gap:8px;padding:11px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+  .editor .bar .lights{display:flex;gap:6px}
+  .editor .bar .lights i{width:11px;height:11px;border-radius:50%;display:block}
+  .editor .bar .lights i:nth-child(1){background:#ff5f57}.editor .bar .lights i:nth-child(2){background:#febc2e}.editor .bar .lights i:nth-child(3){background:#28c840}
+  .editor .bar .fname{font-family:var(--mono);font-size:.76rem;color:var(--muted);margin-left:6px}
+  .editor .bar .badge{margin-left:auto;font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.7;color:#dfe3ec}
+  .k{color:#ff8fa3}.ty{color:#7fd4ff}.fn{color:#c9b8ff}.st{color:#9ff0c4}.cm{color:#6b7488;font-style:italic}.nm{color:#ffb454}.pp{color:#ff9d54}
+  pre.term{background:#07090d;color:#cfd5df}
+  pre.term .ok{color:var(--green)} pre.term .bad{color:var(--err)} pre.term .dim{color:var(--faint)}
+
+  /* ---------- table ---------- */
+  .table-wrap{border:1px solid var(--border);border-radius:16px;overflow-x:auto;margin:10px 0 16px}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{text-align:left;padding:12px 15px;border-bottom:1px solid var(--border);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.02);font-weight:500}
+  tbody tr:last-child td{border-bottom:none}
+  tbody td:first-child{color:var(--text);font-family:var(--mono);font-size:.8rem}
+  td{color:#c3c8d4;font-weight:300}
+
+  /* ---------- grade ruler ---------- */
+  .ruler{position:relative;height:74px;margin:10px 0 6px}
+  .ruler .bar{position:absolute;left:0;right:0;top:30px;height:12px;border-radius:100px;background:linear-gradient(90deg,var(--green),var(--blue) 40%,var(--purple) 70%,var(--faint))}
+  .ruler .lab{position:absolute;top:50px;font-family:var(--mono);font-size:.7rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+  .ruler .top{position:absolute;top:0;font-family:var(--mono);font-size:.7rem;transform:translateX(-50%);white-space:nowrap}
+  .ruler .pin{position:absolute;top:24px;width:4px;height:24px;border-radius:2px;background:var(--text);transform:translateX(-50%);transition:left .35s cubic-bezier(.3,1.4,.5,1);box-shadow:0 0 12px rgba(255,255,255,.6)}
+
+  /* ---------- demos ---------- */
+  .demo{border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;background:var(--surface);margin:16px 0}
+  .demo-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.76rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .demo-head .live{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.6s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .demo-body{padding:18px}
+  .ctrls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+  .ctrls label{font-family:var(--mono);font-size:.76rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .ctrls input[type=number],.ctrls input[type=text],.ctrls select{font-family:var(--mono);font-size:.82rem;background:#0c0f15;color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:8px 10px;width:90px}
+  .ctrls input[type=text]{width:220px}
+  .ctrls select{width:auto}
+  .ctrls input[type=range]{width:180px;accent-color:var(--green)}
+  .btn{font-family:var(--mono);font-size:.78rem;font-weight:500;cursor:pointer;background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);border-radius:9px;padding:9px 13px;transition:.18s}
+  .btn:hover{border-color:var(--text)}
+  .btn.g{border-color:var(--green-line);color:var(--green)} .btn.g:hover{background:var(--green-glow)}
+  .btn.b{border-color:var(--blue-line);color:var(--blue)} .btn.b:hover{background:var(--blue-glow)}
+  .btn.p{border-color:var(--purple-line);color:var(--purple)} .btn.p:hover{background:var(--purple-glow)}
+  .btn.o{border-color:var(--orange-line);color:var(--orange)} .btn.o:hover{background:var(--orange-glow)}
+  .btn.ghost{color:var(--muted)}
+  .console{background:#07090d;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:.78rem;min-height:130px;max-height:260px;overflow-y:auto;line-height:1.7}
+  .console .ln{animation:fadein .3s}
+  .console .ok{color:var(--green)} .console .bad{color:var(--err)} .console .dim{color:var(--faint)} .console .inf{color:var(--blue)} .console .warn{color:var(--amber)}
+  @keyframes fadein{from{opacity:0;transform:translateY(3px)}}
+  .state{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+  .state .pill{font-family:var(--mono);font-size:.74rem;padding:6px 11px;border-radius:100px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted)}
+  .state .pill b{color:var(--text);font-weight:600}
+  .state .pill.yes b{color:var(--green)} .state .pill.no b{color:var(--err)}
+
+  /* ---------- throw flow ---------- */
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+  .flow .f{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--surface-2);position:relative}
+  .flow .f .n{font-family:var(--mono);font-size:.7rem;color:var(--faint);display:block;margin-bottom:6px}
+  .flow .f h5{font-family:var(--mono);font-size:.9rem;margin-bottom:6px}
+  .flow .f p{font-size:.84rem;color:#c3c8d4;font-weight:300}
+  .flow .f.t h5{color:var(--blue)} .flow .f.th h5{color:var(--err)} .flow .f.c h5{color:var(--green)}
+
+  /* ---------- UML ---------- */
+  .uml-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:16px;background:#0c0f15;padding:18px;margin:12px 0}
+  .uml-wrap svg{display:block;min-width:700px;width:100%;height:auto}
+  .uml-wrap svg text{font-family:'JetBrains Mono',monospace}
+
+  /* ---------- intern table ---------- */
+  .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+  .slot{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--surface-2);font-family:var(--mono);font-size:.76rem;transition:.25s}
+  .slot .i{color:var(--faint);display:block;font-size:.66rem;margin-bottom:3px}
+  .slot.scan{border-color:var(--amber);box-shadow:0 0 0 1px rgba(255,180,84,.3)}
+  .slot.hit{border-color:var(--green);background:var(--green-glow);color:var(--green)}
+  .slot.miss{opacity:.5}
+
+  .js .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+  .js .reveal.show{opacity:1;transform:none}
+
+
+  @media (max-width:760px){
+    .map,.duo,.flow,.slots{grid-template-columns:1fr}
+    .ctrls input[type=text]{width:100%}
+  }
+
+  /* ---------- overrides against assets/site.css (manual, added after migration: re-apply if the page is re-migrated) ---------- */
+  .callout{display:block;align-items:normal;gap:normal}
+  .card{position:static;overflow:visible}
+  .editor .bar .badge{padding:0;border:0;border-radius:0}
+  .demo button.btn{font-size:.78rem;padding:9px 13px;transition:.18s}
+  .demo button.btn:hover{border-color:var(--text);color:var(--text)}
+  .demo button.btn.g,.demo button.btn.g:hover{border-color:var(--green-line);color:var(--green)} .demo button.btn.g:hover{background:var(--green-glow)}
+  .demo button.btn.b,.demo button.btn.b:hover{border-color:var(--blue-line);color:var(--blue)} .demo button.btn.b:hover{background:var(--blue-glow)}
+  .demo button.btn.p,.demo button.btn.p:hover{border-color:var(--purple-line);color:var(--purple)} .demo button.btn.p:hover{background:var(--purple-glow)}
+  .demo button.btn.o,.demo button.btn.o:hover{border-color:var(--orange-line);color:var(--orange)} .demo button.btn.o:hover{background:var(--orange-glow)}
+  .demo button.btn.ghost,.demo button.btn.ghost:hover{color:var(--muted)}
+  .ctrls input[type=range]{background:revert;border:revert;border-radius:revert;padding:0;font:revert;color:revert}
+  /* narrow screens: nowrap inline code made the page wider than the viewport (375px) */
+  @media (max-width:760px){ code.i{white-space:normal;overflow-wrap:anywhere} }
+</style>
+<header class="hero">
+  <div class="kicker"><span class="dot"></span>C++ · Module 05 · Repetition &amp; Exceptions</div>
+  <h1 class="title">Welcome to<br><span class="g">the bureaucracy</span></h1>
+  <p class="lead">The subject is thin? Here's <b>what's expected of you</b> for each exercise: the classes to create, their <b>headers</b> (declarations only), and the <b>expected result</b>. The <code class="i">.cpp</code> code, that's on you to write.</p>
+  <p class="subj">subject: en.subject.pdf · v11.1 · C++98 · -Wall -Wextra -Werror</p>
+</header>
+
+<div class="wrap">
+
+<!-- ================= MAP ================= -->
+<section class="reveal c-green">
+  <div class="sec-head"><span class="sec-num">00</span><h2>The map of the module</h2></div>
+  <p class="body">The 4 exercises build <b>one single story</b>: each ex picks up the files from the previous one and adds to them. So don't half-ass ex00: you're going to be carrying it all the way to the end.</p>
+  <div class="map">
+    <a class="map-item" href="#ex00"><span class="ex" style="background:var(--green)">ex00</span><div><h4>Bureaucrat</h4><p>A class with a name and a grade (1 to 150). Invalid grade → we <b>throw an exception</b>.</p></div></a>
+    <a class="map-item" href="#ex01"><span class="ex" style="background:var(--blue)">ex01</span><div><h4>Form</h4><p>A form that the bureaucrat can <b>sign</b> if their grade is good enough.</p></div></a>
+    <a class="map-item" href="#ex02"><span class="ex" style="background:var(--purple)">ex02</span><div><h4>AForm + 3 forms</h4><p>Form becomes <b>abstract</b>. 3 concrete forms that do a real action when they get <b>executed</b>.</p></div></a>
+    <a class="map-item" href="#ex03"><span class="ex" style="background:var(--orange)">ex03</span><div><h4>Intern</h4><p>An intern who <b>builds</b> the right form from its name (text). Without a wall of if/else.</p></div></a>
+  </div>
+
+  <div class="callout info">
+    <span class="t">How to read this guide</span>
+    The code blocks below are <b>headers (.hpp)</b>: just declarations, zero implementation (that's the 42 rule anyway). The names of private attributes (<code class="i">_name</code>, <code class="i">_grade</code>…) are suggestions, you can rename them. On the other hand, <b>names imposed by the subject</b> (<code class="i">getName</code>, <code class="i">beSigned</code>, <code class="i">GradeTooHighException</code>…) must be <b>exactly</b> those.
+  </div>
+  <div class="callout">
+    <span class="t">Important reminder · Canonical form (OCF)</span>
+    Since CPP02, all your classes must have the 4: <b>default constructor</b>, <b>copy constructor</b>, <b>assignment operator</b> <code class="i">operator=</code>, <b>destructor</b>. Exception from the subject: <b>exception classes</b> don't need to be in OCF.
+  </div>
+</section>
+
+<!-- ================= BASES ================= -->
+<section id="bases" class="reveal c-err">
+  <div class="sec-head"><span class="sec-num">★</span><h2>The 2 things to understand before coding<small>exceptions · the "upside down" grade</small></h2></div>
+
+  <h3 class="sub">1 · What's an exception&nbsp;?</h3>
+  <p class="body">In C, when something fails, you return <code class="i">-1</code> and the caller has to check. In C++, you can <b>throw</b> (<code class="i">throw</code>) an error: the function stops <b>dead</b>, and the error bubbles up the call stack until the first <code class="i">catch</code> that knows how to handle it. All the code in between is skipped.</p>
+  <div class="flow">
+    <div class="f t"><span class="n">① try</span><h5>try { ... }</h5><p>"I'm trying this block. If there's an exception in it, I want to catch it."</p></div>
+    <div class="f th"><span class="n">② throw</span><h5>throw X;</h5><p>Somewhere (even 5 functions down), an object gets thrown. Everything stops right here.</p></div>
+    <div class="f c"><span class="n">③ catch</span><h5>catch (std::exception &amp; e)</h5><p>We land here. <code class="i">e.what()</code> gives the error message.</p></div>
+  </div>
+
+  <div class="editor">
+    <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">the idea, in short</span><span class="badge">generic example</span></div>
+<pre class="cpp">try
+{
+    Bureaucrat bob("Bob", 0);          // grade 0 = invalid → the constructor throws an exception
+    std::cout &lt;&lt; "never printed" &lt;&lt; std::endl;   // skipped!
+}
+catch (std::exception &amp; e)            // we catch ANY exception that inherits from std::exception
+{
+    std::cout &lt;&lt; "Error: " &lt;&lt; e.what() &lt;&lt; std::endl;
+}</pre>
+  </div>
+
+  <p class="body"><b>Why does <code class="i">catch (std::exception &amp; e)</code> catch your own exception?</b> Because your exception class is going to <b>inherit</b> from <code class="i">std::exception</code> (it's the polymorphism from CPP04!). And you're going to <b>override</b> its virtual function <code class="i">what()</code> so it returns your message.</p>
+
+  <p class="body">The subject imposes names like <code class="i">Bureaucrat::GradeTooHighException</code>: the <code class="i">::</code> means it's a class <b>declared inside</b> the Bureaucrat class (a nested class). Here's the template, you'll reuse it for every exception in the module:</p>
+
+  <div class="editor">
+    <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">nested exception template (in a .hpp)</span><span class="badge">declaration</span></div>
+<pre class="cpp">#include &lt;exception&gt;
+
+class Bureaucrat
+{
+    public:
+        // ... the rest of the class ...
+
+        class GradeTooHighException : public std::exception
+        {
+            public:
+                virtual const char* what() const throw();
+        };
+};</pre>
+  </div>
+  <div class="callout">
+    <span class="t">The weird bit: throw()</span>
+    In C++98, <code class="i">what()</code> is declared in <code class="i">std::exception</code> with <code class="i">throw()</code> at the end, which means "this function never throws an exception." To override it, <b>you must copy the exact same signature</b>: <code class="i">virtual const char* what() const throw();</code>. In the .cpp, you'll write <code class="i">const char* Bureaucrat::GradeTooHighException::what() const throw() { return "..."; }</code>.
+  </div>
+  <div class="callout err">
+    <span class="t">Classic trap</span>
+    We <b>throw</b> an object: <code class="i">throw GradeTooHighException();</code> (with parentheses → that constructs a temporary object). No <code class="i">new</code>, no pointer. And we catch <b>by reference</b>: <code class="i">catch (std::exception &amp; e)</code>.
+  </div>
+
+  <h3 class="sub">2 · The grade is "upside down"</h3>
+  <p class="body">This is THE thing that confuses everyone. <b>1 = the highest grade</b> (the boss), <b>150 = the lowest</b> (the intern's intern). So:</p>
+  <div class="ruler" id="ruler">
+    <div class="bar"></div>
+    <span class="top" style="left:0%;color:var(--green);transform:none">▲ better</span>
+    <span class="top" style="right:0;left:auto;color:var(--faint);transform:none">worse ▼</span>
+    <span class="lab" style="left:0%;transform:none">1</span>
+    <span class="lab" style="left:50%">75</span>
+    <span class="lab" style="right:0;left:auto;transform:none">150</span>
+    <div class="pin" id="rulerPin" style="left:50%"></div>
+  </div>
+  <div class="duo">
+    <div class="card"><h4 style="color:var(--green)">incrementGrade()</h4><ul>
+      <li><span class="m">↑</span><span>The bureaucrat <b>moves up</b> in grade → the number <b>decreases</b>. 3 becomes 2.</span></li>
+      <li><span class="m">✗</span><span>If the grade is already 1 → <code class="i">GradeTooHighException</code>.</span></li>
+    </ul></div>
+    <div class="card"><h4 style="color:var(--err)">decrementGrade()</h4><ul>
+      <li><span class="m">↓</span><span>The bureaucrat <b>moves down</b> → the number <b>increases</b>. 3 becomes 4.</span></li>
+      <li><span class="m">✗</span><span>If the grade is already 150 → <code class="i">GradeTooLowException</code>.</span></li>
+    </ul></div>
+  </div>
+  <p class="body" style="margin-top:14px">And for forms (ex01+): "having a high enough grade" = <b>your number is smaller than or equal to</b> the required number. A bureaucrat with grade 10 can sign a form that "requires grade 25". A grade 30 can't.</p>
+</section>
+
+<!-- ================= EX00 ================= -->
+<section id="ex00" class="reveal c-green">
+  <div class="sec-head"><span class="sec-num">ex00</span><h2>Bureaucrat<small>« Mommy, when I grow up, I want to be a bureaucrat! »</small></h2></div>
+
+  <p class="body"><b>What you need to do, in plain English:</b> create a <code class="i">Bureaucrat</code> class that has a name (which never changes) and a grade between 1 and 150. You can make its grade go up or down. As soon as something tries to set a grade outside [1, 150] — at construction or with increment/decrement — you <b>throw an exception</b>. And you can print it with <code class="i">std::cout &lt;&lt; bureaucrat</code>.</p>
+
+  <h3 class="sub">Files to submit</h3>
+  <div class="files"><span>Makefile</span><span>main.cpp</span><span class="new">Bureaucrat.hpp</span><span class="new">Bureaucrat.cpp</span></div>
+
+  <h3 class="sub">The header <span class="tag">the .cpp is on you</span></h3>
+  <div class="editor">
+    <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex00/Bureaucrat.hpp</span><span class="badge">declarations</span></div>
+<pre class="cpp">#ifndef BUREAUCRAT_HPP
+#define BUREAUCRAT_HPP
+
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include &lt;exception&gt;
+
+class Bureaucrat
+{
+    private:
+        const std::string   _name;      // const → fixed at construction, never modified again
+        int                 _grade;     // 1 (best) ... 150 (worst)
+
+    public:
+        // --- Canonical form ---
+        Bureaucrat();                                   // default name/grade of your choice (valid!)
+        Bureaucrat(const std::string &amp; name, int grade); // may throw an exception
+        Bureaucrat(const Bureaucrat &amp; other);
+        Bureaucrat &amp; operator=(const Bureaucrat &amp; other);
+        ~Bureaucrat();
+
+        // --- Getters (imposed names) ---
+        const std::string &amp; getName() const;
+        int                 getGrade() const;
+
+        // --- Changing grade ---
+        void    incrementGrade();   // grade - 1  (may throw GradeTooHighException)
+        void    decrementGrade();   // grade + 1  (may throw GradeTooLowException)
+
+        // --- Exceptions (imposed names) ---
+        class GradeTooHighException : public std::exception
+        {
+            public:
+                virtual const char* what() const throw();
+        };
+        class GradeTooLowException : public std::exception
+        {
+            public:
+                virtual const char* what() const throw();
+        };
+};
+
+// Overload of &lt;&lt; : FREE function (outside the class), not a method
+std::ostream &amp; operator&lt;&lt;(std::ostream &amp; out, const Bureaucrat &amp; b);
+
+#endif</pre>
+  </div>
+
+  <div class="duo">
+    <div class="card"><h4 style="color:var(--green)">What each function must do</h4><ul>
+      <li><span class="m">→</span><span><b>Constructor (name, grade)</b>: if grade &lt; 1 → throw TooHigh; if grade &gt; 150 → throw TooLow; otherwise store it.</span></li>
+      <li><span class="m">→</span><span><b>increment / decrement</b>: check <b>before</b> modifying, throw the same exception as the constructor.</span></li>
+      <li><span class="m">→</span><span><b>what()</b>: just returns a string, e.g. <code class="i">"Grade too high"</code>.</span></li>
+      <li><span class="m">→</span><span><b>operator&lt;&lt;</b>: writes to <code class="i">out</code> and <b>returns out</b> (so you can chain the &lt;&lt;).</span></li>
+    </ul></div>
+    <div class="card"><h4 style="color:var(--amber)">Traps</h4><ul>
+      <li><span class="m">!</span><span><b>Const name + operator=</b>: impossible to reassign a <code class="i">const</code>. In <code class="i">operator=</code>, you only copy <b>the grade</b>. That's normal and expected.</span></li>
+      <li><span class="m">!</span><span>A <code class="i">const</code> is initialized <b>only</b> in the initialization list: <code class="i">: _name(name)</code>, not in the constructor body.</span></li>
+      <li><span class="m">!</span><span>Moving up in grade = <b>subtracting</b>. Read that twice.</span></li>
+    </ul></div>
+  </div>
+
+  <h3 class="sub">The expected result</h3>
+  <p class="body">The format of <code class="i">&lt;&lt;</code> is <b>imposed</b> (character for character, with the final period):</p>
+  <div class="editor"><div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">imposed format</span></div>
+<pre class="term">&lt;name&gt;, bureaucrat grade &lt;grade&gt;.</pre></div>
+  <p class="body">The rest (error messages, tests) is up to you. Your <code class="i">main.cpp</code> must <b>prove</b> that everything works. Example output from a good main:</p>
+  <div class="editor"><div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">./bureaucrat</span><span class="badge">example</span></div>
+<pre class="term"><span class="dim">--- Test 1: valid bureaucrat ---</span>
+Bob, bureaucrat grade 2.
+Bob, bureaucrat grade 1.       <span class="dim">← after incrementGrade()</span>
+<span class="bad">Error: Grade too high</span>          <span class="dim">← incrementGrade() called once too many</span>
+<span class="dim">--- Test 2: invalid construction ---</span>
+<span class="bad">Error: Grade too low</span>           <span class="dim">← Bureaucrat("Jim", 151)</span>
+<span class="bad">Error: Grade too high</span>          <span class="dim">← Bureaucrat("Tim", 0)</span></pre></div>
+
+  <div class="callout ok">
+    <span class="t">What your main should test (the grader will check)</span>
+    Valid creation · creation with 0 · creation with 151 · increment until it goes past 1 · decrement until it goes past 150 · printing with <code class="i">&lt;&lt;</code>. Each dangerous case in its own <code class="i">try/catch</code>, otherwise the first exception stops all the following tests.
+  </div>
+
+  <!-- demo -->
+  <div class="demo">
+    <div class="demo-head"><span class="live"></span>Simulator · what your program should do</div>
+    <div class="demo-body">
+      <div class="ctrls">
+        <label>name <input type="text" id="b0name" value="Bob" style="width:110px"></label>
+        <label>grade <input type="number" id="b0grade" value="3"></label>
+        <button class="btn g" id="b0new">Bureaucrat(name, grade)</button>
+      </div>
+      <div class="ctrls">
+        <button class="btn g" id="b0inc">incrementGrade()</button>
+        <button class="btn o" id="b0dec">decrementGrade()</button>
+        <button class="btn" id="b0print">std::cout &lt;&lt; bob</button>
+        <button class="btn ghost" id="b0clr">clear</button>
+      </div>
+      <div class="console" id="b0out"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EX01 ================= -->
+<section id="ex01" class="reveal c-blue">
+  <div class="sec-head"><span class="sec-num">ex01</span><h2>Form<small>« Form up, maggots! »</small></h2></div>
+
+  <p class="body"><b>In plain English:</b> you create a <code class="i">Form</code> class (a paper form). It has a name, a signed/not-signed state, a minimum grade <b>to sign it</b>, and a minimum grade <b>to execute it</b> (which is useless before ex02, but it has to exist). A bureaucrat can try to sign it: if their grade is good enough, the form switches to "signed", otherwise an exception.</p>
+
+  <h3 class="sub">Files to submit</h3>
+  <div class="files"><span>Makefile</span><span>main.cpp</span><span>Bureaucrat.hpp</span><span>Bureaucrat.cpp</span><span class="new">Form.hpp</span><span class="new">Form.cpp</span></div>
+
+  <h3 class="sub">The Form header</h3>
+  <div class="editor">
+    <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex01/Form.hpp</span><span class="badge">declarations</span></div>
+<pre class="cpp">#ifndef FORM_HPP
+#define FORM_HPP
+
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include &lt;exception&gt;
+
+class Bureaucrat;   // "forward declaration" → see the explanation below
+
+class Form
+{
+    private:                            // PRIVATE, not protected (the subject insists)
+        const std::string   _name;
+        bool                _signed;        // false at construction
+        const int           _gradeToSign;
+        const int           _gradeToExecute;
+
+    public:
+        Form();
+        Form(const std::string &amp; name, int gradeToSign, int gradeToExecute); // may throw
+        Form(const Form &amp; other);
+        Form &amp; operator=(const Form &amp; other);
+        ~Form();
+
+        const std::string &amp; getName() const;
+        bool                getSigned() const;      // or isSigned(), your choice
+        int                 getGradeToSign() const;
+        int                 getGradeToExecute() const;
+
+        void    beSigned(const Bureaucrat &amp; b);   // throws GradeTooLowException if b is too low
+
+        class GradeTooHighException : public std::exception
+        {
+            public:
+                virtual const char* what() const throw();
+        };
+        class GradeTooLowException : public std::exception
+        {
+            public:
+                virtual const char* what() const throw();
+        };
+};
+
+std::ostream &amp; operator&lt;&lt;(std::ostream &amp; out, const Form &amp; f);
+
+#endif</pre>
+  </div>
+
+  <h3 class="sub">What we add to Bureaucrat</h3>
+  <div class="editor">
+    <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex01/Bureaucrat.hpp — the additions</span><span class="badge">declarations</span></div>
+<pre class="cpp">class Form;          // above "class Bureaucrat", after the #include
+
+class Bureaucrat
+{
+    // ... everything that was there in ex00 ...
+    public:
+        void    signForm(Form &amp; form);   // NOT const: signing modifies the form
+};</pre>
+  </div>
+
+  <div class="callout info">
+    <span class="t">Why "class Bureaucrat;" all on its own?</span>
+    Form needs to know about Bureaucrat (for <code class="i">beSigned</code>), and Bureaucrat needs to know about Form (for <code class="i">signForm</code>). If each .hpp does <code class="i">#include</code> of the other, it goes in circles and won't compile. Solution: in the <b>.hpp</b>, we just say "this class exists" (<code class="i">class Form;</code>). That's enough to declare a reference <code class="i">Form &amp;</code>. The real <code class="i">#include "Form.hpp"</code> goes in the <b>.cpp</b>, where you actually use its functions.
+  </div>
+
+  <h3 class="sub">Who calls who?</h3>
+  <div class="duo">
+    <div class="card"><h4 style="color:var(--blue)">Form::beSigned(bureaucrat)</h4><ul>
+      <li><span class="m">1</span><span>Compares the bureaucrat's grade to the grade required to sign.</span></li>
+      <li><span class="m">2</span><span>Good enough (<code class="i">grade &lt;= required</code>) → <code class="i">_signed = true</code>.</span></li>
+      <li><span class="m">3</span><span>Too low → <code class="i">throw Form::GradeTooLowException()</code>.</span></li>
+      <li><span class="m">·</span><span><b>Doesn't print anything.</b> It's the "engine".</span></li>
+    </ul></div>
+    <div class="card"><h4 style="color:var(--green)">Bureaucrat::signForm(form)</h4><ul>
+      <li><span class="m">1</span><span>Calls <code class="i">form.beSigned(*this)</code> inside a <b>try</b>.</span></li>
+      <li><span class="m">2</span><span>It succeeds → prints <code class="i">&lt;bureaucrat&gt; signed &lt;form&gt;</code>.</span></li>
+      <li><span class="m">3</span><span>Exception caught → prints <code class="i">&lt;bureaucrat&gt; couldn't sign &lt;form&gt; because &lt;reason&gt;.</code> (reason = <code class="i">e.what()</code>).</span></li>
+      <li><span class="m">·</span><span>It's the "interface" that <b>prints</b>.</span></li>
+    </ul></div>
+  </div>
+
+  <h3 class="sub">The expected result</h3>
+  <div class="editor"><div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">./form</span><span class="badge">example</span></div>
+<pre class="term">Form Permis, signed: no, grade to sign: 50, grade to execute: 20   <span class="dim">← your format for &lt;&lt;, free choice</span>
+<span class="ok">Alice signed Permis</span>                                              <span class="dim">← Alice grade 10</span>
+<span class="bad">Bob couldn't sign Permis because Grade too low.</span>                 <span class="dim">← Bob grade 120</span>
+<span class="bad">Error: Grade too high</span>                                            <span class="dim">← Form("X", 0, 10)</span></pre></div>
+  <div class="callout">
+    <span class="t">What if we create a Form with an invalid grade?</span>
+    Same rules as Bureaucrat: <code class="i">Form("X", 0, 10)</code> → <code class="i">Form::GradeTooHighException</code>, <code class="i">Form("X", 10, 151)</code> → <code class="i">Form::GradeTooLowException</code>. Check <b>both</b> grades in the constructor.
+  </div>
+
+  <div class="demo">
+    <div class="demo-head"><span class="live"></span>Simulator · signForm</div>
+    <div class="demo-body">
+      <div class="ctrls">
+        <label>bureaucrat's grade <input type="range" id="s1g" min="1" max="150" value="60"> <b id="s1gv" style="color:var(--text);width:30px">60</b></label>
+        <label>grade required to sign <input type="number" id="s1req" value="50" min="1" max="150"></label>
+      </div>
+      <div class="ctrls">
+        <button class="btn b" id="s1sign">bob.signForm(permis)</button>
+        <button class="btn ghost" id="s1reset">new form</button>
+      </div>
+      <div class="state" id="s1state"></div>
+      <div class="console" id="s1out"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EX02 ================= -->
+<section id="ex02" class="reveal c-purple">
+  <div class="sec-head"><span class="sec-num">ex02</span><h2>AForm + the 3 forms<small>« No, you need form 28B, not 28C... »</small></h2></div>
+
+  <p class="body"><b>In plain English:</b> you rename <code class="i">Form</code> into <code class="i">AForm</code> (A = Abstract) and make it <b>abstract</b>, exactly like <code class="i">Animal</code> in CPP04 ex02: you can no longer do <code class="i">AForm f;</code>. Then you create 3 concrete forms that inherit from AForm, each with a <b>target</b> (<code class="i">target</code>, a string) and an <b>action</b>. Finally, a form can be <b>executed</b> by a bureaucrat, provided it's signed and the bureaucrat has the execution grade.</p>
+
+  <h3 class="sub">Files to submit</h3>
+  <div class="files"><span>Makefile</span><span>main.cpp</span><span>Bureaucrat.hpp/.cpp</span><span class="new">AForm.hpp/.cpp</span><span class="new">ShrubberyCreationForm.hpp/.cpp</span><span class="new">RobotomyRequestForm.hpp/.cpp</span><span class="new">PresidentialPardonForm.hpp/.cpp</span></div>
+  <p class="body" style="font-size:.88rem">Note: <b>no more Form.hpp/Form.cpp</b> in ex02 — it's replaced by AForm.</p>
+
+  <h3 class="sub">The 3 concrete forms</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Class</th><th>Sign</th><th>Execute</th><th>Action when executed</th></tr></thead>
+    <tbody>
+      <tr><td>ShrubberyCreationForm</td><td>145</td><td>137</td><td>Creates a file <code class="i">&lt;target&gt;_shrubbery</code> in the current directory and writes <b>ASCII trees</b> into it.</td></tr>
+      <tr><td>RobotomyRequestForm</td><td>72</td><td>45</td><td>Prints drilling noises, then <b>1 time out of 2</b>: "&lt;target&gt; has been robotomized successfully", otherwise "robotomy failed".</td></tr>
+      <tr><td>PresidentialPardonForm</td><td>25</td><td>5</td><td>Prints "&lt;target&gt; has been pardoned by Zaphod Beeblebrox".</td></tr>
+    </tbody>
+  </table></div>
+  <p class="body">Their constructor takes <b>only one parameter: the target</b>. The name and the grades, they provide themselves to AForm's constructor. E.g.: <code class="i">ShrubberyCreationForm("home")</code> → creates <code class="i">home_shrubbery</code>.</p>
+
+  <h3 class="sub">The class diagram</h3>
+  <div class="uml-wrap">
+    <svg viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="tri" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto"><path d="M1,1 L11,6 L1,11 Z" fill="#0c0f15" stroke="#c79bff" stroke-width="1.3"/></marker>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10" fill="none" stroke="#8a93a6" stroke-width="1.4"/></marker></defs>
+      <!-- Bureaucrat -->
+      <rect x="20" y="30" width="250" height="150" rx="10" fill="#12151d" stroke="rgba(62,230,176,.5)"/>
+      <text x="145" y="56" text-anchor="middle" fill="#3ee6b0" font-size="14" font-weight="700">Bureaucrat</text>
+      <line x1="20" y1="68" x2="270" y2="68" stroke="rgba(150,170,200,.2)"/>
+      <text x="34" y="92" fill="#8a93a6" font-size="11">- const _name, _grade</text>
+      <line x1="20" y1="104" x2="270" y2="104" stroke="rgba(150,170,200,.2)"/>
+      <text x="34" y="126" fill="#e9ebf0" font-size="11">+ signForm(AForm&amp;)</text>
+      <text x="34" y="146" fill="#e9ebf0" font-size="11">+ executeForm(AForm const&amp;) const</text>
+      <text x="34" y="166" fill="#8a93a6" font-size="11">+ getName, getGrade, inc/dec…</text>
+      <!-- AForm -->
+      <rect x="380" y="20" width="310" height="175" rx="10" fill="#12151d" stroke="rgba(199,155,255,.6)" stroke-dasharray="5 4"/>
+      <text x="535" y="44" text-anchor="middle" fill="#c79bff" font-size="11" font-style="italic">«abstract»</text>
+      <text x="535" y="62" text-anchor="middle" fill="#c79bff" font-size="14" font-weight="700">AForm</text>
+      <line x1="380" y1="72" x2="690" y2="72" stroke="rgba(150,170,200,.2)"/>
+      <text x="394" y="94" fill="#8a93a6" font-size="11">- const _name, _signed,</text>
+      <text x="394" y="110" fill="#8a93a6" font-size="11">- const _gradeToSign, _gradeToExecute</text>
+      <line x1="380" y1="120" x2="690" y2="120" stroke="rgba(150,170,200,.2)"/>
+      <text x="394" y="142" fill="#e9ebf0" font-size="11">+ beSigned(Bureaucrat const&amp;)</text>
+      <text x="394" y="160" fill="#e9ebf0" font-size="11">+ execute(Bureaucrat const&amp;) const</text>
+      <text x="394" y="180" fill="#ff8fa3" font-size="11"># executeAction() const = 0</text>
+      <!-- arrow bureaucrat -> aform -->
+      <line x1="270" y1="105" x2="378" y2="105" stroke="#8a93a6" stroke-width="1.4" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+      <text x="324" y="96" text-anchor="middle" fill="#5b6475" font-size="10">uses</text>
+      <!-- children -->
+      <rect x="250" y="290" width="200" height="80" rx="10" fill="#12151d" stroke="rgba(150,170,200,.3)"/>
+      <text x="350" y="314" text-anchor="middle" fill="#e9ebf0" font-size="12" font-weight="700">ShrubberyCreation</text>
+      <text x="350" y="336" text-anchor="middle" fill="#8a93a6" font-size="11">- _target</text>
+      <text x="350" y="356" text-anchor="middle" fill="#9ff0c4" font-size="11">145 / 137</text>
+      <rect x="470" y="290" width="190" height="80" rx="10" fill="#12151d" stroke="rgba(150,170,200,.3)"/>
+      <text x="565" y="314" text-anchor="middle" fill="#e9ebf0" font-size="12" font-weight="700">RobotomyRequest</text>
+      <text x="565" y="336" text-anchor="middle" fill="#8a93a6" font-size="11">- _target</text>
+      <text x="565" y="356" text-anchor="middle" fill="#9ff0c4" font-size="11">72 / 45</text>
+      <rect x="680" y="290" width="200" height="80" rx="10" fill="#12151d" stroke="rgba(150,170,200,.3)"/>
+      <text x="780" y="314" text-anchor="middle" fill="#e9ebf0" font-size="12" font-weight="700">PresidentialPardon</text>
+      <text x="780" y="336" text-anchor="middle" fill="#8a93a6" font-size="11">- _target</text>
+      <text x="780" y="356" text-anchor="middle" fill="#9ff0c4" font-size="11">25 / 5</text>
+      <path d="M350,290 V245 H780 V290" fill="none" stroke="#c79bff" stroke-width="1.3"/>
+      <line x1="565" y1="245" x2="565" y2="290" stroke="#c79bff" stroke-width="1.3"/>
+      <line x1="535" y1="245" x2="535" y2="197" stroke="#c79bff" stroke-width="1.3" marker-end="url(#tri)"/>
+      <text x="545" y="228" fill="#5b6475" font-size="10">inherits (public)</text>
+    </svg>
+  </div>
+
+  <h3 class="sub">"One way is more elegant than the other"</h3>
+  <p class="body">The subject lets you choose where to check the conditions (signed? high enough grade?). Two options:</p>
+  <div class="duo">
+    <div class="card" style="border-color:var(--err-line)"><h4 style="color:var(--err)">✗ Heavy option</h4><ul>
+      <li><span class="m">·</span><span>Each concrete form overrides <code class="i">execute()</code> and <b>redoes the same checks</b>.</span></li>
+      <li><span class="m">·</span><span>3 times the same copy-pasted code. One slip-up = a bug.</span></li>
+    </ul></div>
+    <div class="card" style="border-color:var(--green-line)"><h4 style="color:var(--green)">✓ Elegant option</h4><ul>
+      <li><span class="m">1</span><span><code class="i">AForm::execute()</code> (non-virtual) does the <b>checks a single time</b> and throws the exception if needed.</span></li>
+      <li><span class="m">2</span><span>If everything's fine, it calls a <b>pure virtual</b> function (e.g. <code class="i">executeAction()</code>) that each form implements with <b>its own action</b>.</span></li>
+      <li><span class="m">★</span><span>Bonus: it's this <code class="i">= 0</code> function that makes AForm abstract.</span></li>
+    </ul></div>
+  </div>
+
+  <h3 class="sub">The headers</h3>
+  <div class="editor">
+    <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex02/AForm.hpp</span><span class="badge">declarations</span></div>
+<pre class="cpp">#ifndef AFORM_HPP
+#define AFORM_HPP
+
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include &lt;exception&gt;
+
+class Bureaucrat;
+
+class AForm
+{
+    private:                            // always PRIVATE, and they stay in the base class
+        const std::string   _name;
+        bool                _signed;
+        const int           _gradeToSign;
+        const int           _gradeToExecute;
+
+    protected:
+        // The action specific to each form. "= 0" → AForm becomes abstract.
+        virtual void    executeAction() const = 0;
+
+    public:
+        AForm();
+        AForm(const std::string &amp; name, int gradeToSign, int gradeToExecute);
+        AForm(const AForm &amp; other);
+        AForm &amp; operator=(const AForm &amp; other);
+        virtual ~AForm();               // VIRTUAL: children will be destroyed through an AForm*
+
+        const std::string &amp; getName() const;
+        bool                getSigned() const;
+        int                 getGradeToSign() const;
+        int                 getGradeToExecute() const;
+
+        void    beSigned(const Bureaucrat &amp; b);
+        void    execute(Bureaucrat const &amp; executor) const;   // imposed signature
+
+        class GradeTooHighException : public std::exception
+        { public: virtual const char* what() const throw(); };
+        class GradeTooLowException : public std::exception
+        { public: virtual const char* what() const throw(); };
+        class FormNotSignedException : public std::exception      // new one!
+        { public: virtual const char* what() const throw(); };
+};
+
+std::ostream &amp; operator&lt;&lt;(std::ostream &amp; out, const AForm &amp; f);
+
+#endif</pre>
+  </div>
+
+  <div class="editor">
+    <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex02/ShrubberyCreationForm.hpp</span><span class="badge">same template for the other 2</span></div>
+<pre class="cpp">#ifndef SHRUBBERYCREATIONFORM_HPP
+#define SHRUBBERYCREATIONFORM_HPP
+
+#include "AForm.hpp"
+#include &lt;string&gt;
+
+class ShrubberyCreationForm : public AForm
+{
+    private:
+        std::string _target;
+
+    protected:
+        virtual void    executeAction() const;      // the action: writing the trees to the file
+
+    public:
+        ShrubberyCreationForm();                                  // default target of your choice
+        ShrubberyCreationForm(const std::string &amp; target);        // THE constructor from the subject
+        ShrubberyCreationForm(const ShrubberyCreationForm &amp; other);
+        ShrubberyCreationForm &amp; operator=(const ShrubberyCreationForm &amp; other);
+        virtual ~ShrubberyCreationForm();
+};
+
+#endif</pre>
+  </div>
+  <p class="body"><code class="i">RobotomyRequestForm.hpp</code> and <code class="i">PresidentialPardonForm.hpp</code> are <b>identical</b> apart from the class name and the include guard. The whole difference is in the .cpp: the grades passed to AForm's constructor, and the content of <code class="i">executeAction()</code>.</p>
+
+  <div class="editor">
+    <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex02/Bureaucrat.hpp — changes</span><span class="badge">declarations</span></div>
+<pre class="cpp">class AForm;                                    // replaces "class Form;"
+
+// inside the class:
+        void    signForm(AForm &amp; form);           // Form → AForm
+        void    executeForm(AForm const &amp; form) const;   // new, imposed signature</pre>
+  </div>
+
+  <div class="duo">
+    <div class="card"><h4 style="color:var(--purple)">AForm::execute(executor)</h4><ul>
+      <li><span class="m">1</span><span>Not signed → <code class="i">throw FormNotSignedException()</code></span></li>
+      <li><span class="m">2</span><span>Executor's grade &gt; execution grade → <code class="i">throw GradeTooLowException()</code></span></li>
+      <li><span class="m">3</span><span>Otherwise → <code class="i">executeAction()</code> (polymorphism picks the right version).</span></li>
+    </ul></div>
+    <div class="card"><h4 style="color:var(--green)">Bureaucrat::executeForm(form)</h4><ul>
+      <li><span class="m">1</span><span>Same idea as <code class="i">signForm</code>: <code class="i">try { form.execute(*this); }</code></span></li>
+      <li><span class="m">2</span><span>OK → <code class="i">&lt;bureaucrat&gt; executed &lt;form&gt;</code></span></li>
+      <li><span class="m">3</span><span>Exception → an <b>explicit</b> error message (free choice), with <code class="i">e.what()</code>.</span></li>
+    </ul></div>
+  </div>
+
+  <div class="callout">
+    <span class="t">The C++ tools you'll need in the .cpp files</span>
+    <b>Shrubbery</b>: <code class="i">#include &lt;fstream&gt;</code> then <code class="i">std::ofstream</code> to create/write the file (in C++98, the constructor wants a <code class="i">const char*</code> → <code class="i">(_target + "_shrubbery").c_str()</code>). Think about the case where the file doesn't open.<br>
+    <b>Robotomy</b>: <code class="i">std::rand()</code> from <code class="i">&lt;cstdlib&gt;</code>, an even or odd number = 50/50. Seed it <b>only once</b> with <code class="i">std::srand(std::time(0))</code> (<code class="i">&lt;ctime&gt;</code>), e.g. at the start of main — otherwise you always get the same result.
+  </div>
+
+  <h3 class="sub">The expected result</h3>
+  <div class="editor"><div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">./forms</span><span class="badge">example</span></div>
+<pre class="term"><span class="ok">Boss signed ShrubberyCreationForm</span>
+<span class="ok">Boss executed ShrubberyCreationForm</span>          <span class="dim">← + a home_shrubbery file appeared</span>
+<span class="ok">Boss signed RobotomyRequestForm</span>
+* BZZZZZ drilling noises *
+Bender has been robotomized successfully      <span class="dim">← or "robotomy failed" (50%)</span>
+<span class="ok">Boss executed RobotomyRequestForm</span>
+<span class="bad">Boss couldn't execute PresidentialPardonForm: form is not signed</span>
+<span class="bad">Intern couldn't execute ShrubberyCreationForm: grade too low</span></pre></div>
+  <div class="callout ok">
+    <span class="t">To test in your main</span>
+    Each form executed successfully · executing a form that's <b>not signed</b> · executing with too low a grade · running the robotomy several times (you should see both cases) · checking the <code class="i">_shrubbery</code> file with <code class="i">cat</code>. And checking that <code class="i">AForm f;</code> <b>doesn't compile</b> (test it, then comment it out).
+  </div>
+
+  <div class="demo">
+    <div class="demo-head"><span class="live"></span>Simulator · sign then execute</div>
+    <div class="demo-body">
+      <div class="ctrls">
+        <label>form
+          <select id="s2form">
+            <option value="0">ShrubberyCreationForm (145 / 137)</option>
+            <option value="1">RobotomyRequestForm (72 / 45)</option>
+            <option value="2">PresidentialPardonForm (25 / 5)</option>
+          </select></label>
+        <label>target <input type="text" id="s2target" value="home" style="width:110px"></label>
+      </div>
+      <div class="ctrls">
+        <label>bureaucrat's grade <input type="range" id="s2g" min="1" max="150" value="40"> <b id="s2gv" style="color:var(--text);width:30px">40</b></label>
+      </div>
+      <div class="ctrls">
+        <button class="btn b" id="s2sign">signForm()</button>
+        <button class="btn p" id="s2exec">executeForm()</button>
+        <button class="btn ghost" id="s2reset">new form</button>
+      </div>
+      <div class="state" id="s2state"></div>
+      <div class="console" id="s2out"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EX03 ================= -->
+<section id="ex03" class="reveal c-orange">
+  <div class="sec-head"><span class="sec-num">ex03</span><h2>Intern<small>« At least this beats coffee-making »</small></h2></div>
+
+  <p class="body"><b>In plain English:</b> an <code class="i">Intern</code> has <b>no attributes at all</b>. It has a single skill: <code class="i">makeForm(formName, target)</code>. You give it a <b>string</b> like <code class="i">"robotomy request"</code>, it gives you back a <b>pointer</b> to a new <code class="i">RobotomyRequestForm</code> created with <code class="i">new</code>. This is what's called a small "factory".</p>
+
+  <h3 class="sub">Files to submit</h3>
+  <div class="files"><span>all the files from ex02</span><span class="new">Intern.hpp</span><span class="new">Intern.cpp</span></div>
+
+  <div class="editor">
+    <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex03/Intern.hpp</span><span class="badge">declarations</span></div>
+<pre class="cpp">#ifndef INTERN_HPP
+#define INTERN_HPP
+
+#include &lt;string&gt;
+#include "AForm.hpp"
+
+class Intern
+{
+    private:
+        // "Little manufacturing functions", one per form.
+        // They ALL have the same signature → we can store them in an array.
+        AForm*  createShrubbery(const std::string &amp; target) const;
+        AForm*  createRobotomy(const std::string &amp; target) const;
+        AForm*  createPardon(const std::string &amp; target) const;
+
+    public:
+        Intern();
+        Intern(const Intern &amp; other);
+        Intern &amp; operator=(const Intern &amp; other);
+        ~Intern();
+
+        AForm*  makeForm(const std::string &amp; formName, const std::string &amp; target) const;
+};
+
+#endif</pre>
+  </div>
+
+  <div class="callout err">
+    <span class="t">Forbidden · the wall of if / else</span>
+    The subject says it clearly: an <code class="i">if (name == "...") ... else if ... else if ...</code> will be <b>rejected</b> during evaluation.
+  </div>
+  <div class="callout ok">
+    <span class="t">The trick: you already know it (CPP01 · Harl!)</span>
+    In <code class="i">makeForm</code>, build <b>two aligned arrays</b>: an array of names (<code class="i">"shrubbery creation"</code>, <code class="i">"robotomy request"</code>, <code class="i">"presidential pardon"</code>) and an array of <b>pointers to member functions</b> (<code class="i">&amp;Intern::createShrubbery</code>…). Then <b>a single loop</b>: if <code class="i">names[i] == formName</code>, call <code class="i">(this-&gt;*creators[i])(target)</code>. It's exactly the mechanism behind <code class="i">Harl::complain</code>.
+  </div>
+
+  <h3 class="sub">The expected result</h3>
+  <div class="editor"><div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">example given by the subject</span></div>
+<pre class="cpp">{
+    Intern  someRandomIntern;
+    AForm*  rrf;
+
+    rrf = someRandomIntern.makeForm("robotomy request", "Bender");
+    // ... use rrf ...
+    delete rrf;     // ← the caller is responsible for the delete (otherwise a leak)
+}</pre></div>
+  <div class="editor"><div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">./intern</span><span class="badge">example</span></div>
+<pre class="term"><span class="ok">Intern creates robotomy request</span>
+<span class="bad">Error: form "coffee request" does not exist</span>   <span class="dim">← explicit message, free format</span></pre></div>
+  <div class="callout">
+    <span class="t">If the name doesn't exist</span>
+    Print an explicit error and return <code class="i">NULL</code> (in C++98, no <code class="i">nullptr</code>). Your main must therefore check <code class="i">if (rrf)</code> before using it. (You can also choose to throw an exception — both are accepted as long as it's consistent.)
+  </div>
+
+  <div class="demo">
+    <div class="demo-head"><span class="live"></span>Simulator · the makeForm loop</div>
+    <div class="demo-body">
+      <div class="slots" id="slots">
+        <div class="slot"><span class="i">[0]</span>"shrubbery creation"<br><span class="i">→ createShrubbery</span></div>
+        <div class="slot"><span class="i">[1]</span>"robotomy request"<br><span class="i">→ createRobotomy</span></div>
+        <div class="slot"><span class="i">[2]</span>"presidential pardon"<br><span class="i">→ createPardon</span></div>
+      </div>
+      <div class="ctrls">
+        <label>formName <input type="text" id="s3name" value="robotomy request"></label>
+        <label>target <input type="text" id="s3target" value="Bender" style="width:110px"></label>
+        <button class="btn o" id="s3go">makeForm()</button>
+      </div>
+      <div class="console" id="s3out"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DEFENSE ================= -->
+<section id="defense" class="reveal c-green">
+  <div class="sec-head"><span class="sec-num">✓</span><h2>Checklist before the defense</h2></div>
+  <div class="duo">
+    <div class="card"><h4 style="color:var(--green)">The whole module</h4><ul class="checks">
+      <li><span class="m">☐</span><span>Compiles with <code class="i">c++ -Wall -Wextra -Werror -std=c++98</code>, Makefile with no relink.</span></li>
+      <li><span class="m">☐</span><span>All classes in <b>OCF</b> (except exceptions).</span></li>
+      <li><span class="m">☐</span><span>No implementation in the .hpp files, include guards everywhere.</span></li>
+      <li><span class="m">☐</span><span>No <code class="i">using namespace</code>, no STL, no <code class="i">printf</code>.</span></li>
+      <li><span class="m">☐</span><span>Exceptions catchable via <code class="i">catch (std::exception &amp; e)</code>.</span></li>
+      <li><span class="m">☐</span><span>No leak in ex03 (<code class="i">leaks</code> / <code class="i">valgrind</code>).</span></li>
+    </ul></div>
+    <div class="card"><h4 style="color:var(--amber)">Questions you might get asked</h4><ul class="checks">
+      <li><span class="m">?</span><span>Why doesn't <code class="i">operator=</code> copy the name?</span></li>
+      <li><span class="m">?</span><span>What happens if you <code class="i">throw</code> and nobody <code class="i">catch</code>es it? <span style="color:var(--faint)">(the program stops: <code class="i">terminate</code>)</span></span></li>
+      <li><span class="m">?</span><span>Why catch by <b>reference</b>?</span></li>
+      <li><span class="m">?</span><span>Why <code class="i">class Form;</code> instead of an include?</span></li>
+      <li><span class="m">?</span><span>What makes AForm abstract? Why a virtual destructor?</span></li>
+      <li><span class="m">?</span><span>How does your array of pointers to member functions work?</span></li>
+    </ul></div>
+  </div>
+  <div class="callout info">
+    <span class="t">Modification during the defense</span>
+    The subject warns you: you may be asked for a <b>small live modification</b> (adding a 4th form to the Intern, changing a message…). If you did the "elegant" version of ex02 and the array from ex03, adding a form = 1 class + 1 line in each array. That's also why these choices matter.
+  </div>
+</section>
+
+</div>
+
+
+
+<script>
+  /* ---------- C++ syntax highlighter ---------- */
+  (function(){
+    var KW = {"class":1,"public":1,"private":1,"protected":1,"virtual":1,"const":1,"return":1,"throw":1,"try":1,"catch":1,"static":1,"void":1,"bool":1,"int":1,"char":1,"new":1,"delete":1,"operator":1,"this":1,"for":1,"if":1,"else":1,"true":1,"false":1};
+    function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    var re = /(\/\/[^\n]*)|("(?:[^"\\\n]|\\.)*")|(#\w+(?:\s+&lt;[^\n]*|\s+<[^>\n]*>)?)|(\b\d+\b)|(\b[A-Za-z_]\w*\b)/g;
+    var blocks = document.querySelectorAll("pre.cpp");
+    for (var b=0;b<blocks.length;b++){
+      var src = blocks[b].textContent, out = "", last = 0, m;
+      re.lastIndex = 0;
+      while ((m = re.exec(src))){
+        out += esc(src.slice(last, m.index));
+        var t = m[0], cls = null;
+        if (m[1]) cls = "cm";
+        else if (m[2]) cls = "st";
+        else if (m[3]) cls = "pp";
+        else if (m[4]) cls = "nm";
+        else {
+          var after = src.slice(re.lastIndex).match(/^\s*\(/);
+          if (KW[t]) cls = "k";
+          else if (t === "std" || /^[A-Z]/.test(t) || t === "string" || t === "ostream" || t === "exception") cls = "ty";
+          else if (after) cls = "fn";
+        }
+        out += cls ? '<span class="'+cls+'">'+esc(t)+'</span>' : esc(t);
+        last = re.lastIndex;
+      }
+      out += esc(src.slice(last));
+      blocks[b].innerHTML = out;
+    }
+  })();
+
+  function $(id){ return document.getElementById(id); }
+  function log(el, txt, cls){
+    var d = document.createElement("div");
+    d.className = "ln" + (cls ? " "+cls : "");
+    d.textContent = txt;
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  /* ---------- ruler ---------- */
+  function setRuler(g){ $("rulerPin").style.left = ((g-1)/149*100) + "%"; }
+
+  /* ---------- ex00 demo ---------- */
+  (function(){
+    var out = $("b0out"), bob = null;
+    function start(){
+      var name = $("b0name").value || "Bob";
+      var g = parseInt($("b0grade").value, 10);
+      log(out, '> Bureaucrat("'+name+'", '+g+')', "dim");
+      if (isNaN(g)) { log(out, "(enter a number)", "warn"); return; }
+      if (g < 1)   { bob = null; log(out, "  throw Bureaucrat::GradeTooHighException → catch: Error: Grade too high", "bad"); return; }
+      if (g > 150) { bob = null; log(out, "  throw Bureaucrat::GradeTooLowException → catch: Error: Grade too low", "bad"); return; }
+      bob = {name:name, grade:g};
+      log(out, "  object created ✓", "ok");
+      setRuler(g);
+    }
+    $("b0new").onclick = start;
+    $("b0inc").onclick = function(){
+      if (!bob) { log(out, "(create a valid bureaucrat first)", "warn"); return; }
+      log(out, "> incrementGrade()   // grade "+bob.grade+" → "+(bob.grade-1), "dim");
+      if (bob.grade - 1 < 1) { log(out, "  throw GradeTooHighException → catch: Error: Grade too high (grade stays "+bob.grade+")", "bad"); return; }
+      bob.grade--; setRuler(bob.grade); log(out, "  ok, grade = "+bob.grade, "ok");
+    };
+    $("b0dec").onclick = function(){
+      if (!bob) { log(out, "(create a valid bureaucrat first)", "warn"); return; }
+      log(out, "> decrementGrade()   // grade "+bob.grade+" → "+(bob.grade+1), "dim");
+      if (bob.grade + 1 > 150) { log(out, "  throw GradeTooLowException → catch: Error: Grade too low (grade stays "+bob.grade+")", "bad"); return; }
+      bob.grade++; setRuler(bob.grade); log(out, "  ok, grade = "+bob.grade, "ok");
+    };
+    $("b0print").onclick = function(){
+      if (!bob) { log(out, "(create a valid bureaucrat first)", "warn"); return; }
+      log(out, bob.name+", bureaucrat grade "+bob.grade+".");
+    };
+    $("b0clr").onclick = function(){ out.innerHTML = ""; };
+    start();
+  })();
+
+  /* ---------- ex01 demo ---------- */
+  (function(){
+    var out = $("s1out"), signed = false;
+    function state(){
+      var g = +$("s1g").value, req = +$("s1req").value;
+      $("s1gv").textContent = g;
+      $("s1state").innerHTML =
+        '<span class="pill">Bob · grade <b>'+g+'</b></span>' +
+        '<span class="pill">Permis · sign <b>'+req+'</b></span>' +
+        '<span class="pill '+(g<=req?'yes':'no')+'">'+g+' &lt;= '+req+' ? <b>'+(g<=req?'yes':'no')+'</b></span>' +
+        '<span class="pill '+(signed?'yes':'no')+'">signed: <b>'+(signed?'yes':'no')+'</b></span>';
+    }
+    $("s1g").oninput = state; $("s1req").oninput = state;
+    $("s1sign").onclick = function(){
+      var g = +$("s1g").value, req = +$("s1req").value;
+      log(out, "> bob.signForm(permis)  →  permis.beSigned(bob)", "dim");
+      if (g <= req){ signed = true; log(out, "Bob signed Permis", "ok"); }
+      else log(out, "  beSigned throws Form::GradeTooLowException, signForm catches it:", "dim"),
+           log(out, "Bob couldn't sign Permis because Grade too low.", "bad");
+      state();
+    };
+    $("s1reset").onclick = function(){ signed = false; out.innerHTML = ""; state(); };
+    state();
+  })();
+
+  /* ---------- ex02 demo ---------- */
+  (function(){
+    var FORMS = [
+      {n:"ShrubberyCreationForm", s:145, e:137},
+      {n:"RobotomyRequestForm", s:72, e:45},
+      {n:"PresidentialPardonForm", s:25, e:5}
+    ];
+    var out = $("s2out"), signed = false;
+    function cur(){ return FORMS[+$("s2form").value]; }
+    function state(){
+      var f = cur(), g = +$("s2g").value;
+      $("s2gv").textContent = g;
+      $("s2state").innerHTML =
+        '<span class="pill">sign <b>'+f.s+'</b> · exec <b>'+f.e+'</b></span>' +
+        '<span class="pill '+(signed?'yes':'no')+'">signed: <b>'+(signed?'yes':'no')+'</b></span>' +
+        '<span class="pill '+(g<=f.s?'yes':'no')+'">can sign: <b>'+(g<=f.s?'yes':'no')+'</b></span>' +
+        '<span class="pill '+(g<=f.e?'yes':'no')+'">can execute: <b>'+(g<=f.e?'yes':'no')+'</b></span>';
+    }
+    $("s2g").oninput = state;
+    $("s2form").onchange = function(){ signed = false; out.innerHTML = ""; state(); };
+    $("s2reset").onclick = function(){ signed = false; out.innerHTML = ""; state(); };
+    $("s2sign").onclick = function(){
+      var f = cur(), g = +$("s2g").value;
+      log(out, "> bob.signForm(form)", "dim");
+      if (g <= f.s){ signed = true; log(out, "Bob signed "+f.n, "ok"); }
+      else log(out, "Bob couldn't sign "+f.n+" because Grade too low.", "bad");
+      state();
+    };
+    $("s2exec").onclick = function(){
+      var f = cur(), g = +$("s2g").value, t = $("s2target").value || "target";
+      log(out, "> bob.executeForm(form)  →  form.execute(bob)", "dim");
+      if (!signed){ log(out, "  AForm::execute: not signed → throw FormNotSignedException", "dim"); log(out, "Bob couldn't execute "+f.n+": form is not signed", "bad"); return; }
+      if (g > f.e){ log(out, "  AForm::execute: "+g+" > "+f.e+" → throw GradeTooLowException", "dim"); log(out, "Bob couldn't execute "+f.n+": grade too low", "bad"); return; }
+      log(out, "  AForm::execute: checks OK → executeAction()  ("+f.n+"'s version)", "inf");
+      if (f.s === 145) log(out, "  [file created: "+t+"_shrubbery, with ASCII trees inside]", "warn");
+      else if (f.s === 72){
+        log(out, "* BZZZZZZ... drilling noises *");
+        if (Math.random() < .5) log(out, t+" has been robotomized successfully");
+        else log(out, "The robotomy on "+t+" failed");
+      }
+      else log(out, t+" has been pardoned by Zaphod Beeblebrox");
+      log(out, "Bob executed "+f.n, "ok");
+    };
+    state();
+  })();
+
+  /* ---------- ex03 demo ---------- */
+  (function(){
+    var NAMES = ["shrubbery creation","robotomy request","presidential pardon"];
+    var CLS = ["ShrubberyCreationForm","RobotomyRequestForm","PresidentialPardonForm"];
+    var slots = document.querySelectorAll("#slots .slot"), out = $("s3out"), busy = false;
+    $("s3go").onclick = function(){
+      if (busy) return; busy = true;
+      var name = $("s3name").value, t = $("s3target").value || "target";
+      for (var k=0;k<slots.length;k++) slots[k].className = "slot";
+      log(out, '> intern.makeForm("'+name+'", "'+t+'")', "dim");
+      var i = 0;
+      (function step(){
+        if (i > 0) slots[i-1].className = "slot miss";
+        if (i >= NAMES.length){
+          log(out, "  no slot matches → error message + return NULL", "dim");
+          log(out, 'Error: form "'+name+'" does not exist', "bad");
+          busy = false; return;
+        }
+        slots[i].className = "slot scan";
+        log(out, '  i = '+i+' : "'+NAMES[i]+'" == "'+name+'" ?', "dim");
+        setTimeout(function(){
+          if (NAMES[i] === name){
+            slots[i].className = "slot hit";
+            log(out, "  yes → (this->*creators["+i+"])(\""+t+"\")  →  new "+CLS[i]+"(\""+t+"\")", "inf");
+            log(out, "Intern creates "+name, "ok");
+            busy = false; return;
+          }
+          i++; step();
+        }, 420);
+      })();
+    };
+  })();
+
+  /* ---------- scroll reveal ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("show"); io.unobserve(e.target);} });
+  },{threshold:.05});
+  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+</script>

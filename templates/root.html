@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>42 Cours</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0a0c10;color:#e9ebf0;font-family:system-ui,sans-serif}a{color:#3ee6b0;margin:0 12px;font-size:1.2rem}</style>
+<script>
+(function () {
+  var lang = null;
+  try { lang = localStorage.getItem('lang'); } catch (e) { /* storage blocked */ }
+  if (lang !== 'fr' && lang !== 'en') lang = /^en/i.test(navigator.language || '') ? 'en' : 'fr';
+  location.replace('/' + lang + '/');
+})();
+</script>
+</head>
+<body>
+<p><a href="/fr/">Français</a><a href="/en/">English</a></p>
+</body>
+</html>

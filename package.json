@@ -1,0 +1,14 @@
+{
+  "name": "42-cours",
+  "private": true,
+  "type": "module",
+  "description": "Cours interactifs pour les projets 42 (FR/EN)",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:strict": "node build.mjs --strict",
+    "check": "node scripts/check.mjs",
+    "test": "node --test test/*.test.mjs",
+    "dev": "node scripts/serve.mjs --watch"
+  },
+  "engines": { "node": ">=18" }
+}

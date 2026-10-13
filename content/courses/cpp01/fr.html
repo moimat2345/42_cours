@@ -1,0 +1,506 @@
+<style>
+:root{
+    --bg:#0a0c10; --surface:#12151d; --surface-2:#171b25;
+    --border:rgba(150,170,200,.12); --border-strong:rgba(150,170,200,.22);
+    --text:#e9ebf0; --muted:#8a93a6; --faint:#5b6475;
+    --stack:#3ee6b0; --stack-glow:rgba(62,230,176,.16); --stack-line:rgba(62,230,176,.35);
+    --heap:#ff9d54; --heap-glow:rgba(255,157,84,.14); --heap-line:rgba(255,157,84,.38);
+    --ptr:#5b9dff; --ref:#c79bff; --err:#ff5d73; --amber:#ffb454;
+    --display:'Chakra Petch',system-ui,sans-serif; --body:'Sora',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --maxw:960px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;position:relative}
+  body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);opacity:.5;pointer-events:none;z-index:0}
+  body::after{content:"";position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:120vw;height:60vh;background:radial-gradient(closest-side,var(--stack-glow),transparent 70%),radial-gradient(closest-side,var(--heap-glow),transparent 70%);background-position:30% 0,70% 0;background-size:60% 100%,60% 100%;background-repeat:no-repeat;filter:blur(20px);pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  header.hero{padding:84px 24px 36px;text-align:center;position:relative;z-index:1}
+  .kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;display:inline-flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:100px;padding:7px 16px;background:rgba(255,255,255,.02)}
+  .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--stack);box-shadow:0 0 10px var(--stack)}
+  h1.title{font-family:var(--display);font-weight:700;font-size:clamp(2.3rem,7vw,4.4rem);line-height:1;letter-spacing:-.01em;margin-bottom:20px}
+  h1.title .g{background:linear-gradient(120deg,var(--stack),var(--ptr) 45%,var(--ref) 70%,var(--heap));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .lead{max-width:620px;margin:0 auto;color:var(--muted);font-size:1.06rem;font-weight:300}
+  .lead b{color:var(--text);font-weight:500}
+  .subj{margin-top:18px;font-family:var(--mono);font-size:.74rem;color:var(--faint);letter-spacing:.04em}
+
+  section{padding:32px 0}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+  .sec-num{font-family:var(--mono);font-size:.8rem;color:var(--stack);border:1px solid var(--stack-line);border-radius:6px;padding:3px 9px;flex:none}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,4vw,2rem);letter-spacing:-.01em;line-height:1.15}
+  h2 .accent{color:var(--stack)}
+  p.body{color:#c3c8d4;font-weight:300;margin-bottom:14px}
+  p.body b{color:var(--text);font-weight:500}
+  code.inline{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:.12em .42em;color:#dfe3ec}
+
+  /* map grid */
+  .map{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .map-item{border:1px solid var(--border);border-radius:14px;padding:18px 20px;background:var(--surface);display:flex;gap:14px;align-items:flex-start;transition:.25s}
+  .map-item:hover{border-color:var(--border-strong);transform:translateY(-2px)}
+  .map-item .ex{font-family:var(--mono);font-size:.72rem;font-weight:700;color:#0a0c10;background:var(--stack);border-radius:6px;padding:3px 7px;flex:none;margin-top:2px}
+  .map-item h4{font-family:var(--display);font-size:1rem;font-weight:600;margin-bottom:3px}
+  .map-item p{color:var(--muted);font-size:.84rem;font-weight:300}
+
+  /* cards */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{border:1px solid var(--border);border-radius:16px;padding:24px;background:linear-gradient(180deg,var(--surface),var(--surface-2));position:relative;overflow:hidden}
+  .card.stack-c{border-color:var(--stack-line);box-shadow:0 0 0 1px var(--stack-glow)}
+  .card.heap-c{border-color:var(--heap-line);box-shadow:0 0 0 1px var(--heap-glow)}
+  .card .ic{font-size:1.5rem;display:block;margin-bottom:12px}
+  .card h3{font-family:var(--mono);font-size:1.1rem;font-weight:700;margin-bottom:10px}
+  .card.stack-c h3{color:var(--stack)} .card.heap-c h3{color:var(--heap)}
+  .card ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .card li{display:flex;gap:10px;color:#c3c8d4;font-weight:300;font-size:.92rem}
+  .card li .m{flex:none}
+
+  /* editor */
+  .editor{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#0c0f15;margin:8px 0;box-shadow:0 30px 60px -40px rgba(0,0,0,.8)}
+  .editor .bar{display:flex;align-items:center;gap:8px;padding:11px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+  .editor .bar .lights{display:flex;gap:6px}
+  .editor .bar .lights i{width:11px;height:11px;border-radius:50%;display:block}
+  .editor .bar .lights i:nth-child(1){background:#ff5f57}.editor .bar .lights i:nth-child(2){background:#febc2e}.editor .bar .lights i:nth-child(3){background:#28c840}
+  .editor .bar .fname{font-family:var(--mono);font-size:.76rem;color:var(--muted);margin-left:6px}
+  pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.7}
+  .k{color:#ff8fa3}.ty{color:#7fd4ff}.fn{color:#c9b8ff}.st{color:#9ff0c4}.cm{color:#5b6475;font-style:italic}.nm{color:#ffb454}.op{color:#ff9d54}
+  .hl-stack{color:var(--stack);font-weight:700}.hl-heap{color:var(--heap);font-weight:700}.hl-ptr{color:var(--ptr);font-weight:700}.hl-ref{color:var(--ref);font-weight:700}
+
+  /* compare table */
+  .table-wrap{border:1px solid var(--border);border-radius:16px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--border);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.02);font-weight:500}
+  thead th.ptr-h{color:var(--ptr)} thead th.ref-h{color:var(--ref)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody td:first-child{color:var(--text);font-weight:400;font-family:var(--mono);font-size:.82rem}
+  td .yes{color:var(--stack)} td .no{color:var(--err)}
+
+  /* interactive: stack vs heap */
+  .demo{border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;background:var(--surface);margin-top:6px}
+  .seg{display:flex;gap:8px;padding:16px 16px 0}
+  .seg button{flex:1;font-family:var(--mono);font-size:.82rem;font-weight:500;cursor:pointer;background:var(--surface-2);color:var(--muted);border:1px solid var(--border);border-radius:11px 11px 0 0;padding:13px 12px;transition:.25s;border-bottom:none;display:flex;align-items:center;justify-content:center;gap:8px}
+  .seg button:hover{color:var(--text)}
+  .seg button.active[data-mode="stack"]{background:var(--stack-glow);color:var(--stack);border-color:var(--stack-line)}
+  .seg button.active[data-mode="heap"]{background:var(--heap-glow);color:var(--heap);border-color:var(--heap-line)}
+  .demo-body{padding:22px;border-top:1px solid var(--border)}
+  .mem-code{font-family:var(--mono);font-size:.85rem;background:#0c0f15;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:18px;color:#dfe3ec;white-space:pre-wrap}
+  .steps{display:flex;flex-direction:column;gap:10px}
+  .step{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);opacity:.45;transform:translateX(-6px);transition:.4s}
+  .step.on{opacity:1;transform:none}
+  .step .n{font-family:var(--mono);font-size:.72rem;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;background:var(--border);color:var(--text)}
+  .step.on .n{background:var(--stack);color:#0a0c10}
+  .step.heap.on .n{background:var(--heap);color:#0a0c10}
+  .step .txt{font-size:.9rem;color:#c3c8d4;font-weight:300}
+  .step .txt b{color:var(--text);font-weight:600}
+  .demo-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .demo-actions button{font-family:var(--mono);font-size:.8rem;cursor:pointer;border-radius:9px;padding:10px 16px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);transition:.2s}
+  .demo-actions button:hover{border-color:var(--stack-line);color:var(--stack)}
+  .verdict-box{margin-top:16px;padding:14px 16px;border-radius:10px;font-family:var(--mono);font-size:.84rem;display:none}
+  .verdict-box.show{display:block}
+  .verdict-box.good{background:var(--stack-glow);color:var(--stack);border:1px solid var(--stack-line)}
+  .verdict-box.bad{background:rgba(255,93,115,.12);color:var(--err);border:1px solid rgba(255,93,115,.38)}
+
+  /* harl simulator */
+  .harl{border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;background:var(--surface);margin-top:6px}
+  .harl-top{padding:18px 20px;border-bottom:1px solid var(--border)}
+  .harl-top p{color:var(--muted);font-size:.88rem;font-weight:300}
+  .harl-btns{display:flex;gap:8px;padding:16px 20px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+  .harl-btns button{font-family:var(--mono);font-size:.78rem;font-weight:600;cursor:pointer;border-radius:8px;padding:9px 14px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);transition:.2s}
+  .harl-btns button:hover{color:var(--text);border-color:var(--border-strong)}
+  .harl-btns button.sel{background:var(--amber);color:#0a0c10;border-color:var(--amber)}
+  .harl-out{padding:8px 20px 20px;font-family:var(--mono);font-size:.82rem}
+  .hmsg{padding:11px 14px;border-radius:9px;margin-top:10px;border:1px solid var(--border);opacity:.28;transition:.35s;filter:grayscale(.7)}
+  .hmsg.lit{opacity:1;filter:none}
+  .hmsg .lvl{font-weight:700;display:block;margin-bottom:3px}
+  .hmsg.debug{border-color:rgba(127,212,255,.4)} .hmsg.debug .lvl{color:#7fd4ff}
+  .hmsg.info{border-color:rgba(62,230,176,.4)} .hmsg.info .lvl{color:var(--stack)}
+  .hmsg.warn{border-color:rgba(255,180,84,.4)} .hmsg.warn .lvl{color:var(--amber)}
+  .hmsg.err{border-color:rgba(255,93,115,.4)} .hmsg.err .lvl{color:var(--err)}
+  .hmsg .body-t{color:#c3c8d4;font-weight:300;font-size:.78rem;font-family:var(--body)}
+  .hmsg-unknown{padding:12px 14px;border-radius:9px;margin-top:10px;color:var(--ref);border:1px dashed rgba(199,155,255,.5);background:rgba(199,155,255,.06);display:none}
+  .hmsg-unknown.show{display:block}
+
+  /* callout */
+  .callout{margin-top:18px;border:1px dashed var(--border-strong);border-radius:14px;padding:18px 20px;background:rgba(91,157,255,.05);display:flex;gap:14px;align-items:flex-start}
+  .callout .bulb{font-size:1.4rem;flex:none}
+  .callout p{color:var(--text);font-weight:300;font-size:.96rem}
+  .callout b{color:var(--ptr);font-weight:600}
+
+  /* cheat */
+  .cheat{border:1px solid var(--stack-line);border-radius:18px;padding:28px;background:linear-gradient(180deg,rgba(62,230,176,.04),transparent);box-shadow:0 0 0 1px var(--stack-glow)}
+  .cheat h2{margin-bottom:18px}
+  .cheat ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .cheat li{display:flex;gap:13px;align-items:flex-start;font-size:.96rem;color:#c3c8d4;font-weight:300}
+  .cheat li b{color:var(--text);font-weight:600}
+  .cheat li .chk{flex:none;color:var(--stack);font-family:var(--mono);font-weight:700}
+
+  footer{text-align:center;padding:48px 24px 60px;color:var(--faint);font-family:var(--mono);font-size:.76rem}
+  footer .line{width:60px;height:1px;background:var(--border-strong);margin:0 auto 22px}
+  footer b{color:var(--muted)}
+
+  .js .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .js .reveal.show{opacity:1;transform:none}
+  .hero .kicker,.hero h1,.hero .lead,.hero .subj{animation:heroUp .9s cubic-bezier(.2,.7,.2,1) backwards}
+  .hero h1{animation-delay:.1s}.hero .lead{animation-delay:.22s}.hero .subj{animation-delay:.36s}
+  @keyframes heroUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+  @media(max-width:680px){
+    .map,.duo{grid-template-columns:1fr}
+    .seg{flex-direction:column}.seg button{border-radius:11px;border-bottom:1px solid var(--border)}
+    pre{font-size:.74rem}
+  }
+</style>
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C++ — Module 01</span>
+  <h1 class="title">Les principes du <span class="g">CPP01</span></h1>
+  <p class="lead">Mémoire, pointeurs, références &amp; switch — expliqués <b>exercice par exercice</b> (Zombie, Weapon/Human, Harl).</p>
+  <p class="subj">Memory allocation · pointers to members · references · switch statements</p>
+</header>
+
+<div class="wrap">
+
+  <!-- 01 MAP -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>La carte du <span class="accent">module</span></h2></div>
+    <p class="body reveal">Le CPP01 a un thème : <b>la mémoire et l'indirection</b> (pointeurs &amp; références). Chaque exo enfonce un clou précis.</p>
+    <div class="map reveal">
+      <div class="map-item"><span class="ex">ex00</span><div><h4>BraiiiiiiinnnzzzZ</h4><p>Stack vs Heap : <code class="inline">new</code> ou pas <code class="inline">new</code> ?</p></div></div>
+      <div class="map-item"><span class="ex">ex01</span><div><h4>Moar brainz!</h4><p>Allouer un tableau d'objets : <code class="inline">new[]</code> / <code class="inline">delete[]</code></p></div></div>
+      <div class="map-item"><span class="ex">ex02</span><div><h4>HI THIS IS BRAIN</h4><p>Démystifier la <b>référence</b> vs le pointeur</p></div></div>
+      <div class="map-item"><span class="ex">ex03</span><div><h4>Unnecessary violence</h4><p>Membre <b>référence</b> (HumanA) vs membre <b>pointeur</b> (HumanB)</p></div></div>
+      <div class="map-item"><span class="ex">ex04</span><div><h4>Sed is for losers</h4><p>Les <b>flux de fichiers</b> C++ : ifstream / ofstream</p></div></div>
+      <div class="map-item"><span class="ex">ex05</span><div><h4>Harl 2.0</h4><p><b>Pointeurs sur fonctions membres</b> (zéro if/else)</p></div></div>
+      <div class="map-item"><span class="ex">ex06</span><div><h4>Harl filter</h4><p>Le <b>switch</b> et son fall-through</p></div></div>
+      <div class="map-item" style="border-style:dashed"><span class="ex" style="background:var(--amber)">RAII</span><div><h4>Le fil rouge</h4><p>Si tu fais <code class="inline">new</code>, tu fais <code class="inline">delete</code>. Toujours.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 02 STACK VS HEAP -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>Stack vs Heap <span class="accent">— le grand sujet</span></h2></div>
+    <p class="body reveal">La question centrale de l'ex00 : <b>où vit ton objet, et qui le détruit ?</b> C'est <u>la</u> décision mémoire en C++.</p>
+
+    <div class="duo reveal">
+      <div class="card stack-c">
+        <span class="ic">📚</span><h3>La Stack (pile)</h3>
+        <ul>
+          <li><span class="m">⚡</span><span>Rapide, automatique. <code class="inline">Zombie z("x");</code></span></li>
+          <li><span class="m">🧹</span><span>Détruit <b>tout seul</b> à la fin du <code class="inline">{ }</code> (scope)</span></li>
+          <li><span class="m">⏱️</span><span>Durée de vie = limitée au bloc courant</span></li>
+          <li><span class="m">✅</span><span>Aucune fuite possible — tu ne gères rien</span></li>
+        </ul>
+      </div>
+      <div class="card heap-c">
+        <span class="ic">🗃️</span><h3>Le Heap (tas)</h3>
+        <ul>
+          <li><span class="m">🔑</span><span>Manuel. <code class="inline">new Zombie("x")</code> → renvoie un pointeur</span></li>
+          <li><span class="m">♾️</span><span>Survit <b>au-delà</b> de la fonction qui l'a créé</span></li>
+          <li><span class="m">🧨</span><span>Tu DOIS faire <code class="inline">delete</code> — sinon <b>fuite mémoire</b></span></li>
+          <li><span class="m">🎯</span><span>À utiliser quand l'objet doit vivre plus longtemps</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout reveal">
+      <span class="bulb">🧭</span>
+      <p><b>La règle de décision :</b> l'objet doit-il survivre à la fonction qui le crée ? <b>Oui</b> → heap (<code class="inline">new</code>). <b>Non</b> → stack. C'est exactement <code class="inline">newZombie</code> (heap, on le renvoie) vs <code class="inline">randomChump</code> (stack, usage local).</p>
+    </div>
+
+    <p class="body reveal" style="margin-top:20px">Joue avec les deux modes 👇 (essaie d'<b>oublier le <code class="inline">delete</code></b> sur le heap pour voir la fuite) :</p>
+
+    <div class="demo reveal">
+      <div class="seg">
+        <button data-mode="stack" class="active">📚 Stack — randomChump()</button>
+        <button data-mode="heap">🗃️ Heap — newZombie()</button>
+      </div>
+      <div class="demo-body">
+        <div class="mem-code" id="memCode"></div>
+        <div class="steps" id="steps"></div>
+        <div class="demo-actions" id="actions"></div>
+        <div class="verdict-box" id="verdict"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 NEW DELETE -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2><span class="accent">new</span> / <span class="accent">delete</span> (et les tableaux)</h2></div>
+    <p class="body reveal">Le C++ remplace <code class="inline">malloc</code>/<code class="inline">free</code> (interdits ici) par <code class="inline">new</code>/<code class="inline">delete</code>, qui <b>appellent le constructeur et le destructeur</b>. Pour un tableau, l'ex01 demande <b>une seule allocation</b> : <code class="inline">new Zombie[N]</code>.</p>
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">zombieHorde.cpp</span></div>
+<pre><code><span class="ty">Zombie</span>* <span class="fn">zombieHorde</span>( <span class="ty">int</span> N, <span class="ty">std::string</span> name )
+{
+    <span class="k">if</span> (N &lt;= <span class="nm">0</span>)
+        <span class="k">return</span> <span class="nm">NULL</span>;
+
+    <span class="ty">Zombie</span>* horde = <span class="hl-heap">new</span> <span class="ty">Zombie</span>[N];   <span class="cm">// UNE seule allocation pour N objets</span>
+
+    <span class="k">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; N; i++)
+        horde[i].<span class="fn">setName</span>(name);
+    <span class="k">return</span> horde;                  <span class="cm">// pointeur vers le 1er zombie</span>
+}</code></pre>
+    </div>
+    <div class="callout reveal" style="background:rgba(255,93,115,.05);border-color:rgba(255,93,115,.3)">
+      <span class="bulb">⚠️</span>
+      <p style="color:#ffc2cb"><b style="color:var(--err)">Le piège classique :</b> ce qui est alloué avec <code class="inline">new[]</code> se libère avec <code class="inline">delete[]</code> (avec les crochets !), pas <code class="inline">delete</code>. Sinon comportement indéfini. → <code class="inline">delete [] horde;</code></p>
+    </div>
+  </section>
+
+  <!-- 04 POINTER VS REFERENCE -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>Pointeur <span style="color:var(--ptr)">vs</span> Référence</h2></div>
+    <p class="body reveal">Le cœur du module (ex02). Une <b>référence</b>, c'est juste un <b>autre nom</b> (un alias) pour une variable qui existe déjà. La preuve : dans l'ex02, la variable, le pointeur et la référence partagent <b>la même adresse</b>.</p>
+
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Critère</th><th class="ptr-h">Pointeur &nbsp;<code style="font-family:var(--mono)">std::string*</code></th><th class="ref-h">Référence &nbsp;<code style="font-family:var(--mono)">std::string&amp;</code></th></tr></thead>
+        <tbody>
+          <tr><td>peut être nul ?</td><td><span class="yes">oui</span> (<code class="inline">NULL</code>)</td><td><span class="no">non</span> — toujours valide</td></tr>
+          <tr><td>doit être initialisé ?</td><td><span class="no">non</span> (dangereux)</td><td><span class="yes">oui</span> — à la déclaration</td></tr>
+          <tr><td>peut « pointer » ailleurs ensuite ?</td><td><span class="yes">oui</span> — réassignable</td><td><span class="no">non</span> — lié à vie</td></tr>
+          <tr><td>syntaxe d'accès</td><td><code class="inline">ptr-&gt;x</code> / <code class="inline">*ptr</code></td><td><code class="inline">ref.x</code> (comme la variable)</td></tr>
+          <tr><td>on stocke…</td><td>une <b>adresse</b></td><td>un <b>alias</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="editor reveal" style="margin-top:14px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex02/main.cpp</span></div>
+<pre><code><span class="ty">std::string</span>  brain = <span class="st">"HI THIS IS BRAIN"</span>;
+<span class="ty">std::string</span>* <span class="hl-ptr">stringPTR</span> = &amp;brain;   <span class="cm">// un pointeur : stocke l'ADRESSE de brain</span>
+<span class="ty">std::string</span>&amp; <span class="hl-ref">stringREF</span> = brain;    <span class="cm">// une référence : un AUTRE NOM pour brain</span>
+
+<span class="cm">// &amp;brain == stringPTR == &amp;stringREF  → la MÊME adresse</span>
+<span class="cm">// brain  == *stringPTR == stringREF   → la MÊME valeur</span></code></pre>
+    </div>
+  </section>
+
+  <!-- 05 MEMBER PTR VS REF -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>Membre <span style="color:var(--ref)">référence</span> vs membre <span style="color:var(--ptr)">pointeur</span></h2></div>
+    <p class="body reveal">L'ex03 te fait <b>choisir</b>. Deux humains quasi identiques, mais une différence de design qui dicte tout :</p>
+
+    <div class="duo reveal">
+      <div class="card" style="border-color:var(--ref);box-shadow:0 0 0 1px rgba(199,155,255,.14)">
+        <span class="ic">🗡️</span><h3 style="color:var(--ref)">HumanA → référence</h3>
+        <ul>
+          <li><span class="m">•</span><span><b>Toujours</b> armé, reçoit l'arme au constructeur</span></li>
+          <li><span class="m">•</span><span>Ne change jamais d'arme, jamais sans arme</span></li>
+          <li><span class="m">→</span><span>Membre <code class="inline">Weapon&amp; _weapon;</code> (jamais nul)</span></li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:var(--ptr);box-shadow:0 0 0 1px rgba(91,157,255,.14)">
+        <span class="ic">🛡️</span><h3 style="color:var(--ptr)">HumanB → pointeur</h3>
+        <ul>
+          <li><span class="m">•</span><span><b>Peut ne pas</b> avoir d'arme (au début)</span></li>
+          <li><span class="m">•</span><span>L'arme s'ajoute après via <code class="inline">setWeapon()</code></span></li>
+          <li><span class="m">→</span><span>Membre <code class="inline">Weapon* _weapon;</code> (peut être <code class="inline">NULL</code>)</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout reveal">
+      <span class="bulb">🧠</span>
+      <p><b>La leçon :</b> « quelque chose peut être absent ou changer » → <b>pointeur</b>. « toujours présent, fixé à la construction » → <b>référence</b>. Le code raconte l'intention.</p>
+    </div>
+  </section>
+
+  <!-- 06 POINTERS TO MEMBERS -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>Pointeurs sur <span class="accent">fonctions membres</span></h2></div>
+    <p class="body reveal">L'ex05 t'oblige à éviter la « forêt de <code class="inline">if/else</code> ». La solution : un <b>tableau de pointeurs sur fonctions membres</b>. Syntaxe étrange mais logique :</p>
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Harl.cpp — complain()</span></div>
+<pre><code><span class="ty">std::string</span> levels[<span class="nm">4</span>] = {<span class="st">"DEBUG"</span>, <span class="st">"INFO"</span>, <span class="st">"WARNING"</span>, <span class="st">"ERROR"</span>};
+
+<span class="cm">// un pointeur sur fonction membre de Harl, ne prenant rien, renvoyant void :</span>
+<span class="ty">void</span> (<span class="ty">Harl</span>::*funcs[<span class="nm">4</span>])( <span class="ty">void</span> ) = {
+    &amp;<span class="ty">Harl</span>::debug, &amp;<span class="ty">Harl</span>::info, &amp;<span class="ty">Harl</span>::warning, &amp;<span class="ty">Harl</span>::error
+};
+
+<span class="k">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; <span class="nm">4</span>; i++)
+    <span class="k">if</span> (levels[i] == level)
+        (<span class="k">this</span>->*funcs[i])();   <span class="cm">// ← on appelle via le pointeur</span></code></pre>
+    </div>
+    <p class="body reveal" style="margin-top:14px">À décoder : <code class="inline">void (Harl::*funcs[4])(void)</code> = « un tableau de 4 pointeurs vers des méthodes de <code class="inline">Harl</code> qui prennent <code class="inline">void</code> et renvoient <code class="inline">void</code> ». On les appelle avec <code class="inline">(this->*funcs[i])()</code>.</p>
+  </section>
+
+  <!-- 07 SWITCH + HARL SIMULATOR -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Le <span class="accent">switch</span> et son fall-through</h2></div>
+    <p class="body reveal">L'ex06 exploite un comportement souvent vu comme un bug : sans <code class="inline">break</code>, un <code class="inline">case</code> <b>tombe</b> dans le suivant. Ici c'est voulu : « ce niveau <b>et au-dessus</b> ». Clique un niveau 👇</p>
+
+    <div class="harl reveal">
+      <div class="harl-top"><p>Simulateur de <code class="inline">./harlFilter &lt;LEVEL&gt;</code> — regarde quels messages s'allument selon le niveau choisi.</p></div>
+      <div class="harl-btns" id="harlBtns">
+        <button data-lvl="0">DEBUG</button>
+        <button data-lvl="1">INFO</button>
+        <button data-lvl="2" class="sel">WARNING</button>
+        <button data-lvl="3">ERROR</button>
+        <button data-lvl="-1">Autre / inconnu</button>
+      </div>
+      <div class="harl-out" id="harlOut">
+        <div class="hmsg debug"><span class="lvl">[ DEBUG ]</span><span class="body-t">I love having extra bacon for my 7XL burger...</span></div>
+        <div class="hmsg info"><span class="lvl">[ INFO ]</span><span class="body-t">I cannot believe adding extra bacon costs more money...</span></div>
+        <div class="hmsg warn"><span class="lvl">[ WARNING ]</span><span class="body-t">I think I deserve to have some extra bacon for free...</span></div>
+        <div class="hmsg err"><span class="lvl">[ ERROR ]</span><span class="body-t">This is unacceptable! I want to speak to the manager now.</span></div>
+        <div class="hmsg-unknown" id="harlUnknown">[ Probably complaining about insignificant problems ]</div>
+      </div>
+    </div>
+
+    <div class="editor reveal" style="margin-top:16px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex06/main.cpp</span></div>
+<pre><code><span class="k">switch</span> (<span class="fn">getLevel</span>(argv[<span class="nm">1</span>]))
+{
+    <span class="k">case</span> <span class="nm">0</span>: harl.<span class="fn">debug</span>();   <span class="cm">// pas de break → tombe dans le case suivant</span>
+    <span class="k">case</span> <span class="nm">1</span>: harl.<span class="fn">info</span>();
+    <span class="k">case</span> <span class="nm">2</span>: harl.<span class="fn">warning</span>();
+    <span class="k">case</span> <span class="nm">3</span>: harl.<span class="fn">error</span>(); <span class="k">break</span>;
+    <span class="k">default</span>: std::cout &lt;&lt; <span class="st">"[ Probably complaining... ]\n"</span>;
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- 08 FILE STREAMS -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Les flux de fichiers <span class="accent">C++</span></h2></div>
+    <p class="body reveal">L'ex04 t'interdit les fonctions C (<code class="inline">fopen</code>, <code class="inline">read</code>…) et <code class="inline">std::string::replace</code>. Tu utilises les <b>streams</b> : <code class="inline">std::ifstream</code> (lire), <code class="inline">std::ofstream</code> (écrire), <code class="inline">std::stringstream</code> (tout charger en mémoire), et tu remplaces à la main avec <code class="inline">find</code> + <code class="inline">substr</code>.</p>
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">FileReplacer.cpp — l'idée</span></div>
+<pre><code><span class="ty">std::ifstream</span>  inFile(_filename.<span class="fn">c_str</span>());   <span class="cm">// ouvrir en lecture</span>
+<span class="k">if</span> (!inFile.<span class="fn">is_open</span>()) <span class="cm">/* gérer l'erreur */</span>;
+
+<span class="ty">std::stringstream</span> buffer;
+buffer &lt;&lt; inFile.<span class="fn">rdbuf</span>();                <span class="cm">// avaler tout le fichier d'un coup</span>
+<span class="ty">std::string</span> content = buffer.<span class="fn">str</span>();
+
+<span class="cm">// remplacer s1 par s2 SANS std::string::replace :</span>
+<span class="k">while</span> ((found = content.<span class="fn">find</span>(_s1, pos)) != <span class="ty">std::string</span>::npos) {
+    result += content.<span class="fn">substr</span>(pos, found - pos);
+    result += _s2;
+    pos = found + _s1.<span class="fn">length</span>();
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- 09 CHEAT -->
+  <section>
+    <div class="cheat reveal">
+      <h2>📌 À retenir (défense d'éval)</h2>
+      <ul>
+        <li><span class="chk">→</span><span><b>Stack</b> = auto, détruit à la fin du scope. <b>Heap</b> (<code class="inline">new</code>) = manuel, survit, à <code class="inline">delete</code>.</span></li>
+        <li><span class="chk">→</span><span><code class="inline">new</code> ↔ <code class="inline">delete</code>, <code class="inline">new[]</code> ↔ <code class="inline">delete[]</code>. Jamais de mélange, jamais d'oubli (= fuite).</span></li>
+        <li><span class="chk">→</span><span>Une <b>référence</b> = un alias : jamais nulle, init obligatoire, non réassignable. Un <b>pointeur</b> = une adresse : peut être nul et changer.</span></li>
+        <li><span class="chk">→</span><span>Membre <b>référence</b> = « toujours là » (HumanA). Membre <b>pointeur</b> = « peut manquer/changer » (HumanB).</span></li>
+        <li><span class="chk">→</span><span>Pointeur sur fonction membre : <code class="inline">void (Harl::*f)(void)</code>, appel <code class="inline">(this->*f)()</code> → remplace les if/else.</span></li>
+        <li><span class="chk">→</span><span><b>switch</b> sans <code class="inline">break</code> = fall-through (volontaire dans l'ex06 pour « ce niveau et au-dessus »).</span></li>
+        <li><span class="chk">→</span><span>I/O en C++ = <b>streams</b> (<code class="inline">ifstream</code>/<code class="inline">ofstream</code>), pas les fonctions C.</span></li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+
+
+<script>
+  /* ---------- Stack vs Heap demo ---------- */
+  var modes = {
+    stack: {
+      code: 'void randomChump(std::string name) {\n    Zombie zombie(name);   // sur la STACK\n    zombie.announce();\n}  // <- ici, fin du scope',
+      steps: [
+        {t:"<b>Création</b> sur la pile : <code>Zombie zombie(name);</code> — le constructeur tourne."},
+        {t:"<b>Utilisation</b> : <code>zombie.announce();</code> dit BraiiiiiiinnnzzzZ..."},
+        {t:"<b>Destruction AUTOMATIQUE</b> à la <code>}</code> finale — le destructeur est appelé tout seul."}
+      ],
+      actions: [],
+      autoVerdict: {cls:"good", txt:"✅ 0 fuite. Tu n'as rien eu à gérer : parfait pour un usage local et court."}
+    },
+    heap: {
+      code: 'Zombie* newZombie(std::string name) {\n    return new Zombie(name);   // sur le HEAP\n}\n// ... le zombie SURVIT, mais qui le détruit ?',
+      steps: [
+        {t:"<b>Création</b> sur le tas : <code>new Zombie(name)</code> renvoie un <b>pointeur</b>."},
+        {t:"<b>Utilisation</b> : le zombie survit en dehors de la fonction (on l'a renvoyé)."},
+        {t:"<b>Destruction MANUELLE</b> : à toi de jouer. Que fais-tu ?"}
+      ],
+      actions: [
+        {label:"delete heapZombie;", good:true, txt:"✅ Bien joué ! Le destructeur tourne, la mémoire est rendue. 0 fuite."},
+        {label:"...rien (oublier)", good:false, txt:"🧨 FUITE MÉMOIRE ! Le zombie reste alloué pour toujours, le destructeur n'est jamais appelé. C'est exactement ce que l'éval traque avec leaks/valgrind."}
+      ],
+      autoVerdict: null
+    }
+  };
+  var curMode = "stack";
+  var memCode = document.getElementById("memCode");
+  var stepsEl = document.getElementById("steps");
+  var actionsEl = document.getElementById("actions");
+  var verdictEl = document.getElementById("verdict");
+
+  function renderMode(){
+    var m = modes[curMode];
+    memCode.textContent = m.code;
+    stepsEl.innerHTML = "";
+    for (var i=0;i<m.steps.length;i++){
+      var d = document.createElement("div");
+      d.className = "step" + (curMode==="heap"?" heap":"");
+      d.innerHTML = '<span class="n">'+(i+1)+'</span><span class="txt">'+m.steps[i].t+'</span>';
+      stepsEl.appendChild(d);
+      (function(el,delay){ setTimeout(function(){ el.classList.add("on"); }, 180*delay); })(d,i+1);
+    }
+    actionsEl.innerHTML = "";
+    verdictEl.className = "verdict-box";
+    if (m.actions.length){
+      for (var j=0;j<m.actions.length;j++){
+        (function(a){
+          var b = document.createElement("button");
+          b.textContent = a.label;
+          b.onclick = function(){
+            verdictEl.className = "verdict-box show " + (a.good?"good":"bad");
+            verdictEl.innerHTML = a.txt;
+          };
+          actionsEl.appendChild(b);
+        })(m.actions[j]);
+      }
+    } else if (m.autoVerdict){
+      setTimeout(function(){
+        verdictEl.className = "verdict-box show " + m.autoVerdict.cls;
+        verdictEl.innerHTML = m.autoVerdict.txt;
+      }, 180*(m.steps.length+1));
+    }
+  }
+  var segBtns = document.querySelectorAll(".seg button");
+  for (var s=0;s<segBtns.length;s++){
+    segBtns[s].addEventListener("click", function(){
+      for (var k=0;k<segBtns.length;k++) segBtns[k].classList.remove("active");
+      this.classList.add("active");
+      curMode = this.getAttribute("data-mode");
+      renderMode();
+    });
+  }
+  renderMode();
+
+  /* ---------- Harl filter simulator ---------- */
+  var harlBtns = document.querySelectorAll("#harlBtns button");
+  var msgs = document.querySelectorAll("#harlOut .hmsg");
+  var unknown = document.getElementById("harlUnknown");
+  function renderHarl(lvl){
+    for (var i=0;i<msgs.length;i++){
+      if (lvl >= 0 && i >= lvl) msgs[i].classList.add("lit");
+      else msgs[i].classList.remove("lit");
+    }
+    if (lvl < 0) unknown.classList.add("show"); else unknown.classList.remove("show");
+  }
+  for (var h=0;h<harlBtns.length;h++){
+    harlBtns[h].addEventListener("click", function(){
+      for (var k=0;k<harlBtns.length;k++) harlBtns[k].classList.remove("sel");
+      this.classList.add("sel");
+      renderHarl(parseInt(this.getAttribute("data-lvl"),10));
+    });
+  }
+  renderHarl(2); // WARNING par défaut
+
+  /* ---------- Scroll reveal ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("show"); io.unobserve(e.target);} });
+  },{threshold:.1});
+  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+</script>

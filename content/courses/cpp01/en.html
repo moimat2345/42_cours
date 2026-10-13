@@ -1,0 +1,498 @@
+<style>
+:root{
+    --bg:#0a0c10; --surface:#12151d; --surface-2:#171b25;
+    --border:rgba(150,170,200,.12); --border-strong:rgba(150,170,200,.22);
+    --text:#e9ebf0; --muted:#8a93a6; --faint:#5b6475;
+    --stack:#3ee6b0; --stack-glow:rgba(62,230,176,.16); --stack-line:rgba(62,230,176,.35);
+    --heap:#ff9d54; --heap-glow:rgba(255,157,84,.14); --heap-line:rgba(255,157,84,.38);
+    --ptr:#5b9dff; --ref:#c79bff; --err:#ff5d73; --amber:#ffb454;
+    --display:'Chakra Petch',system-ui,sans-serif; --body:'Sora',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --maxw:960px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;position:relative}
+  body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);opacity:.5;pointer-events:none;z-index:0}
+  body::after{content:"";position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:120vw;height:60vh;background:radial-gradient(closest-side,var(--stack-glow),transparent 70%),radial-gradient(closest-side,var(--heap-glow),transparent 70%);background-position:30% 0,70% 0;background-size:60% 100%,60% 100%;background-repeat:no-repeat;filter:blur(20px);pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  header.hero{padding:84px 24px 36px;text-align:center;position:relative;z-index:1}
+  .kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;display:inline-flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:100px;padding:7px 16px;background:rgba(255,255,255,.02)}
+  .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--stack);box-shadow:0 0 10px var(--stack)}
+  h1.title{font-family:var(--display);font-weight:700;font-size:clamp(2.3rem,7vw,4.4rem);line-height:1;letter-spacing:-.01em;margin-bottom:20px}
+  h1.title .g{background:linear-gradient(120deg,var(--stack),var(--ptr) 45%,var(--ref) 70%,var(--heap));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .lead{max-width:620px;margin:0 auto;color:var(--muted);font-size:1.06rem;font-weight:300}
+  .lead b{color:var(--text);font-weight:500}
+  .subj{margin-top:18px;font-family:var(--mono);font-size:.74rem;color:var(--faint);letter-spacing:.04em}
+
+  section{padding:32px 0}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+  .sec-num{font-family:var(--mono);font-size:.8rem;color:var(--stack);border:1px solid var(--stack-line);border-radius:6px;padding:3px 9px;flex:none}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,4vw,2rem);letter-spacing:-.01em;line-height:1.15}
+  h2 .accent{color:var(--stack)}
+  p.body{color:#c3c8d4;font-weight:300;margin-bottom:14px}
+  p.body b{color:var(--text);font-weight:500}
+  code.inline{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:.12em .42em;color:#dfe3ec}
+
+  .map{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .map-item{border:1px solid var(--border);border-radius:14px;padding:18px 20px;background:var(--surface);display:flex;gap:14px;align-items:flex-start;transition:.25s}
+  .map-item:hover{border-color:var(--border-strong);transform:translateY(-2px)}
+  .map-item .ex{font-family:var(--mono);font-size:.72rem;font-weight:700;color:#0a0c10;background:var(--stack);border-radius:6px;padding:3px 7px;flex:none;margin-top:2px}
+  .map-item h4{font-family:var(--display);font-size:1rem;font-weight:600;margin-bottom:3px}
+  .map-item p{color:var(--muted);font-size:.84rem;font-weight:300}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{border:1px solid var(--border);border-radius:16px;padding:24px;background:linear-gradient(180deg,var(--surface),var(--surface-2));position:relative;overflow:hidden}
+  .card.stack-c{border-color:var(--stack-line);box-shadow:0 0 0 1px var(--stack-glow)}
+  .card.heap-c{border-color:var(--heap-line);box-shadow:0 0 0 1px var(--heap-glow)}
+  .card .ic{font-size:1.5rem;display:block;margin-bottom:12px}
+  .card h3{font-family:var(--mono);font-size:1.1rem;font-weight:700;margin-bottom:10px}
+  .card.stack-c h3{color:var(--stack)} .card.heap-c h3{color:var(--heap)}
+  .card ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .card li{display:flex;gap:10px;color:#c3c8d4;font-weight:300;font-size:.92rem}
+  .card li .m{flex:none}
+
+  .editor{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#0c0f15;margin:8px 0;box-shadow:0 30px 60px -40px rgba(0,0,0,.8)}
+  .editor .bar{display:flex;align-items:center;gap:8px;padding:11px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+  .editor .bar .lights{display:flex;gap:6px}
+  .editor .bar .lights i{width:11px;height:11px;border-radius:50%;display:block}
+  .editor .bar .lights i:nth-child(1){background:#ff5f57}.editor .bar .lights i:nth-child(2){background:#febc2e}.editor .bar .lights i:nth-child(3){background:#28c840}
+  .editor .bar .fname{font-family:var(--mono);font-size:.76rem;color:var(--muted);margin-left:6px}
+  pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.7}
+  .k{color:#ff8fa3}.ty{color:#7fd4ff}.fn{color:#c9b8ff}.st{color:#9ff0c4}.cm{color:#5b6475;font-style:italic}.nm{color:#ffb454}.op{color:#ff9d54}
+  .hl-stack{color:var(--stack);font-weight:700}.hl-heap{color:var(--heap);font-weight:700}.hl-ptr{color:var(--ptr);font-weight:700}.hl-ref{color:var(--ref);font-weight:700}
+
+  .table-wrap{border:1px solid var(--border);border-radius:16px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--border);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.02);font-weight:500}
+  thead th.ptr-h{color:var(--ptr)} thead th.ref-h{color:var(--ref)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody td:first-child{color:var(--text);font-weight:400;font-family:var(--mono);font-size:.82rem}
+  td .yes{color:var(--stack)} td .no{color:var(--err)}
+
+  .demo{border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;background:var(--surface);margin-top:6px}
+  .seg{display:flex;gap:8px;padding:16px 16px 0}
+  .seg button{flex:1;font-family:var(--mono);font-size:.82rem;font-weight:500;cursor:pointer;background:var(--surface-2);color:var(--muted);border:1px solid var(--border);border-radius:11px 11px 0 0;padding:13px 12px;transition:.25s;border-bottom:none;display:flex;align-items:center;justify-content:center;gap:8px}
+  .seg button:hover{color:var(--text)}
+  .seg button.active[data-mode="stack"]{background:var(--stack-glow);color:var(--stack);border-color:var(--stack-line)}
+  .seg button.active[data-mode="heap"]{background:var(--heap-glow);color:var(--heap);border-color:var(--heap-line)}
+  .demo-body{padding:22px;border-top:1px solid var(--border)}
+  .mem-code{font-family:var(--mono);font-size:.85rem;background:#0c0f15;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:18px;color:#dfe3ec;white-space:pre-wrap}
+  .steps{display:flex;flex-direction:column;gap:10px}
+  .step{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);opacity:.45;transform:translateX(-6px);transition:.4s}
+  .step.on{opacity:1;transform:none}
+  .step .n{font-family:var(--mono);font-size:.72rem;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;background:var(--border);color:var(--text)}
+  .step.on .n{background:var(--stack);color:#0a0c10}
+  .step.heap.on .n{background:var(--heap);color:#0a0c10}
+  .step .txt{font-size:.9rem;color:#c3c8d4;font-weight:300}
+  .step .txt b{color:var(--text);font-weight:600}
+  .demo-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .demo-actions button{font-family:var(--mono);font-size:.8rem;cursor:pointer;border-radius:9px;padding:10px 16px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);transition:.2s}
+  .demo-actions button:hover{border-color:var(--stack-line);color:var(--stack)}
+  .verdict-box{margin-top:16px;padding:14px 16px;border-radius:10px;font-family:var(--mono);font-size:.84rem;display:none}
+  .verdict-box.show{display:block}
+  .verdict-box.good{background:var(--stack-glow);color:var(--stack);border:1px solid var(--stack-line)}
+  .verdict-box.bad{background:rgba(255,93,115,.12);color:var(--err);border:1px solid rgba(255,93,115,.38)}
+
+  .harl{border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;background:var(--surface);margin-top:6px}
+  .harl-top{padding:18px 20px;border-bottom:1px solid var(--border)}
+  .harl-top p{color:var(--muted);font-size:.88rem;font-weight:300}
+  .harl-btns{display:flex;gap:8px;padding:16px 20px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+  .harl-btns button{font-family:var(--mono);font-size:.78rem;font-weight:600;cursor:pointer;border-radius:8px;padding:9px 14px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);transition:.2s}
+  .harl-btns button:hover{color:var(--text);border-color:var(--border-strong)}
+  .harl-btns button.sel{background:var(--amber);color:#0a0c10;border-color:var(--amber)}
+  .harl-out{padding:8px 20px 20px;font-family:var(--mono);font-size:.82rem}
+  .hmsg{padding:11px 14px;border-radius:9px;margin-top:10px;border:1px solid var(--border);opacity:.28;transition:.35s;filter:grayscale(.7)}
+  .hmsg.lit{opacity:1;filter:none}
+  .hmsg .lvl{font-weight:700;display:block;margin-bottom:3px}
+  .hmsg.debug{border-color:rgba(127,212,255,.4)} .hmsg.debug .lvl{color:#7fd4ff}
+  .hmsg.info{border-color:rgba(62,230,176,.4)} .hmsg.info .lvl{color:var(--stack)}
+  .hmsg.warn{border-color:rgba(255,180,84,.4)} .hmsg.warn .lvl{color:var(--amber)}
+  .hmsg.err{border-color:rgba(255,93,115,.4)} .hmsg.err .lvl{color:var(--err)}
+  .hmsg .body-t{color:#c3c8d4;font-weight:300;font-size:.78rem;font-family:var(--body)}
+  .hmsg-unknown{padding:12px 14px;border-radius:9px;margin-top:10px;color:var(--ref);border:1px dashed rgba(199,155,255,.5);background:rgba(199,155,255,.06);display:none}
+  .hmsg-unknown.show{display:block}
+
+  .callout{margin-top:18px;border:1px dashed var(--border-strong);border-radius:14px;padding:18px 20px;background:rgba(91,157,255,.05);display:flex;gap:14px;align-items:flex-start}
+  .callout .bulb{font-size:1.4rem;flex:none}
+  .callout p{color:var(--text);font-weight:300;font-size:.96rem}
+  .callout b{color:var(--ptr);font-weight:600}
+
+  .cheat{border:1px solid var(--stack-line);border-radius:18px;padding:28px;background:linear-gradient(180deg,rgba(62,230,176,.04),transparent);box-shadow:0 0 0 1px var(--stack-glow)}
+  .cheat h2{margin-bottom:18px}
+  .cheat ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .cheat li{display:flex;gap:13px;align-items:flex-start;font-size:.96rem;color:#c3c8d4;font-weight:300}
+  .cheat li b{color:var(--text);font-weight:600}
+  .cheat li .chk{flex:none;color:var(--stack);font-family:var(--mono);font-weight:700}
+
+  footer{text-align:center;padding:48px 24px 60px;color:var(--faint);font-family:var(--mono);font-size:.76rem}
+  footer .line{width:60px;height:1px;background:var(--border-strong);margin:0 auto 22px}
+  footer b{color:var(--muted)}
+
+  .js .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .js .reveal.show{opacity:1;transform:none}
+  .hero .kicker,.hero h1,.hero .lead,.hero .subj{animation:heroUp .9s cubic-bezier(.2,.7,.2,1) backwards}
+  .hero h1{animation-delay:.1s}.hero .lead{animation-delay:.22s}.hero .subj{animation-delay:.36s}
+  @keyframes heroUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+  @media(max-width:680px){
+    .map,.duo{grid-template-columns:1fr}
+    .seg{flex-direction:column}.seg button{border-radius:11px;border-bottom:1px solid var(--border)}
+    pre{font-size:.74rem}
+  }
+</style>
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C++ — Module 01</span>
+  <h1 class="title">The principles of <span class="g">CPP01</span></h1>
+  <p class="lead">Memory, pointers, references &amp; switch — explained <b>exercise by exercise</b> (Zombie, Weapon/Human, Harl).</p>
+  <p class="subj">Memory allocation · pointers to members · references · switch statements</p>
+</header>
+
+<div class="wrap">
+
+  <!-- 01 MAP -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>The module <span class="accent">map</span></h2></div>
+    <p class="body reveal">CPP01 has one theme: <b>memory and indirection</b> (pointers &amp; references). Each exercise hammers in one precise nail.</p>
+    <div class="map reveal">
+      <div class="map-item"><span class="ex">ex00</span><div><h4>BraiiiiiiinnnzzzZ</h4><p>Stack vs Heap: <code class="inline">new</code> or no <code class="inline">new</code>?</p></div></div>
+      <div class="map-item"><span class="ex">ex01</span><div><h4>Moar brainz!</h4><p>Allocate an array of objects: <code class="inline">new[]</code> / <code class="inline">delete[]</code></p></div></div>
+      <div class="map-item"><span class="ex">ex02</span><div><h4>HI THIS IS BRAIN</h4><p>Demystify the <b>reference</b> vs the pointer</p></div></div>
+      <div class="map-item"><span class="ex">ex03</span><div><h4>Unnecessary violence</h4><p>Member <b>reference</b> (HumanA) vs member <b>pointer</b> (HumanB)</p></div></div>
+      <div class="map-item"><span class="ex">ex04</span><div><h4>Sed is for losers</h4><p>C++ <b>file streams</b>: ifstream / ofstream</p></div></div>
+      <div class="map-item"><span class="ex">ex05</span><div><h4>Harl 2.0</h4><p><b>Pointers to member functions</b> (zero if/else)</p></div></div>
+      <div class="map-item"><span class="ex">ex06</span><div><h4>Harl filter</h4><p>The <b>switch</b> and its fall-through</p></div></div>
+      <div class="map-item" style="border-style:dashed"><span class="ex" style="background:var(--amber)">RAII</span><div><h4>The common thread</h4><p>If you <code class="inline">new</code>, you <code class="inline">delete</code>. Always.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 02 STACK VS HEAP -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>Stack vs Heap <span class="accent">— the big one</span></h2></div>
+    <p class="body reveal">The central question of ex00: <b>where does your object live, and who destroys it?</b> This is <u>the</u> memory decision in C++.</p>
+
+    <div class="duo reveal">
+      <div class="card stack-c">
+        <span class="ic">📚</span><h3>The Stack</h3>
+        <ul>
+          <li><span class="m">⚡</span><span>Fast, automatic. <code class="inline">Zombie z("x");</code></span></li>
+          <li><span class="m">🧹</span><span>Destroyed <b>by itself</b> at the end of the <code class="inline">{ }</code> (scope)</span></li>
+          <li><span class="m">⏱️</span><span>Lifetime = limited to the current block</span></li>
+          <li><span class="m">✅</span><span>No leak possible — you manage nothing</span></li>
+        </ul>
+      </div>
+      <div class="card heap-c">
+        <span class="ic">🗃️</span><h3>The Heap</h3>
+        <ul>
+          <li><span class="m">🔑</span><span>Manual. <code class="inline">new Zombie("x")</code> → returns a pointer</span></li>
+          <li><span class="m">♾️</span><span>Survives <b>beyond</b> the function that created it</span></li>
+          <li><span class="m">🧨</span><span>You MUST <code class="inline">delete</code> it — otherwise <b>memory leak</b></span></li>
+          <li><span class="m">🎯</span><span>Use it when the object must live longer</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout reveal">
+      <span class="bulb">🧭</span>
+      <p><b>The decision rule:</b> must the object outlive the function that creates it? <b>Yes</b> → heap (<code class="inline">new</code>). <b>No</b> → stack. That's exactly <code class="inline">newZombie</code> (heap, we return it) vs <code class="inline">randomChump</code> (stack, local use).</p>
+    </div>
+
+    <p class="body reveal" style="margin-top:20px">Play with both modes 👇 (try to <b>forget the <code class="inline">delete</code></b> on the heap to see the leak):</p>
+
+    <div class="demo reveal">
+      <div class="seg">
+        <button data-mode="stack" class="active">📚 Stack — randomChump()</button>
+        <button data-mode="heap">🗃️ Heap — newZombie()</button>
+      </div>
+      <div class="demo-body">
+        <div class="mem-code" id="memCode"></div>
+        <div class="steps" id="steps"></div>
+        <div class="demo-actions" id="actions"></div>
+        <div class="verdict-box" id="verdict"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 NEW DELETE -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2><span class="accent">new</span> / <span class="accent">delete</span> (and arrays)</h2></div>
+    <p class="body reveal">C++ replaces <code class="inline">malloc</code>/<code class="inline">free</code> (forbidden here) with <code class="inline">new</code>/<code class="inline">delete</code>, which <b>call the constructor and the destructor</b>. For an array, ex01 asks for <b>a single allocation</b>: <code class="inline">new Zombie[N]</code>.</p>
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">zombieHorde.cpp</span></div>
+<pre><code><span class="ty">Zombie</span>* <span class="fn">zombieHorde</span>( <span class="ty">int</span> N, <span class="ty">std::string</span> name )
+{
+    <span class="k">if</span> (N &lt;= <span class="nm">0</span>)
+        <span class="k">return</span> <span class="nm">NULL</span>;
+
+    <span class="ty">Zombie</span>* horde = <span class="hl-heap">new</span> <span class="ty">Zombie</span>[N];   <span class="cm">// ONE single allocation for N objects</span>
+
+    <span class="k">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; N; i++)
+        horde[i].<span class="fn">setName</span>(name);
+    <span class="k">return</span> horde;                  <span class="cm">// pointer to the 1st zombie</span>
+}</code></pre>
+    </div>
+    <div class="callout reveal" style="background:rgba(255,93,115,.05);border-color:rgba(255,93,115,.3)">
+      <span class="bulb">⚠️</span>
+      <p style="color:#ffc2cb"><b style="color:var(--err)">The classic trap:</b> what you allocate with <code class="inline">new[]</code> is freed with <code class="inline">delete[]</code> (with the brackets!), not <code class="inline">delete</code>. Otherwise it's undefined behaviour. → <code class="inline">delete [] horde;</code></p>
+    </div>
+  </section>
+
+  <!-- 04 POINTER VS REFERENCE -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>Pointer <span style="color:var(--ptr)">vs</span> Reference</h2></div>
+    <p class="body reveal">The heart of the module (ex02). A <b>reference</b> is just <b>another name</b> (an alias) for a variable that already exists. The proof: in ex02, the variable, the pointer and the reference all share <b>the same address</b>.</p>
+
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Criterion</th><th class="ptr-h">Pointer &nbsp;<code style="font-family:var(--mono)">std::string*</code></th><th class="ref-h">Reference &nbsp;<code style="font-family:var(--mono)">std::string&amp;</code></th></tr></thead>
+        <tbody>
+          <tr><td>can be null?</td><td><span class="yes">yes</span> (<code class="inline">NULL</code>)</td><td><span class="no">no</span> — always valid</td></tr>
+          <tr><td>must be initialized?</td><td><span class="no">no</span> (dangerous)</td><td><span class="yes">yes</span> — at declaration</td></tr>
+          <tr><td>can "point" elsewhere later?</td><td><span class="yes">yes</span> — reassignable</td><td><span class="no">no</span> — bound for life</td></tr>
+          <tr><td>access syntax</td><td><code class="inline">ptr-&gt;x</code> / <code class="inline">*ptr</code></td><td><code class="inline">ref.x</code> (like the variable)</td></tr>
+          <tr><td>you store…</td><td>an <b>address</b></td><td>an <b>alias</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="editor reveal" style="margin-top:14px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex02/main.cpp</span></div>
+<pre><code><span class="ty">std::string</span>  brain = <span class="st">"HI THIS IS BRAIN"</span>;
+<span class="ty">std::string</span>* <span class="hl-ptr">stringPTR</span> = &amp;brain;   <span class="cm">// a pointer: stores the ADDRESS of brain</span>
+<span class="ty">std::string</span>&amp; <span class="hl-ref">stringREF</span> = brain;    <span class="cm">// a reference: ANOTHER NAME for brain</span>
+
+<span class="cm">// &amp;brain == stringPTR == &amp;stringREF  → the SAME address</span>
+<span class="cm">// brain  == *stringPTR == stringREF   → the SAME value</span></code></pre>
+    </div>
+  </section>
+
+  <!-- 05 MEMBER PTR VS REF -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>Member <span style="color:var(--ref)">reference</span> vs member <span style="color:var(--ptr)">pointer</span></h2></div>
+    <p class="body reveal">ex03 makes you <b>choose</b>. Two almost identical humans, but one design difference that dictates everything:</p>
+
+    <div class="duo reveal">
+      <div class="card" style="border-color:var(--ref);box-shadow:0 0 0 1px rgba(199,155,255,.14)">
+        <span class="ic">🗡️</span><h3 style="color:var(--ref)">HumanA → reference</h3>
+        <ul>
+          <li><span class="m">•</span><span><b>Always</b> armed, receives the weapon in the constructor</span></li>
+          <li><span class="m">•</span><span>Never changes weapon, never without one</span></li>
+          <li><span class="m">→</span><span>Member <code class="inline">Weapon&amp; _weapon;</code> (never null)</span></li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:var(--ptr);box-shadow:0 0 0 1px rgba(91,157,255,.14)">
+        <span class="ic">🛡️</span><h3 style="color:var(--ptr)">HumanB → pointer</h3>
+        <ul>
+          <li><span class="m">•</span><span><b>May not</b> have a weapon (at first)</span></li>
+          <li><span class="m">•</span><span>The weapon is added later via <code class="inline">setWeapon()</code></span></li>
+          <li><span class="m">→</span><span>Member <code class="inline">Weapon* _weapon;</code> (can be <code class="inline">NULL</code>)</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout reveal">
+      <span class="bulb">🧠</span>
+      <p><b>The lesson:</b> "something can be absent or change" → <b>pointer</b>. "always present, fixed at construction" → <b>reference</b>. The code tells the intent.</p>
+    </div>
+  </section>
+
+  <!-- 06 POINTERS TO MEMBERS -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>Pointers to <span class="accent">member functions</span></h2></div>
+    <p class="body reveal">ex05 forces you to avoid the "forest of <code class="inline">if/else</code>". The solution: an <b>array of pointers to member functions</b>. Strange syntax, but logical:</p>
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Harl.cpp — complain()</span></div>
+<pre><code><span class="ty">std::string</span> levels[<span class="nm">4</span>] = {<span class="st">"DEBUG"</span>, <span class="st">"INFO"</span>, <span class="st">"WARNING"</span>, <span class="st">"ERROR"</span>};
+
+<span class="cm">// a pointer to a member function of Harl, taking nothing, returning void:</span>
+<span class="ty">void</span> (<span class="ty">Harl</span>::*funcs[<span class="nm">4</span>])( <span class="ty">void</span> ) = {
+    &amp;<span class="ty">Harl</span>::debug, &amp;<span class="ty">Harl</span>::info, &amp;<span class="ty">Harl</span>::warning, &amp;<span class="ty">Harl</span>::error
+};
+
+<span class="k">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; <span class="nm">4</span>; i++)
+    <span class="k">if</span> (levels[i] == level)
+        (<span class="k">this</span>->*funcs[i])();   <span class="cm">// ← we call through the pointer</span></code></pre>
+    </div>
+    <p class="body reveal" style="margin-top:14px">How to read it: <code class="inline">void (Harl::*funcs[4])(void)</code> = "an array of 4 pointers to methods of <code class="inline">Harl</code> that take <code class="inline">void</code> and return <code class="inline">void</code>". You call them with <code class="inline">(this->*funcs[i])()</code>.</p>
+  </section>
+
+  <!-- 07 SWITCH + HARL SIMULATOR -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>The <span class="accent">switch</span> and its fall-through</h2></div>
+    <p class="body reveal">ex06 exploits a behaviour often seen as a bug: without a <code class="inline">break</code>, a <code class="inline">case</code> <b>falls into</b> the next one. Here it's intentional: "this level <b>and above</b>". Click a level 👇</p>
+
+    <div class="harl reveal">
+      <div class="harl-top"><p>Simulator for <code class="inline">./harlFilter &lt;LEVEL&gt;</code> — watch which messages light up based on the chosen level.</p></div>
+      <div class="harl-btns" id="harlBtns">
+        <button data-lvl="0">DEBUG</button>
+        <button data-lvl="1">INFO</button>
+        <button data-lvl="2" class="sel">WARNING</button>
+        <button data-lvl="3">ERROR</button>
+        <button data-lvl="-1">Other / unknown</button>
+      </div>
+      <div class="harl-out" id="harlOut">
+        <div class="hmsg debug"><span class="lvl">[ DEBUG ]</span><span class="body-t">I love having extra bacon for my 7XL burger...</span></div>
+        <div class="hmsg info"><span class="lvl">[ INFO ]</span><span class="body-t">I cannot believe adding extra bacon costs more money...</span></div>
+        <div class="hmsg warn"><span class="lvl">[ WARNING ]</span><span class="body-t">I think I deserve to have some extra bacon for free...</span></div>
+        <div class="hmsg err"><span class="lvl">[ ERROR ]</span><span class="body-t">This is unacceptable! I want to speak to the manager now.</span></div>
+        <div class="hmsg-unknown" id="harlUnknown">[ Probably complaining about insignificant problems ]</div>
+      </div>
+    </div>
+
+    <div class="editor reveal" style="margin-top:16px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex06/main.cpp</span></div>
+<pre><code><span class="k">switch</span> (<span class="fn">getLevel</span>(argv[<span class="nm">1</span>]))
+{
+    <span class="k">case</span> <span class="nm">0</span>: harl.<span class="fn">debug</span>();   <span class="cm">// no break → falls into the next case</span>
+    <span class="k">case</span> <span class="nm">1</span>: harl.<span class="fn">info</span>();
+    <span class="k">case</span> <span class="nm">2</span>: harl.<span class="fn">warning</span>();
+    <span class="k">case</span> <span class="nm">3</span>: harl.<span class="fn">error</span>(); <span class="k">break</span>;
+    <span class="k">default</span>: std::cout &lt;&lt; <span class="st">"[ Probably complaining... ]\n"</span>;
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- 08 FILE STREAMS -->
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>C++ <span class="accent">file streams</span></h2></div>
+    <p class="body reveal">ex04 forbids C functions (<code class="inline">fopen</code>, <code class="inline">read</code>…) and <code class="inline">std::string::replace</code>. You use the <b>streams</b>: <code class="inline">std::ifstream</code> (read), <code class="inline">std::ofstream</code> (write), <code class="inline">std::stringstream</code> (load everything into memory), and you replace by hand with <code class="inline">find</code> + <code class="inline">substr</code>.</p>
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">FileReplacer.cpp — the idea</span></div>
+<pre><code><span class="ty">std::ifstream</span>  inFile(_filename.<span class="fn">c_str</span>());   <span class="cm">// open for reading</span>
+<span class="k">if</span> (!inFile.<span class="fn">is_open</span>()) <span class="cm">/* handle the error */</span>;
+
+<span class="ty">std::stringstream</span> buffer;
+buffer &lt;&lt; inFile.<span class="fn">rdbuf</span>();                <span class="cm">// swallow the whole file at once</span>
+<span class="ty">std::string</span> content = buffer.<span class="fn">str</span>();
+
+<span class="cm">// replace s1 with s2 WITHOUT std::string::replace :</span>
+<span class="k">while</span> ((found = content.<span class="fn">find</span>(_s1, pos)) != <span class="ty">std::string</span>::npos) {
+    result += content.<span class="fn">substr</span>(pos, found - pos);
+    result += _s2;
+    pos = found + _s1.<span class="fn">length</span>();
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- 09 CHEAT -->
+  <section>
+    <div class="cheat reveal">
+      <h2>📌 Key takeaways (eval defense)</h2>
+      <ul>
+        <li><span class="chk">→</span><span><b>Stack</b> = automatic, destroyed at the end of the scope. <b>Heap</b> (<code class="inline">new</code>) = manual, survives, must be <code class="inline">delete</code>d.</span></li>
+        <li><span class="chk">→</span><span><code class="inline">new</code> ↔ <code class="inline">delete</code>, <code class="inline">new[]</code> ↔ <code class="inline">delete[]</code>. Never mix, never forget (= leak).</span></li>
+        <li><span class="chk">→</span><span>A <b>reference</b> = an alias: never null, init mandatory, not reassignable. A <b>pointer</b> = an address: can be null and change.</span></li>
+        <li><span class="chk">→</span><span>Member <b>reference</b> = "always there" (HumanA). Member <b>pointer</b> = "may be missing/change" (HumanB).</span></li>
+        <li><span class="chk">→</span><span>Pointer to member function: <code class="inline">void (Harl::*f)(void)</code>, call <code class="inline">(this->*f)()</code> → replaces the if/else.</span></li>
+        <li><span class="chk">→</span><span><b>switch</b> without <code class="inline">break</code> = fall-through (intentional in ex06 for "this level and above").</span></li>
+        <li><span class="chk">→</span><span>C++ I/O = <b>streams</b> (<code class="inline">ifstream</code>/<code class="inline">ofstream</code>), not the C functions.</span></li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+
+
+<script>
+  /* ---------- Stack vs Heap demo ---------- */
+  var modes = {
+    stack: {
+      code: 'void randomChump(std::string name) {\n    Zombie zombie(name);   // on the STACK\n    zombie.announce();\n}  // <- here, end of scope',
+      steps: [
+        {t:"<b>Creation</b> on the stack: <code>Zombie zombie(name);</code> — the constructor runs."},
+        {t:"<b>Usage</b>: <code>zombie.announce();</code> says BraiiiiiiinnnzzzZ..."},
+        {t:"<b>AUTOMATIC destruction</b> at the final <code>}</code> — the destructor is called by itself."}
+      ],
+      actions: [],
+      autoVerdict: {cls:"good", txt:"✅ 0 leak. You had nothing to manage: perfect for a short, local use."}
+    },
+    heap: {
+      code: 'Zombie* newZombie(std::string name) {\n    return new Zombie(name);   // on the HEAP\n}\n// ... the zombie SURVIVES, but who destroys it?',
+      steps: [
+        {t:"<b>Creation</b> on the heap: <code>new Zombie(name)</code> returns a <b>pointer</b>."},
+        {t:"<b>Usage</b>: the zombie survives outside the function (we returned it)."},
+        {t:"<b>MANUAL destruction</b>: it's on you. What do you do?"}
+      ],
+      actions: [
+        {label:"delete heapZombie;", good:true, txt:"✅ Nicely done! The destructor runs, the memory is returned. 0 leak."},
+        {label:"...nothing (forget)", good:false, txt:"🧨 MEMORY LEAK! The zombie stays allocated forever, the destructor is never called. This is exactly what the eval hunts for with leaks/valgrind."}
+      ],
+      autoVerdict: null
+    }
+  };
+  var curMode = "stack";
+  var memCode = document.getElementById("memCode");
+  var stepsEl = document.getElementById("steps");
+  var actionsEl = document.getElementById("actions");
+  var verdictEl = document.getElementById("verdict");
+
+  function renderMode(){
+    var m = modes[curMode];
+    memCode.textContent = m.code;
+    stepsEl.innerHTML = "";
+    for (var i=0;i<m.steps.length;i++){
+      var d = document.createElement("div");
+      d.className = "step" + (curMode==="heap"?" heap":"");
+      d.innerHTML = '<span class="n">'+(i+1)+'</span><span class="txt">'+m.steps[i].t+'</span>';
+      stepsEl.appendChild(d);
+      (function(el,delay){ setTimeout(function(){ el.classList.add("on"); }, 180*delay); })(d,i+1);
+    }
+    actionsEl.innerHTML = "";
+    verdictEl.className = "verdict-box";
+    if (m.actions.length){
+      for (var j=0;j<m.actions.length;j++){
+        (function(a){
+          var b = document.createElement("button");
+          b.textContent = a.label;
+          b.onclick = function(){
+            verdictEl.className = "verdict-box show " + (a.good?"good":"bad");
+            verdictEl.innerHTML = a.txt;
+          };
+          actionsEl.appendChild(b);
+        })(m.actions[j]);
+      }
+    } else if (m.autoVerdict){
+      setTimeout(function(){
+        verdictEl.className = "verdict-box show " + m.autoVerdict.cls;
+        verdictEl.innerHTML = m.autoVerdict.txt;
+      }, 180*(m.steps.length+1));
+    }
+  }
+  var segBtns = document.querySelectorAll(".seg button");
+  for (var s=0;s<segBtns.length;s++){
+    segBtns[s].addEventListener("click", function(){
+      for (var k=0;k<segBtns.length;k++) segBtns[k].classList.remove("active");
+      this.classList.add("active");
+      curMode = this.getAttribute("data-mode");
+      renderMode();
+    });
+  }
+  renderMode();
+
+  /* ---------- Harl filter simulator ---------- */
+  var harlBtns = document.querySelectorAll("#harlBtns button");
+  var msgs = document.querySelectorAll("#harlOut .hmsg");
+  var unknown = document.getElementById("harlUnknown");
+  function renderHarl(lvl){
+    for (var i=0;i<msgs.length;i++){
+      if (lvl >= 0 && i >= lvl) msgs[i].classList.add("lit");
+      else msgs[i].classList.remove("lit");
+    }
+    if (lvl < 0) unknown.classList.add("show"); else unknown.classList.remove("show");
+  }
+  for (var h=0;h<harlBtns.length;h++){
+    harlBtns[h].addEventListener("click", function(){
+      for (var k=0;k<harlBtns.length;k++) harlBtns[k].classList.remove("sel");
+      this.classList.add("sel");
+      renderHarl(parseInt(this.getAttribute("data-lvl"),10));
+    });
+  }
+  renderHarl(2); // WARNING by default
+
+  /* ---------- Scroll reveal ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("show"); io.unobserve(e.target);} });
+  },{threshold:.1});
+  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+</script>

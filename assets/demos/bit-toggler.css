@@ -1,0 +1,6 @@
+[data-demo="bit-toggler"] .bt-title{color:var(--muted);font-size:.9rem}
+[data-demo="bit-toggler"] .bt-row{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+[data-demo="bit-toggler"] .bt-bit{font-family:var(--mono);font-size:1rem;flex:1 1 0;min-width:28px;max-width:40px;width:auto;height:44px;border-radius:9px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--muted);cursor:pointer;transition:.15s}
+[data-demo="bit-toggler"] .bt-bit.on{background:color-mix(in srgb,var(--accent) 18%,transparent);border-color:var(--accent);color:var(--accent);font-weight:700}
+[data-demo="bit-toggler"] .bt-out{font-family:var(--mono);font-size:.9rem;white-space:pre-wrap}
+[data-demo="bit-toggler"] .bt-reset{margin-top:10px;font-family:var(--mono);font-size:.8rem;padding:8px 14px;border-radius:9px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);cursor:pointer}

@@ -1,0 +1,5 @@
+[
+  { "id": "public-vs-private", "group": "extras", "order": 1, "icon": "🔓", "accent": "#3ee6b0",
+    "tag": { "fr": "C++ · Encapsulation", "en": "C++ · Encapsulation" }, "name": "public vs private",
+    "summary": { "fr": "La différence entre public et private, et l'encapsulation, expliquées avec la classe Contact.", "en": "The difference between public and private, and encapsulation, explained with the Contact class." } }
+]

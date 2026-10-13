@@ -1,0 +1,9 @@
+{
+  "buildCommand": "node build.mjs",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "redirects": [
+    { "source": "/", "has": [{ "type": "header", "key": "accept-language", "value": "^en.*" }], "destination": "/en/", "permanent": false },
+    { "source": "/", "destination": "/fr/", "permanent": false }
+  ]
+}

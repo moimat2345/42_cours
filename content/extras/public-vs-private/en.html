@@ -1,0 +1,567 @@
+<style>
+:root{
+    --bg:#0a0c10;
+    --surface:#12151d;
+    --surface-2:#171b25;
+    --border:rgba(150,170,200,.12);
+    --border-strong:rgba(150,170,200,.22);
+    --text:#e9ebf0;
+    --muted:#8a93a6;
+    --faint:#5b6475;
+
+    --pub:#3ee6b0;
+    --pub-glow:rgba(62,230,176,.16);
+    --pub-line:rgba(62,230,176,.35);
+
+    --priv:#ff5d73;
+    --priv-glow:rgba(255,93,115,.14);
+    --priv-line:rgba(255,93,115,.38);
+
+    --blue:#5b9dff;
+    --amber:#ffb454;
+
+    --display:'Chakra Petch',system-ui,sans-serif;
+    --body:'Sora',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+
+    --maxw:920px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html{scroll-behavior:smooth}
+
+  body{
+    font-family:var(--body);
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background-image:
+      linear-gradient(var(--border) 1px,transparent 1px),
+      linear-gradient(90deg,var(--border) 1px,transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);
+            mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);
+    opacity:.5;
+    pointer-events:none;z-index:0;
+  }
+  body::after{
+    content:"";
+    position:fixed;top:-20%;left:50%;transform:translateX(-50%);
+    width:120vw;height:60vh;
+    background:radial-gradient(closest-side,var(--pub-glow),transparent 70%),
+               radial-gradient(closest-side,var(--priv-glow),transparent 70%);
+    background-position:35% 0,65% 0;
+    background-size:60% 100%,60% 100%;
+    background-repeat:no-repeat;
+    filter:blur(20px);
+    pointer-events:none;z-index:0;
+  }
+
+  .wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  header.hero{padding:88px 24px 40px;text-align:center;position:relative;z-index:1}
+  .kicker{
+    font-family:var(--mono);font-size:.74rem;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:26px;
+    display:inline-flex;align-items:center;gap:10px;
+    border:1px solid var(--border);border-radius:100px;padding:7px 16px;
+    background:rgba(255,255,255,.02);
+  }
+  .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--pub);box-shadow:0 0 10px var(--pub)}
+
+  h1.title{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(2.6rem,9vw,5.4rem);line-height:.98;letter-spacing:-.01em;
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.18em .32em;
+    margin-bottom:22px;
+  }
+  h1.title .pub{color:var(--pub);text-shadow:0 0 34px var(--pub-glow)}
+  h1.title .priv{color:var(--priv);text-shadow:0 0 34px var(--priv-glow)}
+  h1.title .vs{
+    font-size:.34em;color:var(--muted);font-family:var(--mono);font-weight:400;
+    border:1px solid var(--border-strong);border-radius:8px;padding:.25em .5em;
+    transform:translateY(-.15em);
+  }
+  .lead{max-width:600px;margin:0 auto;color:var(--muted);font-size:1.08rem;font-weight:300}
+  .lead b{color:var(--text);font-weight:500}
+
+  .scroll-hint{margin-top:46px;font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;color:var(--faint);text-transform:uppercase}
+  .scroll-hint .arrow{display:block;margin:10px auto 0;width:1px;height:34px;background:linear-gradient(var(--border-strong),transparent);position:relative}
+  .scroll-hint .arrow::after{content:"";position:absolute;left:-3px;top:0;width:7px;height:7px;border-right:1px solid var(--border-strong);border-bottom:1px solid var(--border-strong);transform:rotate(45deg);animation:slide 1.8s ease-in-out infinite}
+  @keyframes slide{0%,100%{top:0;opacity:0}50%{top:18px;opacity:1}}
+
+  section{padding:34px 0}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:24px}
+  .sec-num{font-family:var(--mono);font-size:.8rem;color:var(--pub);border:1px solid var(--pub-line);border-radius:6px;padding:3px 9px;flex:none}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,4vw,2rem);letter-spacing:-.01em;line-height:1.15}
+  h2 .accent{color:var(--pub)}
+  p.body{color:#c3c8d4;font-weight:300;margin-bottom:14px}
+  p.body b{color:var(--text);font-weight:500}
+  .pub-w{color:var(--pub);font-weight:500}
+  .priv-w{color:var(--priv);font-weight:500}
+  code.inline{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:.12em .42em;color:#dfe3ec}
+
+  .tldr{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:8px}
+  .card{
+    border:1px solid var(--border);border-radius:16px;padding:26px 24px;
+    background:linear-gradient(180deg,var(--surface),var(--surface-2));
+    position:relative;overflow:hidden;
+  }
+  .card.pub-c{border-color:var(--pub-line);box-shadow:0 0 0 1px var(--pub-glow),0 24px 60px -40px var(--pub)}
+  .card.priv-c{border-color:var(--priv-line);box-shadow:0 0 0 1px var(--priv-glow),0 24px 60px -40px var(--priv)}
+  .card .ic{font-size:1.6rem;display:block;margin-bottom:14px}
+  .card h3{font-family:var(--mono);font-size:1.15rem;font-weight:700;margin-bottom:6px}
+  .card.pub-c h3{color:var(--pub)}
+  .card.priv-c h3{color:var(--priv)}
+  .card .who{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+  .card p{color:#c3c8d4;font-weight:300;font-size:.96rem}
+  .card .corner{position:absolute;top:0;right:0;font-family:var(--mono);font-size:6rem;font-weight:700;line-height:1;opacity:.05;transform:translate(18%,-22%)}
+
+  .key-callout{
+    margin-top:22px;border:1px dashed var(--border-strong);border-radius:14px;padding:20px 22px;
+    background:rgba(91,157,255,.05);display:flex;gap:16px;align-items:flex-start;
+  }
+  .key-callout .bulb{font-size:1.5rem;flex:none}
+  .key-callout p{color:var(--text);font-weight:300;font-size:1rem}
+  .key-callout b{color:var(--blue);font-weight:600}
+
+  .house{
+    display:grid;grid-template-columns:1fr 1fr;gap:0;
+    border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:6px;
+  }
+  .house>div{padding:26px 24px}
+  .house .inside{background:linear-gradient(180deg,rgba(255,93,115,.06),transparent);border-right:1px solid var(--border)}
+  .house .outside{background:linear-gradient(180deg,rgba(62,230,176,.06),transparent)}
+  .house .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;display:inline-flex;align-items:center;gap:8px}
+  .house .inside .tag{color:var(--priv)}
+  .house .outside .tag{color:var(--pub)}
+  .house ul{list-style:none;display:flex;flex-direction:column;gap:11px}
+  .house li{display:flex;gap:11px;align-items:flex-start;color:#c3c8d4;font-weight:300;font-size:.95rem}
+  .house li .m{flex:none;font-size:1.05rem;line-height:1.4}
+
+  .table-wrap{border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:.92rem}
+  th,td{text-align:left;padding:15px 18px;border-bottom:1px solid var(--border)}
+  thead th{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.02);font-weight:500}
+  tbody tr:last-child td{border-bottom:none}
+  tbody td:first-child{color:var(--text);font-weight:400}
+  .yes{color:var(--pub);font-weight:600;font-family:var(--mono)}
+  .no{color:var(--priv);font-weight:600;font-family:var(--mono)}
+  td .sub{display:block;color:var(--faint);font-size:.78rem;font-weight:300;margin-top:2px;font-family:var(--body)}
+
+  .editor{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#0c0f15;margin:6px 0;box-shadow:0 30px 60px -40px rgba(0,0,0,.8)}
+  .editor .bar{display:flex;align-items:center;gap:8px;padding:11px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+  .editor .bar .lights{display:flex;gap:6px}
+  .editor .bar .lights i{width:11px;height:11px;border-radius:50%;display:block}
+  .editor .bar .lights i:nth-child(1){background:#ff5f57}
+  .editor .bar .lights i:nth-child(2){background:#febc2e}
+  .editor .bar .lights i:nth-child(3){background:#28c840}
+  .editor .bar .fname{font-family:var(--mono);font-size:.76rem;color:var(--muted);margin-left:6px}
+  pre{margin:0;padding:20px 22px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;line-height:1.75}
+  pre code{font-family:inherit}
+  .k{color:#ff8fa3}
+  .ty{color:#7fd4ff}
+  .fn{color:#c9b8ff}
+  .st{color:#9ff0c4}
+  .cm{color:#5b6475;font-style:italic}
+  .nm{color:#ffb454}
+  .pp{color:#7a8aa8}
+  .pub-t{color:var(--pub);font-weight:700}
+  .priv-t{color:var(--priv);font-weight:700}
+  .ok-line{background:rgba(62,230,176,.07);display:block;border-left:2px solid var(--pub);padding-left:8px;margin-left:-10px}
+  .bad-line{background:rgba(255,93,115,.07);display:block;border-left:2px solid var(--priv);padding-left:8px;margin-left:-10px}
+
+  .demo{border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;background:var(--surface);margin-top:6px}
+  .demo .demo-top{padding:20px 22px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.015)}
+  .demo .demo-top p{color:var(--muted);font-size:.9rem;font-weight:300}
+  .seg{display:flex;gap:8px;padding:16px 16px 0}
+  .seg button{
+    flex:1;font-family:var(--mono);font-size:.82rem;font-weight:500;cursor:pointer;
+    background:var(--surface-2);color:var(--muted);border:1px solid var(--border);
+    border-radius:11px 11px 0 0;padding:13px 12px;transition:all .25s ease;border-bottom:none;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .seg button:hover{color:var(--text)}
+  .seg button.active[data-loc="in"]{background:var(--priv-glow);color:var(--priv);border-color:var(--priv-line)}
+  .seg button.active[data-loc="out"]{background:var(--pub-glow);color:var(--pub);border-color:var(--pub-line)}
+  .demo-ctx{font-family:var(--mono);font-size:.78rem;padding:14px 22px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);transition:.3s}
+  .demo-ctx.in{background:rgba(255,93,115,.05);color:var(--priv)}
+  .demo-ctx.out{background:rgba(62,230,176,.05);color:var(--pub)}
+  .demo-rows{display:flex;flex-direction:column}
+  .drow{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border)}
+  .drow:last-child{border-bottom:none}
+  .drow .dcode{font-family:var(--mono);font-size:.82rem;color:#dfe3ec}
+  .drow .dlabel{display:block;font-family:var(--body);font-size:.76rem;color:var(--faint);font-weight:300;margin-bottom:5px}
+  .verdict{font-family:var(--mono);font-size:.78rem;font-weight:700;padding:6px 12px;border-radius:8px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:.3s}
+  .verdict.ok{background:var(--pub-glow);color:var(--pub);border:1px solid var(--pub-line)}
+  .verdict.bad{background:var(--priv-glow);color:var(--priv);border:1px solid var(--priv-line)}
+  .dnote{grid-column:1/-1;font-size:.82rem;color:var(--muted);font-weight:300;margin-top:2px;padding-left:2px}
+  .dnote::before{content:"↳ ";color:var(--faint)}
+
+  .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .why-card{border:1px solid var(--border);border-radius:14px;padding:22px;background:var(--surface)}
+  .why-card .n{font-family:var(--mono);color:var(--amber);font-size:.8rem;margin-bottom:10px}
+  .why-card h4{font-family:var(--display);font-weight:600;font-size:1.05rem;margin-bottom:8px}
+  .why-card p{color:var(--muted);font-size:.9rem;font-weight:300}
+
+  .bonus{display:flex;flex-direction:column;gap:12px}
+  .bns{border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 12px 12px 0;padding:16px 20px;background:var(--surface)}
+  .bns h4{font-family:var(--mono);font-size:.92rem;color:var(--blue);margin-bottom:6px;font-weight:500}
+  .bns p{color:#c3c8d4;font-size:.9rem;font-weight:300}
+  .bns code{font-family:var(--mono);font-size:.84em;background:var(--surface-2);padding:.1em .4em;border-radius:4px;color:#dfe3ec}
+
+  .cheat{border:1px solid var(--pub-line);border-radius:18px;padding:30px;background:linear-gradient(180deg,rgba(62,230,176,.04),transparent);box-shadow:0 0 0 1px var(--pub-glow)}
+  .cheat h2{margin-bottom:20px}
+  .cheat ul{list-style:none;display:flex;flex-direction:column;gap:14px}
+  .cheat li{display:flex;gap:14px;align-items:flex-start;font-size:.98rem;color:#c3c8d4;font-weight:300}
+  .cheat li b{color:var(--text);font-weight:600}
+  .cheat li .chk{flex:none;color:var(--pub);font-family:var(--mono);font-weight:700;margin-top:1px}
+
+
+  .js .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .js .reveal.show{opacity:1;transform:none}
+
+  .hero .kicker,.hero h1,.hero .lead,.hero .scroll-hint{animation:heroUp .9s cubic-bezier(.2,.7,.2,1) backwards}
+  .hero h1{animation-delay:.1s}
+  .hero .lead{animation-delay:.24s}
+  .hero .scroll-hint{animation-delay:.42s}
+  @keyframes heroUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+  @media(max-width:680px){
+    .tldr,.why-grid{grid-template-columns:1fr}
+    .house{grid-template-columns:1fr}
+    .house .inside{border-right:none;border-bottom:1px solid var(--border)}
+    .seg{flex-direction:column}
+    .seg button{border-radius:11px;border-bottom:1px solid var(--border)}
+    .drow{grid-template-columns:1fr}
+    .verdict{justify-self:start}
+    pre{font-size:.78rem}
+    .card .corner{display:none}
+  }
+
+  /* ---------- overrides against assets/site.css (manual, added after migration: re-apply if the page is re-migrated) ---------- */
+  th,td{vertical-align:middle}
+  tbody td:first-child{font-family:inherit;font-size:inherit}
+  .demo{margin-bottom:0}
+</style>
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>CPP00 &nbsp;·&nbsp; Encapsulation 101</span>
+  <h1 class="title">
+    <span class="pub">public</span>
+    <span class="vs">vs</span>
+    <span class="priv">private</span>
+  </h1>
+  <p class="lead">The difference, finally clear — explained with <b>your own <code class="inline" style="font-size:.9em">Contact</code> class</b> from the PhoneBook.</p>
+  <div class="scroll-hint">scroll<span class="arrow"></span></div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>The answer in <span class="accent">10 seconds</span></h2></div>
+
+    <div class="tldr reveal">
+      <div class="card pub-c">
+        <span class="corner">+</span>
+        <span class="ic">🔓</span>
+        <h3>public</h3>
+        <div class="who">accessible from anywhere</div>
+        <p>Anyone can use it: your <code class="inline">main</code>, another class, any code on the outside. It's the <b style="color:var(--pub)">front door</b> of your class.</p>
+      </div>
+      <div class="card priv-c">
+        <span class="corner">−</span>
+        <span class="ic">🔒</span>
+        <h3>private</h3>
+        <div class="who">inside the class only</div>
+        <p>Only <b style="color:var(--priv)">the class's own methods</b> can touch it. From the outside (your <code class="inline">main</code>), it's <b style="color:var(--priv)">forbidden</b> — the compiler refuses.</p>
+      </div>
+    </div>
+
+    <div class="key-callout reveal">
+      <span class="bulb">💡</span>
+      <p>The real question isn't <i>"who"</i> is allowed, but <b>"WHERE is the code written?"</b>. The same attribute is accessible <span class="pub-w">from inside</span> the class and <span class="priv-w">forbidden from outside</span>.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>The <span class="accent">house</span> analogy 🏠</h2></div>
+    <p class="body reveal">Picture a <b>class = a house</b>. There's what happens <span class="priv-w">inside</span>, and what's visible <span class="pub-w">from the street</span>.</p>
+
+    <div class="house reveal">
+      <div class="inside">
+        <span class="tag">🔒 private · the inside</span>
+        <ul>
+          <li><span class="m">🛋️</span><span>Your living room, your bedroom, your diary. Nobody in the street touches them directly.</span></li>
+          <li><span class="m">👨‍👩‍👧</span><span>Only the <b style="color:var(--priv)">residents</b> (the class's methods) can reach and modify them.</span></li>
+          <li><span class="m">🤫</span><span>This is exactly your <code class="inline">_darkestSecret</code>: a secret, so it's <b style="color:var(--priv)">hidden</b>.</span></li>
+        </ul>
+      </div>
+      <div class="outside">
+        <span class="tag">🔓 public · the façade</span>
+        <ul>
+          <li><span class="m">🔔</span><span>The doorbell, the mailbox, the door. <b style="color:var(--pub)">Everyone</b> in the street can use them.</span></li>
+          <li><span class="m">🚪</span><span>These are your <b style="color:var(--pub)">public methods</b>: <code class="inline">setFirstName()</code>, <code class="inline">getFirstName()</code>…</span></li>
+          <li><span class="m">🤝</span><span>The only "clean" way for the outside to interact with the inside.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Who can access <span class="accent">what?</span></h2></div>
+    <div class="table-wrap reveal">
+      <table>
+        <thead>
+          <tr>
+            <th>Where you write the code…</th>
+            <th>access to <span style="color:var(--pub)">public</span></th>
+            <th>access to <span style="color:var(--priv)">private</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>From inside the class<span class="sub">e.g. in Contact.cpp, a method of Contact</span></td>
+            <td><span class="yes">✓ YES</span></td>
+            <td><span class="yes">✓ YES</span></td>
+          </tr>
+          <tr>
+            <td>From the outside<span class="sub">e.g. in your main(), through a Contact object</span></td>
+            <td><span class="yes">✓ YES</span></td>
+            <td><span class="no">✗ NO</span></td>
+          </tr>
+          <tr>
+            <td>From a child class (inheritance)<span class="sub">you'll see this in CPP02/03 — protected</span></td>
+            <td><span class="yes">✓ YES</span></td>
+            <td><span class="no">✗ NO</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>Your <span class="accent">Contact</span> class, dissected</h2></div>
+    <p class="body reveal">Here's your real <code class="inline">Contact.hpp</code>. Look at the two blocks: the <span class="priv-w">private data</span> on top, the <span class="pub-w">public interface</span> below.</p>
+
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Contact.hpp</span></div>
+<pre><code><span class="k">class</span> <span class="ty">Contact</span>
+{
+<span class="priv-t">private</span>:                          <span class="cm">// 🔒 THE DATA — hidden from the world</span>
+    <span class="ty">std::string</span> _firstName;
+    <span class="ty">std::string</span> _lastName;
+    <span class="ty">std::string</span> _nickname;
+    <span class="ty">std::string</span> _phoneNumber;
+    <span class="ty">std::string</span> _darkestSecret;   <span class="cm">// a "secret"... so it's private, makes sense!</span>
+
+<span class="pub-t">public</span>:                           <span class="cm">// 🔓 THE INTERFACE — the front door</span>
+    <span class="ty">void</span>        <span class="fn">setFirstName</span>(<span class="ty">std::string</span> str);  <span class="cm">// to WRITE</span>
+    <span class="ty">std::string</span> <span class="fn">getFirstName</span>(<span class="ty">void</span>);             <span class="cm">// to READ</span>
+    <span class="cm">// ... same for lastName, nickname, etc.</span>
+};</code></pre>
+    </div>
+
+    <p class="body reveal" style="margin-top:22px">And in <code class="inline">Contact.cpp</code>, the setter <b>touches</b> the private attribute… and that's <span class="pub-w">allowed</span>, because we're <b>inside the class</b>:</p>
+
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Contact.cpp</span></div>
+<pre><code><span class="k">void</span> <span class="ty">Contact</span>::<span class="fn">setFirstName</span>(<span class="ty">std::string</span> str)
+{
+<span class="ok-line">    <span class="k">this</span>-&gt;_firstName = str;   <span class="cm">// ✅ OK : we're INSIDE the Contact class</span></span>
+}</code></pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>Demo: <span class="accent">switch your point of view</span></h2></div>
+    <p class="body reveal">The exact same line of code can <b>compile or blow up</b> depending on where you write it. Click to switch context 👇</p>
+
+    <div class="demo reveal">
+      <div class="demo-top">
+        <p>You're trying to manipulate a <code class="inline">Contact contact;</code> object. Where are you writing the code?</p>
+      </div>
+      <div class="seg">
+        <button data-loc="in" class="active">🏠 Inside (Contact.cpp)</button>
+        <button data-loc="out">🌍 Outside (main.cpp)</button>
+      </div>
+      <div class="demo-ctx in" id="ctx"></div>
+      <div class="demo-rows" id="rows"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>What happens if you <span class="accent">cheat</span></h2></div>
+    <p class="body reveal">If from your <code class="inline">main</code> you try to reach a private attribute directly, the code <b>doesn't even compile</b>. It's not a crash at runtime: it's the <b>compiler</b> stopping you right away.</p>
+
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">main.cpp</span></div>
+<pre><code><span class="ty">Contact</span> contact;
+
+<span class="ok-line">contact.<span class="fn">setFirstName</span>(<span class="st">"Bob"</span>);        <span class="cm">// ✅ OK    → setFirstName is public</span></span>
+<span class="ok-line">std::cout &lt;&lt; contact.<span class="fn">getFirstName</span>(); <span class="cm">// ✅ OK    → getFirstName is public</span></span>
+
+<span class="bad-line">contact._firstName = <span class="st">"Bob"</span>;          <span class="cm">// ❌ ERROR → _firstName is private</span></span>
+<span class="bad-line">std::cout &lt;&lt; contact._darkestSecret; <span class="cm">// ❌ ERROR → _darkestSecret is private</span></span></code></pre>
+    </div>
+
+    <div class="editor reveal" style="margin-top:14px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal — c++ -Wall -Wextra -Werror</span></div>
+<pre><code><span class="priv-t">error:</span> 'std::string Contact::_firstName' is <span class="priv-t">private</span> within this context
+    contact._firstName = <span class="st">"Bob"</span>;
+            <span class="priv-t">^~~~~~~~~~</span>
+<span class="cm">note: declared private here</span>
+    std::string _firstName;
+                <span class="priv-t">^~~~~~~~~~</span></code></pre>
+    </div>
+    <p class="body reveal" style="margin-top:16px">👉 The fix: go through the <b class="pub-w">public front door</b>, i.e. <code class="inline">contact.setFirstName("Bob")</code>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Why bother? <span class="accent">Encapsulation</span></h2></div>
+    <p class="body reveal">"Why hide my variables when I could just make everything public?" Here are the real reasons — this is <b>the heart of OOP</b>.</p>
+
+    <div class="why-grid reveal">
+      <div class="why-card">
+        <div class="n">// 01</div>
+        <h4>🛡️ Protect the data</h4>
+        <p>A setter can <b style="color:#c3c8d4">validate</b> before writing (e.g. reject an empty phone number). With direct public access, anyone can put anything.</p>
+      </div>
+      <div class="why-card">
+        <div class="n">// 02</div>
+        <h4>🔧 Freedom to change the inside</h4>
+        <p>As long as your public methods keep the same names, you can <b style="color:#c3c8d4">rewrite everything inside</b> without breaking the code that uses your class.</p>
+      </div>
+      <div class="why-card">
+        <div class="n">// 03</div>
+        <h4>🎯 A clear interface</h4>
+        <p>Whoever uses <code class="inline" style="font-size:.85em">Contact</code> only sees <code class="inline" style="font-size:.85em">set/get</code>. They don't need to know how it's stored inside. Easy to use.</p>
+      </div>
+      <div class="why-card">
+        <div class="n">// 04</div>
+        <h4>🚫 Avoid invalid states</h4>
+        <p>You control exactly how your object can be modified. Fewer surprises, fewer "impossible" bugs.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>The bonus <span class="accent">nobody tells you</span></h2></div>
+    <div class="bonus reveal">
+      <div class="bns">
+        <h4>// struct vs class</h4>
+        <p>In C++, the <b>only</b> difference between <code>struct</code> and <code>class</code> is the default access: <code>class</code> → everything is <span class="priv-w">private</span> by default, <code>struct</code> → everything is <span class="pub-w">public</span> by default. That's it!</p>
+      </div>
+      <div class="bns">
+        <h4>// the underscore _</h4>
+        <p>The <code>_</code> in front of <code>_firstName</code> isn't required in C++. It's a <b>convention</b> (42 and many others) to spot a <span class="priv-w">private</span> attribute at a glance.</p>
+      </div>
+      <div class="bns">
+        <h4>// checked at compile time</h4>
+        <p><code>private</code> is a <b>compiler</b> barrier, not a runtime security. If you break the access rule, it won't compile — it won't "crash" later.</p>
+      </div>
+      <div class="bns">
+        <h4>// it's per-class, not per-object</h4>
+        <p>A method of <code>Contact</code> can read the private attributes of <b>another</b> <code>Contact</code> (handy for the copy constructor). The barrier protects from <b>outside the class</b>, not between objects of the same class.</p>
+      </div>
+      <div class="bns">
+        <h4>// what about protected? (coming up)</h4>
+        <p>There's a 3rd keyword: <code>protected</code>. It's like <code>private</code>, but <b>child classes</b> (inheritance) can access it too. You'll meet it in <b>CPP02/03</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="cheat reveal">
+      <h2>📌 Key takeaways</h2>
+      <ul>
+        <li><span class="chk">→</span><span><b class="pub-w">public</b> = accessible from anywhere (your <code class="inline">main</code>, other classes).</span></li>
+        <li><span class="chk">→</span><span><b class="priv-w">private</b> = accessible <b>only from inside</b> the class.</span></li>
+        <li><span class="chk">→</span><span>The golden rule: <b>"where is the code written?"</b> — not "who".</span></li>
+        <li><span class="chk">→</span><span>Put <b>data in private</b> and expose <b>methods in public</b> (the getters/setters) = <b>encapsulation</b>.</span></li>
+        <li><span class="chk">→</span><span>Breaking <code class="inline">private</code> from the outside = <b>compile error</b>, never a silent crash.</span></li>
+        <li><span class="chk">→</span><span>Your PhoneBook does exactly this: <code class="inline">Contact</code> hides its fields, everything else goes through <code class="inline">set/get</code>.</span></li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+
+
+<script>
+  var actions = [
+    {
+      label:"Read / write the private attribute _firstName directly",
+      in:{  code:'this->_firstName = "Bob";',     ok:true,  note:"You're INSIDE the Contact class → full access to its privates." },
+      out:{ code:'contact._firstName = "Bob";',   ok:false, note:"_firstName is private → compile error." }
+    },
+    {
+      label:"Call the public method setFirstName()",
+      in:{  code:'this->setFirstName("Bob");',    ok:true,  note:"A public method is accessible from anywhere." },
+      out:{ code:'contact.setFirstName("Bob");',  ok:true,  note:"setFirstName is public → the legal front door." }
+    },
+    {
+      label:"Read the darkest secret _darkestSecret",
+      in:{  code:'std::cout << this->_darkestSecret;',  ok:true,  note:"From the inside, even the secret is readable." },
+      out:{ code:'std::cout << contact._darkestSecret;',ok:false, note:"_darkestSecret is private → forbidden from main." }
+    },
+    {
+      label:"Read the secret via the public getter",
+      in:{  code:'this->getDarkestSecret();',     ok:true,  note:"Always OK: it's public." },
+      out:{ code:'contact.getDarkestSecret();',   ok:true,  note:"The get() is the clean way to reach it from outside." }
+    }
+  ];
+
+  var ctxText = {
+    in:"📍 Context: you're writing in a method of Contact  →  you have access to EVERYTHING (public + private).",
+    out:"📍 Context: you're writing in main()  →  you only have access to public."
+  };
+
+  var loc = "in";
+  var rowsEl = document.getElementById("rows");
+  var ctxEl  = document.getElementById("ctx");
+
+  function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+  function render(){
+    ctxEl.className = "demo-ctx " + loc;
+    ctxEl.textContent = ctxText[loc];
+    rowsEl.innerHTML = "";
+    for(var i=0;i<actions.length;i++){
+      var a = actions[i];
+      var d = a[loc];
+      var row = document.createElement("div");
+      row.className = "drow";
+      row.innerHTML =
+        '<div class="dcode"><span class="dlabel">'+a.label+'</span>'+esc(d.code)+'</div>'+
+        '<div class="verdict '+(d.ok?"ok":"bad")+'">'+(d.ok?"✓ compiles":"✗ error")+'</div>'+
+        '<div class="dnote">'+d.note+'</div>';
+      rowsEl.appendChild(row);
+    }
+  }
+
+  var btns = document.querySelectorAll(".seg button");
+  for(var b=0;b<btns.length;b++){
+    btns[b].addEventListener("click",function(){
+      for(var j=0;j<btns.length;j++) btns[j].classList.remove("active");
+      this.classList.add("active");
+      loc = this.getAttribute("data-loc");
+      render();
+    });
+  }
+  render();
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("show"); io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+</script>
