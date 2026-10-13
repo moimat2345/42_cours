@@ -2,10 +2,10 @@
   "fr": {
     "siteName": "42 Cours",
     "brand": "cours",
-    "kicker": "42 · Cours",
-    "description": "Un cours par projet 42, avec des démos interactives pour comprendre en manipulant.",
-    "heroTitle": "Les projets <span class=\"g\">42</span>, expliqués",
-    "heroLead": "Un cours par projet, avec des <b>démos interactives</b> pour comprendre en manipulant. Choisis un projet pour commencer.",
+    "kicker": "42 · Mes cours",
+    "description": "Les cours et démos interactives qui m'ont aidé à faire mes projets 42, à disposition de tous si besoin.",
+    "heroTitle": "Mes cours <span class=\"g\">42</span>",
+    "heroLead": "C'est avec ça que j'ai fait mes projets : je me suis aidé de ces cours et de leurs <b>démos interactives</b> pour comprendre. Je les mets <b>à disposition de tous</b> si besoin. Choisis un projet pour commencer.",
     "filterLabel": "Filtrer par catégorie",
     "group_all": "Tout",
     "group_c": "C",
@@ -13,9 +13,9 @@
     "group_gfx": "Graphique",
     "group_cpp": "C++",
     "cppTitle": "C++ Modules",
-    "cppLead": "Les modules CPP00 à CPP05 : un cours par module.",
+    "cppLead": "Ce qui m'a aidé sur les modules CPP00 à CPP05 : un cours par module.",
     "extrasTitle": "Cours supplémentaires",
-    "extrasLead": "Des notions transverses qui servent dans plusieurs projets.",
+    "extrasLead": "Des notions qui m'ont servi dans plusieurs projets.",
     "badgeReady": "Cours dispo",
     "badgeSoon": "Bientôt",
     "prev": "Précédent",
@@ -23,15 +23,15 @@
     "tocLabel": "Sommaire",
     "pagerLabel": "Cours précédent et suivant",
     "fallbackBanner": "Cette page n'est pas encore traduite : voici la version française.",
-    "footer": "Les cours des projets de l'école 42, avec démos interactives."
+    "footer": "Ce qui m'a aidé sur mes projets 42, à disposition de tous si besoin."
   },
   "en": {
     "siteName": "42 Courses",
     "brand": "courses",
-    "kicker": "42 · Courses",
-    "description": "One course per 42 project, with interactive demos to learn by playing with them.",
-    "heroTitle": "The <span class=\"g\">42</span> projects, explained",
-    "heroLead": "One course per project, with <b>interactive demos</b> so you learn by playing with them. Pick a project to start.",
+    "kicker": "42 · My courses",
+    "description": "The courses and interactive demos that helped me build my 42 projects, open to everyone if you need them.",
+    "heroTitle": "My <span class=\"g\">42</span> courses",
+    "heroLead": "This is what I used to build my projects: I got help from these courses and their <b>interactive demos</b> to understand. They are <b>open to everyone</b> if you need them. Pick a project to start.",
     "filterLabel": "Filter by category",
     "group_all": "All",
     "group_c": "C",
@@ -39,9 +39,9 @@
     "group_gfx": "Graphics",
     "group_cpp": "C++",
     "cppTitle": "C++ Modules",
-    "cppLead": "Modules CPP00 to CPP05: one course per module.",
+    "cppLead": "What helped me with modules CPP00 to CPP05: one course per module.",
     "extrasTitle": "Extra courses",
-    "extrasLead": "Cross-cutting notions that help in several projects.",
+    "extrasLead": "Notions that helped me in several projects.",
     "badgeReady": "Course ready",
     "badgeSoon": "Coming soon",
     "prev": "Previous",
@@ -49,6 +49,6 @@
     "tocLabel": "Contents",
     "pagerLabel": "Previous and next course",
     "fallbackBanner": "This page is not translated yet: showing the French version.",
-    "footer": "Courses for the 42 school projects, with interactive demos."
+    "footer": "What helped me with my 42 projects, open to everyone if you need it."
   }
 }
