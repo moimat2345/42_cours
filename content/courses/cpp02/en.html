@@ -1,0 +1,444 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C++ · Module 02 · Operators</span>
+  <h1 class="title">CPP<span class="g">02</span></h1>
+  <p class="lead">A class of <b>fixed-point numbers</b> to learn the <b>Orthodox Canonical Form</b> and <b>operator overloading</b>, then use it to tell whether a point is inside a triangle.</p>
+  <p class="subj">subject: en.subject.pdf · version 9.1 · c++ -Wall -Wextra -Werror · must also compile with -std=c++98</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>The module at a <span class="accent">glance</span></h2></div>
+    <p class="body">You write a <code class="inline">Fixed</code> class that represents a <b>fixed-point number</b>: a number with a fractional part stored in a plain <code class="inline">int</code>, whose <b>last 8 bits</b> hold the fractional part. The module builds in layers, with the same class carried from one exercise to the next: ex00 lays it down, ex01 makes it useful, ex02 teaches it to compute, and ex03 (optional) uses it to tell whether a point is inside a triangle.</p>
+    <p class="body">Two ideas carry the whole module. The <b>Orthodox Canonical Form</b>: from here on, every class defines its own four basic functions (default constructor, copy constructor, copy assignment operator, destructor). And <b>operator overloading</b>: making <code class="inline">a + b</code>, <code class="inline">a &lt; b</code> or <code class="inline">std::cout &lt;&lt; a</code> work with your own class.</p>
+    <div class="callout"><span class="bulb">📖</span><p>The page numbers in parentheses, like <b>(p. 9)</b>, are the ones printed at the bottom of the subject's pages (version 9.1): the cover has no number and the table of contents carries 1, so printed page 9 is the 10th page of the PDF file. Keep the PDF open next to this page: the course explains the subject, it does not replace it.</p></div>
+    <div class="callout"><span class="bulb">💡</span><p><b>The subject is short, its examples matter.</b> It warns that an exercise's guidelines can look brief while the examples show requirements that are not written down (p. 4). Run each <code class="inline">main</code> from the subject and compare your output line by line.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>The module <span class="accent">map</span></h2></div>
+    <div class="map">
+      <div class="map-item"><span class="ex">ex00</span><div><h4>Your first class</h4><p><code class="inline">Fixed</code> in canonical form: a raw integer, 8 fractional bits, <code class="inline">getRawBits</code> and <code class="inline">setRawBits</code> (p. 9).</p></div></div>
+      <div class="map-item"><span class="ex">ex01</span><div><h4>A useful class</h4><p>Constructors from an <code class="inline">int</code> and a <code class="inline">float</code>, <code class="inline">toFloat()</code>, <code class="inline">toInt()</code> and the <code class="inline">&lt;&lt;</code> operator (p. 11).</p></div></div>
+      <div class="map-item"><span class="ex">ex02</span><div><h4>Operators</h4><p>Six comparisons, four arithmetic operators, <code class="inline">++</code> and <code class="inline">--</code> in two forms, and the static <code class="inline">min</code> / <code class="inline">max</code> (p. 13).</p></div></div>
+      <div class="map-item"><span class="ex">ex03</span><div><h4>BSP, optional</h4><p><code class="inline">Point</code> and <code class="inline">bsp()</code>: is a point inside a triangle? The subject says you can pass the module without this exercise (p. 15).</p></div></div>
+    </div>
+
+    <p class="body" style="margin-top:22px">The subject's rules that weigh on your code, with their page:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rule</th><th>What the subject says</th><th>Page</th></tr></thead>
+        <tbody>
+          <tr><td>Compilation</td><td>With <code class="inline">c++</code> and the flags <code class="inline">-Wall -Wextra -Werror</code>. The code must still compile if you add <code class="inline">-std=c++98</code>.</td><td>3</td></tr>
+          <tr><td>Directories and names</td><td>Directories <code class="inline">ex00</code>, <code class="inline">ex01</code>... Classes in UpperCamelCase; a class's files are named after it (<code class="inline">Fixed.hpp</code>, <code class="inline">Fixed.cpp</code>).</td><td>3</td></tr>
+          <tr><td>Output</td><td>Unless specified otherwise, every output message ends with a newline and goes to the standard output.</td><td>3</td></tr>
+          <tr><td>Style</td><td>No Norm in C++: the style is free, but code your peer evaluators can't understand is code they can't grade.</td><td>3</td></tr>
+          <tr><td>Forbidden (grade 0)</td><td><code class="inline">*printf()</code>, <code class="inline">*alloc()</code> and <code class="inline">free()</code>. C++11 and Boost are forbidden too.</td><td>3</td></tr>
+          <tr><td>Forbidden (grade −42)</td><td><code class="inline">using namespace</code> and <code class="inline">friend</code>, unless stated otherwise. The STL (containers, <code class="inline">&lt;algorithm&gt;</code>) is only allowed in modules 08 and 09.</td><td>4</td></tr>
+          <tr><td>Canonical form</td><td>From module 02 to module 09, classes are in Orthodox Canonical Form unless stated otherwise: default constructor, copy constructor, copy assignment operator, destructor.</td><td>4, 6</td></tr>
+          <tr><td>Two files per class</td><td>The header (<code class="inline">.hpp</code> or <code class="inline">.h</code>) holds the class definition, the <code class="inline">.cpp</code> holds its implementation.</td><td>6</td></tr>
+          <tr><td>Headers</td><td>A function implemented in a header (except templates) means 0 for the exercise. A header stands on its own (it includes its dependencies) and has include guards, otherwise 0.</td><td>4</td></tr>
+          <tr><td>Memory</td><td>No leaks when you allocate with <code class="inline">new</code>.</td><td>4</td></tr>
+          <tr><td>Authorized function</td><td><code class="inline">roundf</code> from <code class="inline">&lt;cmath&gt;</code> in exercises 01, 02 and 03. Nothing is forbidden in ex00.</td><td>9, 11, 13, 15</td></tr>
+          <tr><td>Makefile and extra files</td><td>The Makefile rules are the same as in C. You may add files (to split your code) as long as the mandatory files are turned in.</td><td>4</td></tr>
+          <tr><td>Defense</td><td>A brief modification of the project may be requested during the evaluation: a few lines to write or rewrite.</td><td>17</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="ocf">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>The Orthodox Canonical <span class="accent">Form</span></h2></div>
+    <p class="body">From this module on, all your classes are in Orthodox Canonical Form, unless the subject says otherwise (p. 6). It comes down to four member functions that you write yourself:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Function</th><th>Declaration for <code class="inline">Fixed</code></th><th>Called when</th></tr></thead>
+        <tbody>
+          <tr><td>Default constructor</td><td><code class="inline">Fixed( void );</code></td><td><code class="inline">Fixed a;</code></td></tr>
+          <tr><td>Copy constructor</td><td><code class="inline">Fixed( Fixed const &amp; src );</code></td><td><code class="inline">Fixed b( a );</code> and <code class="inline">Fixed c = a;</code>, but also passing or returning by value</td></tr>
+          <tr><td>Copy assignment operator</td><td><code class="inline">Fixed &amp; operator=( Fixed const &amp; rhs );</code></td><td><code class="inline">c = b;</code> (c already exists)</td></tr>
+          <tr><td>Destructor</td><td><code class="inline">~Fixed( void );</code></td><td>At the end of the object's scope</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:18px">Why write them by hand? If you don't, the compiler generates them for you. Writing them gives you control over what happens, which becomes essential as soon as a class owns memory. Here, you mostly write them to <b>see when each one is called</b>: the subject shows an output where each function prints a message (p. 10).</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">who gets called?</span></div>
+<pre><span class="ty">Fixed</span> a;         <span class="cm">// default constructor</span>
+<span class="ty">Fixed</span> b( a );    <span class="cm">// copy constructor: b does not exist yet</span>
+<span class="ty">Fixed</span> c;         <span class="cm">// default constructor</span>
+c = b;            <span class="cm">// copy assignment operator: c already exists</span>
+<span class="ty">Fixed</span> d = a;     <span class="cm">// copy constructor, despite the = sign</span>
+                  <span class="cm">// then one destructor per object at the end of the scope, in reverse order</span></pre>
+    </div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Copy or assignment?</b> The <code class="inline">=</code> sign doesn't decide: if the object is <b>created</b> on that line, it's a constructor; if it already existed, it's the assignment operator. Count your messages: every object constructed (by default, by copy, from an <code class="inline">int</code>...) must end with exactly one <code class="inline">Destructor called</code>.</p></div>
+
+    <p class="body">Two details about the assignment operator. It returns <code class="inline">*this</code> by <b>reference</b>, which allows chaining <code class="inline">a = b = c;</code>. And a <code class="inline">this != &amp;rhs</code> test avoids copying an object onto itself: harmless for an <code class="inline">int</code>, but essential the day the class manages memory.</p>
+    <p class="body">Many implementations make the copy constructor call the assignment operator. That's why the subject notes, on its sample output, that the "Copy assignment operator called" line may be missing depending on your implementation (p. 10). Initializing the member directly in the copy constructor is another valid choice: both can be defended, so be ready to explain yours.</p>
+  </section>
+
+  <section id="overload">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>Operator <span class="accent">overloading</span></h2></div>
+    <p class="body">In C++, <code class="inline">a + b</code> is just another way to write a function call: <code class="inline">a.operator+( b )</code>. Overloading an operator means writing that function for your class. The same symbol then does different things depending on the type of its operands: that's the <b>ad-hoc polymorphism</b> in the module's title.</p>
+    <p class="body">An operator comes in two forms. <b>Member</b>: the left operand is the object itself (<code class="inline">*this</code>) and the function receives the right operand. <b>Free</b> (outside the class): the function receives both operands. You need a free function when the left operand isn't of your class, as in <code class="inline">std::cout &lt;&lt; a</code>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Operators</th><th>Form</th><th>What they return</th></tr></thead>
+        <tbody>
+          <tr><td>== != &lt; &gt; &lt;= &gt;=</td><td>member, <code class="inline">const</code></td><td>a <code class="inline">bool</code></td></tr>
+          <tr><td>+ - * /</td><td>member, <code class="inline">const</code></td><td>a new <code class="inline">Fixed</code>, by value: the operands don't change</td></tr>
+          <tr><td>++a  --a (prefix)</td><td>member</td><td><code class="inline">Fixed &amp;</code>: the modified object itself</td></tr>
+          <tr><td>a++  a-- (postfix)</td><td>member, with a dummy <code class="inline">int</code> parameter</td><td>a <code class="inline">Fixed</code> by value: the old value</td></tr>
+          <tr><td>=</td><td>member</td><td><code class="inline">Fixed &amp;</code> (<code class="inline">*this</code>)</td></tr>
+          <tr><td>&lt;&lt;</td><td>free</td><td><code class="inline">std::ostream &amp;</code>, to chain the <code class="inline">&lt;&lt;</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Fixed.hpp (excerpt)</span></div>
+<pre><span class="ty">Fixed</span>   <span class="k">operator</span>+( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;   <span class="cm">// a + b  ==  a.operator+( b )</span>
+<span class="ty">bool</span>    <span class="k">operator</span>&lt;( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+<span class="ty">Fixed</span> &amp; <span class="k">operator</span>++( <span class="ty">void</span> );                   <span class="cm">// ++a</span>
+<span class="ty">Fixed</span>   <span class="k">operator</span>++( <span class="ty">int</span> );                    <span class="cm">// a++  (the int only tells them apart)</span>
+
+<span class="cm">// outside the class:</span>
+std::ostream &amp; <span class="k">operator</span>&lt;&lt;( std::ostream &amp; out, <span class="ty">Fixed</span> <span class="k">const</span> &amp; value );</pre>
+    </div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Why <code class="inline">&lt;&lt;</code> has to be free.</b> Written as a method of <code class="inline">Fixed</code>, it would have <code class="inline">a</code> as its left operand: you would write <code class="inline">a &lt;&lt; std::cout</code>, and <code class="inline">std::cout &lt;&lt; a</code> would no longer compile (observed with clang). You can't add a method to <code class="inline">std::ostream</code>. And since <code class="inline">friend</code> is forbidden (p. 4), the free function goes through the class's public interface, for example <code class="inline">toFloat()</code>.</p></div>
+
+    <p class="body">A tip to write less code: define <code class="inline">==</code> and <code class="inline">&lt;</code> for real, then express the four other comparisons from them (<code class="inline">!=</code> is the opposite of <code class="inline">==</code>...). It's up to you to find which ones follow from which.</p>
+  </section>
+
+  <section id="ex00">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>ex00 · <span class="accent">Fixed</span></h2></div>
+    <p class="body"><b>What you're asked.</b> A first class in canonical form that represents a fixed-point number and, for now, only knows how to store its raw integer. The point of the exercise is the canonical form, not the conversion.</p>
+
+    <p class="body"><b>The idea of a fixed-point number.</b> An <code class="inline">int</code> can store integers. To fit a number with a fractional part into it, you decide that its <b>last 8 bits</b> are "after the point". The stored integer (the <b>raw</b> value) is then <code class="inline">value × 2<sup>8</sup></code>, that is <code class="inline">value × 256</code>. The subject asks you to read a three-page article on integers and floating-point numbers before you start (p. 9).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Real value</th><th>Stored raw</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>0 × 256</td></tr>
+          <tr><td>1</td><td>256</td><td>1 × 256</td></tr>
+          <tr><td>10</td><td>2560</td><td>10 × 256</td></tr>
+          <tr><td>0.5</td><td>128</td><td>0.5 × 256</td></tr>
+          <tr><td>0.00390625</td><td>1</td><td>1 / 256, the smallest step</td></tr>
+          <tr><td>42.42</td><td>10860</td><td>42.42 × 256 = 10859.52, rounded: the stored value is 42.421875</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:18px"><b>What the subject requires (p. 10).</b> Private members: an integer that stores the value, and a <b>static constant integer</b> that stores the number of fractional bits, always equal to the integer literal 8. Public members: the default constructor (value initialized to 0), the copy constructor, the copy assignment operator, the destructor, <code class="inline">int getRawBits( void ) const;</code> and <code class="inline">void setRawBits( int const raw );</code>.</p>
+
+    <p class="body"><b>Files to submit (p. 9).</b> <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">Fixed.hpp</code> (or <code class="inline">Fixed.h</code>) and <code class="inline">Fixed.cpp</code>. No function is forbidden.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex00/Fixed.hpp (skeleton)</span></div>
+<pre><span class="k">#ifndef</span> FIXED_HPP
+<span class="k"># define</span> FIXED_HPP
+
+<span class="k">class</span> <span class="ty">Fixed</span>
+{
+    <span class="k">public</span>:
+        <span class="ty">Fixed</span>( <span class="ty">void</span> );                       <span class="cm">// value initialized to 0</span>
+        <span class="ty">Fixed</span>( <span class="ty">Fixed</span> <span class="k">const</span> &amp; src );
+        ~<span class="ty">Fixed</span>( <span class="ty">void</span> );
+
+        <span class="ty">Fixed</span> &amp;   <span class="k">operator</span>=( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs );
+
+        <span class="ty">int</span>      <span class="fn">getRawBits</span>( <span class="ty">void</span> ) <span class="k">const</span>;
+        <span class="ty">void</span>     <span class="fn">setRawBits</span>( <span class="ty">int</span> <span class="k">const</span> raw );
+
+    <span class="k">private</span>:
+        <span class="ty">int</span>                 _raw;               <span class="cm">// the raw value</span>
+        <span class="k">static</span> <span class="ty">int</span> <span class="k">const</span>    _fractionalBits;    <span class="cm">// will be 8 (given in Fixed.cpp)</span>
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+
+    <div class="callout"><span class="bulb">💡</span><p><b>Where do you give the value 8?</b> Either in the class (<code class="inline">static int const _fractionalBits = 8;</code>) or in the <code class="inline">.cpp</code> (<code class="inline">int const Fixed::_fractionalBits = 8;</code>). With the first form, if you pass the constant to a function that takes an <code class="inline">int const &amp;</code>, the linker may complain about an undefined symbol (observed with clang without optimization; optimization can hide it). Defining it in the <code class="inline">.cpp</code> avoids that trap. Also remember to mark <code class="inline">getRawBits</code> as <code class="inline">const</code>: without it you can't call it on a <code class="inline">Fixed const</code>, and the next exercise creates some.</p></div>
+
+    <p class="body"><b>The expected result.</b> The subject gives this <code class="inline">main</code> (p. 10): a <code class="inline">Fixed a</code>, a copy <code class="inline">b( a )</code>, a <code class="inline">Fixed c</code> to which <code class="inline">b</code> is assigned, then the display of <code class="inline">getRawBits()</code> for each. The output should look like this, apart from the messages of your choice ("something similar to", says the subject):</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">expected output, p. 10</span></div>
+<pre>Default constructor called
+Copy constructor called
+Copy assignment operator called     <span class="cm">← may be missing depending on your implementation</span>
+getRawBits member function called
+Default constructor called
+Copy assignment operator called
+getRawBits member function called
+getRawBits member function called
+0
+getRawBits member function called
+0
+getRawBits member function called
+0
+Destructor called
+Destructor called
+Destructor called</pre>
+    </div>
+    <p class="body">Read it in blocks. <code class="inline">Fixed a;</code> gives the first message. <code class="inline">Fixed b( a );</code> gives the copy; in the subject's example, the <code class="inline">Copy assignment...</code> and <code class="inline">getRawBits...</code> lines that follow come from a copy constructor that relies on the assignment, which reads the other object's raw value with <code class="inline">getRawBits()</code>. <code class="inline">Fixed c;</code> then <code class="inline">c = b;</code> give the second block. Each <code class="inline">cout</code> then calls <code class="inline">getRawBits()</code> (hence the message before each <code class="inline">0</code>). Three objects, three destructors.</p>
+  </section>
+
+  <section id="ex01">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>ex01 · <span class="accent">Conversions</span></h2></div>
+    <p class="body"><b>What you're asked (p. 11).</b> The ex00 class can only represent 0. Add:</p>
+    <ul style="margin:0 0 14px 22px;color:#c3c8d4;font-weight:300">
+      <li>a constructor that takes a constant <code class="inline">int</code> and converts it to the corresponding fixed-point value;</li>
+      <li>a constructor that takes a constant <code class="inline">float</code> and converts it to the corresponding fixed-point value;</li>
+      <li><code class="inline">float toFloat( void ) const;</code> and <code class="inline">int toInt( void ) const;</code>;</li>
+      <li>in the class files, an overload of the insertion operator <code class="inline">&lt;&lt;</code> that writes the floating-point representation of the number into the output stream passed as a parameter.</li>
+    </ul>
+    <p class="body">Both constructors keep 8 fractional bits, as in ex00. <b>Files to submit</b>: the same as ex00. <b>Authorized</b>: <code class="inline">roundf</code> from <code class="inline">&lt;cmath&gt;</code> (p. 11).</p>
+
+    <p class="body"><b>The reasoning.</b> Everything follows from the ex00 formula: <code class="inline">raw = value × 256</code>.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Function</th><th>Direction</th><th>The idea</th></tr></thead>
+        <tbody>
+          <tr><td>Fixed( int const )</td><td>int → raw</td><td>Multiply by 256, that is shift 8 bits to the left.</td></tr>
+          <tr><td>Fixed( float const )</td><td>float → raw</td><td>Multiply by 256 then <b>round</b> with <code class="inline">roundf</code>.</td></tr>
+          <tr><td>toFloat()</td><td>raw → float</td><td>Divide the raw value by 256, in floating point.</td></tr>
+          <tr><td>toInt()</td><td>raw → int</td><td>Shift by 8 bits (<code class="inline">raw &gt;&gt; 8</code>), i.e. divide by 256 rounding down: the fractional part disappears.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:18px">Why <code class="inline">roundf</code> and not a plain truncation? Because <code class="inline">42.42f × 256</code> doesn't come out even: it gives about 10859.52. Truncating would give 10859, that is 42.418; rounding gives 10860, that is 42.4219, the value the subject shows. Write <code class="inline">1 &lt;&lt; _fractionalBits</code> rather than hard-coding 256: the constant stays the single source of truth.</p>
+    <p class="body">Play with the demo. Type <code class="inline">42.42f</code> in <code class="inline">float</code> mode: the raw value is 10860. Type <code class="inline">10</code> in <code class="inline">int</code> mode: it's 2560. Then move the slider to see the precision change, and try an integer that is too big.</p>
+
+    <div class="demo" data-demo="cpp02-fixed-point">
+      <div class="demo-static"><p class="body">Demo: you type an <code class="inline">int</code> or a <code class="inline">float</code> and see what <code class="inline">Fixed</code> stores with 8 fractional bits. <code class="inline">42.42f</code> gives the raw value <code class="inline">10860</code>: <code class="inline">toFloat()</code> returns <code class="inline">42.421875</code>, <code class="inline">toInt()</code> returns <code class="inline">42</code> and <code class="inline">std::cout</code> prints <code class="inline">42.4219</code>. <code class="inline">10</code> gives <code class="inline">2560</code>. A slider changes the number of fractional bits to show how the precision changes.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Convert a number to Fixed and read what the class stores","modeLabel":"Constructor called","valueLabel":"Value to convert","presetsLabel":"Examples","bitsLabel":"Fractional bits","backTo8":"Back to 8, the subject's value","bitsIsEight":"8 fractional bits: this is the value the subject requires (p. 10).","bitsNotEight":"The subject requires 8 fractional bits. Other values are only here to show how the precision changes.","errEmpty":"✗ Type a number.","errNotInt":"✗ That's not an int: remove the decimal point, or switch to Fixed( float ).","errIntRange":"✗ Outside the range of an int (from -2147483648 to 2147483647).","errNotFloat":"✗ That's not a number. Type something like 42.42f or 10: the decimal separator is the dot, as in code.","errFloatRange":"✗ Too big for a float.","errIntOverflow":"✗ Overflow: {n} << {bits} is {prod} mathematically, but an int only goes from -2147483648 to 2147483647. The shift gives {wrapped} with clang: a wrong result (undefined behavior). With {bits} fractional bits, the integer must stay between {lo} and {hi}.","errFloatOverflow":"✗ Overflow: roundf( {fx} * {scale} ) = roundf( {prod} ) does not fit in an int (from {min} to {max}). Converting that float to an int has no guaranteed result.","okLine":"✓ raw = {raw}, toFloat() = {tf}, toInt() = {ti}","rawLabel":"Raw value (getRawBits)","calcLabel":"Computation","binLabel":"The 32 bits of the raw value","toFloatLabel":"toFloat()","coutLabel":"std::cout << x","toIntLabel":"toInt()","errLabel":"Gap from the typed value","precLabel":"Precision and range","stepInt":"{n} << {bits} = {n} * {scale} = {raw}","stepFloatReal":"In memory, the float {lit} is actually {fx}.","stepFloat":"roundf( {fx} * {scale} ) = roundf( {prod} ) = {raw}","bitsAria":"The 32 bits of the raw value: {bin}. Number of fractional bits, the last ones: {n}.","legend":"Fractional bits: tinted background and a line under them, on the right. First bit, underlined: the sign.","splitLine":"Integer part: raw >> {bits} = {ip}. Fractional part: {fp} / {scale} = {fv}.","toFloatText":"{tf}  (= {raw} / {scale})","coutText":"{out}  (6 significant digits, as std::cout prints it)","toIntText":"{ti}  (raw >> {bits}: the fractional part disappears)","toIntNeg":"{shift} with raw >> {bits} (rounds down), {div} with raw / {scale} (rounds toward zero). The subject doesn't decide: pick one, and be ready to justify it.","errText":"{err}  (stored value - typed value)","precText":"Smallest step ε = 1 / {scale} = {eps}. Possible values: from {lo} to {hi}."}</script>
+    </div>
+
+    <p class="body"><b>The header</b> gains these declarations. The free <code class="inline">&lt;&lt;</code> function is declared <b>after</b> the class, and the header includes <code class="inline">&lt;iostream&gt;</code> for <code class="inline">std::ostream</code>: a header must stand on its own (p. 4).</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex01/Fixed.hpp (additions)</span></div>
+<pre><span class="k">#include</span> &lt;iostream&gt;
+
+<span class="k">class</span> <span class="ty">Fixed</span>
+{
+    <span class="k">public</span>:
+        <span class="cm">// ... what was in ex00, plus:</span>
+        <span class="ty">Fixed</span>( <span class="ty">int</span> <span class="k">const</span> n );
+        <span class="ty">Fixed</span>( <span class="ty">float</span> <span class="k">const</span> f );
+
+        <span class="ty">float</span>   <span class="fn">toFloat</span>( <span class="ty">void</span> ) <span class="k">const</span>;
+        <span class="ty">int</span>     <span class="fn">toInt</span>( <span class="ty">void</span> ) <span class="k">const</span>;
+};
+
+std::ostream &amp; <span class="k">operator</span>&lt;&lt;( std::ostream &amp; out, <span class="ty">Fixed</span> <span class="k">const</span> &amp; value );</pre>
+    </div>
+
+    <p class="body"><b>The expected result.</b> With the subject's <code class="inline">main</code> (p. 11), which builds <code class="inline">a</code>, <code class="inline">b( 10 )</code>, <code class="inline">c( 42.42f )</code>, a copy <code class="inline">d( b )</code> and then assigns <code class="inline">Fixed( 1234.4321f )</code> to <code class="inline">a</code>, the display lines must be (p. 12):</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">expected output, p. 12 (without the constructor messages)</span></div>
+<pre>a is 1234.43
+b is 10
+c is 42.4219
+d is 10
+a is 1234 as integer
+b is 10 as integer
+c is 42 as integer
+d is 10 as integer</pre>
+    </div>
+    <p class="body">Why <code class="inline">42.4219</code> and <code class="inline">1234.43</code>? The raw value of <code class="inline">42.42f</code> is 10860, which reads back as exactly 42.421875; by default <code class="inline">std::cout</code> prints only 6 significant digits of a <code class="inline">float</code>, hence 42.4219.</p>
+  </section>
+
+  <section id="ex02">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>ex02 · <span class="accent">Operators</span></h2></div>
+    <p class="body"><b>What you're asked (p. 13).</b> Add to the class, as public member functions:</p>
+    <ul style="margin:0 0 14px 22px;color:#c3c8d4;font-weight:300">
+      <li>the <b>6 comparison operators</b>: <code class="inline">&gt;</code>, <code class="inline">&lt;</code>, <code class="inline">&gt;=</code>, <code class="inline">&lt;=</code>, <code class="inline">==</code>, <code class="inline">!=</code>;</li>
+      <li>the <b>4 arithmetic operators</b>: <code class="inline">+</code>, <code class="inline">-</code>, <code class="inline">*</code>, <code class="inline">/</code>;</li>
+      <li>the <b>4 increment/decrement operators</b> (pre and post), which increase or decrease the value by the smallest representable ε, such that 1 + ε &gt; 1;</li>
+      <li>four public <b>static</b> member functions: two <code class="inline">min</code> and two <code class="inline">max</code>, one taking references to <code class="inline">Fixed</code>, the other references to constant <code class="inline">Fixed</code>, returning a reference to the smallest or the greatest.</li>
+    </ul>
+    <p class="body"><b>Files to submit</b>: the same as ex00. <b>Authorized</b>: <code class="inline">roundf</code> (p. 13).</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex02/Fixed.hpp (additions)</span></div>
+<pre><span class="k">class</span> <span class="ty">Fixed</span>
+{
+    <span class="k">public</span>:
+        <span class="cm">// ... ex00 and ex01, plus:</span>
+        <span class="ty">bool</span>    <span class="k">operator</span>&gt;( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+        <span class="ty">bool</span>    <span class="k">operator</span>&lt;( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+        <span class="ty">bool</span>    <span class="k">operator</span>&gt;=( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+        <span class="ty">bool</span>    <span class="k">operator</span>&lt;=( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+        <span class="ty">bool</span>    <span class="k">operator</span>==( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+        <span class="ty">bool</span>    <span class="k">operator</span>!=( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+
+        <span class="ty">Fixed</span>   <span class="k">operator</span>+( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+        <span class="ty">Fixed</span>   <span class="k">operator</span>-( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+        <span class="ty">Fixed</span>   <span class="k">operator</span>*( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+        <span class="ty">Fixed</span>   <span class="k">operator</span>/( <span class="ty">Fixed</span> <span class="k">const</span> &amp; rhs ) <span class="k">const</span>;
+
+        <span class="ty">Fixed</span> &amp; <span class="k">operator</span>++( <span class="ty">void</span> );        <span class="cm">// ++a: returns the modified object</span>
+        <span class="ty">Fixed</span>   <span class="k">operator</span>++( <span class="ty">int</span> );         <span class="cm">// a++: returns the old value</span>
+        <span class="ty">Fixed</span> &amp; <span class="k">operator</span>--( <span class="ty">void</span> );
+        <span class="ty">Fixed</span>   <span class="k">operator</span>--( <span class="ty">int</span> );
+
+        <span class="k">static</span> <span class="ty">Fixed</span> &amp;         <span class="fn">min</span>( <span class="ty">Fixed</span> &amp; a, <span class="ty">Fixed</span> &amp; b );
+        <span class="k">static</span> <span class="ty">Fixed</span> <span class="k">const</span> &amp;   <span class="fn">min</span>( <span class="ty">Fixed</span> <span class="k">const</span> &amp; a, <span class="ty">Fixed</span> <span class="k">const</span> &amp; b );
+        <span class="k">static</span> <span class="ty">Fixed</span> &amp;         <span class="fn">max</span>( <span class="ty">Fixed</span> &amp; a, <span class="ty">Fixed</span> &amp; b );
+        <span class="k">static</span> <span class="ty">Fixed</span> <span class="k">const</span> &amp;   <span class="fn">max</span>( <span class="ty">Fixed</span> <span class="k">const</span> &amp; a, <span class="ty">Fixed</span> <span class="k">const</span> &amp; b );
+};</pre>
+    </div>
+
+    <p class="body"><b>Comparisons.</b> Compare the <b>raw</b> values, which are integers: the result is exact. Going through <code class="inline">toFloat()</code> to compare would only bring rounding back in.</p>
+    <p class="body"><b>Addition and subtraction.</b> Both raw values have the same scale (× 256): adding or subtracting the raw values gives the raw value of the result.</p>
+    <p class="body"><b>Multiplication and division.</b> Here the scale matters. The product of two raw values is at scale 256 × 256, that is 2<sup>16</sup>: it has to be brought back to scale 256 (a shift of 8 bits). That product can also overflow an <code class="inline">int</code> (1000 × 1000 already gives raw values of 256000 and a product of over 6 × 10<sup>10</sup>), so ask yourself what the intermediate type should be. The <code class="inline">long long</code> type is not strict C++98 (clang rejects it with <code class="inline">-pedantic -Werror</code>, observed) and the size of <code class="inline">long</code> depends on the machine: check on your school's. For division, it's the opposite: the quotient of two raw values has no scale left, so put it back <b>before</b> dividing, otherwise you lose the whole fractional part. Another route exists: go through <code class="inline">float</code> values and rebuild a <code class="inline">Fixed</code> with the ex01 constructor. Each choice has its limits in precision and range, and you must be able to state them.</p>
+    <p class="body"><b>Increment and decrement.</b> The smallest representable step is a raw value of 1, that is ε = 1 / 256 = 0.00390625. That's exactly what the subject's output shows: after a <code class="inline">++a</code> on a <code class="inline">Fixed</code> at 0, you read 0.00390625. The prefix form modifies then returns the object (by reference). The postfix form must return the value from <b>before</b>: it keeps a copy, increments, then returns that copy, by value.</p>
+    <p class="body"><b>min and max.</b> You return one of the two objects you received, not a copy, hence the references. Two versions of each so that it works with <code class="inline">const</code> objects as well as modifiable ones (see the pitfalls).</p>
+
+    <p class="body"><b>The expected result.</b> The subject gives this <code class="inline">main</code> (p. 14): a <code class="inline">Fixed a</code>, a <code class="inline">Fixed const b( Fixed( 5.05f ) * Fixed( 2 ) )</code>, then <code class="inline">a</code>, <code class="inline">++a</code>, <code class="inline">a</code>, <code class="inline">a++</code>, <code class="inline">a</code>, <code class="inline">b</code> and <code class="inline">Fixed::max( a, b )</code>. Without the constructor and destructor messages, as in the subject's example:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">expected output, p. 14</span></div>
+<pre>0
+0.00390625
+0.00390625
+0.00390625
+0.0078125
+10.1016
+10.1016</pre>
+    </div>
+    <p class="body">Read it: <code class="inline">++a</code> prints the already incremented value, <code class="inline">a++</code> prints the old one (still 0.00390625) and leaves <code class="inline">a</code> at 0.0078125. And <code class="inline">b</code> is 5.05f × 2: 5.05f becomes the raw value 1293, that is 5.05078125, doubled to 10.1015625, which <code class="inline">cout</code> rounds to 10.1016.</p>
+    <div class="callout"><span class="bulb">📖</span><p>The subject says a division by 0 may crash the program (p. 14). It also says it's up to you to test every feature of your class: your <code class="inline">main</code> must go beyond the example.</p></div>
+  </section>
+
+  <section id="ex03">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>ex03 · <span class="accent">BSP</span></h2></div>
+    <p class="body"><b>What you're asked (p. 15-16).</b> Reuse your <code class="inline">Fixed</code> class to write a function that tells whether a point is <b>inside a triangle</b>. BSP stands for <i>Binary Space Partitioning</i>. This exercise is optional: you can pass the module without it (p. 15).</p>
+    <p class="body"><b>Files to submit (p. 15).</b> <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">Fixed.hpp</code> (or <code class="inline">.h</code>), <code class="inline">Fixed.cpp</code>, <code class="inline">Point.hpp</code> (or <code class="inline">.h</code>), <code class="inline">Point.cpp</code> and <code class="inline">bsp.cpp</code>. <b>Authorized</b>: <code class="inline">roundf</code>.</p>
+    <p class="body"><b>What the subject requires (p. 16).</b> A <code class="inline">Point</code> class in canonical form that represents a 2D point: two private attributes <code class="inline">Fixed const x</code> and <code class="inline">Fixed const y</code> (and "anything else useful"), a default constructor that sets x and y to 0, a constructor that takes two constant <code class="inline">float</code> values, the copy constructor, the assignment operator and the destructor. Then the function <code class="inline">bool bsp( Point const a, Point const b, Point const c, Point const point );</code>: <code class="inline">a</code>, <code class="inline">b</code>, <code class="inline">c</code> are the vertices, <code class="inline">point</code> is the point to test. It returns <code class="inline">true</code> if the point is inside the triangle, <code class="inline">false</code> otherwise, and <b>false too if the point is a vertex or is on an edge</b>. The subject asks you to write and turn in your own tests.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex03/Point.hpp (skeleton)</span></div>
+<pre><span class="k">#ifndef</span> POINT_HPP
+<span class="k"># define</span> POINT_HPP
+
+<span class="k"># include</span> "Fixed.hpp"
+
+<span class="k">class</span> <span class="ty">Point</span>
+{
+    <span class="k">public</span>:
+        <span class="ty">Point</span>( <span class="ty">void</span> );                                  <span class="cm">// x and y at 0</span>
+        <span class="ty">Point</span>( <span class="ty">float</span> <span class="k">const</span> x, <span class="ty">float</span> <span class="k">const</span> y );
+        <span class="ty">Point</span>( <span class="ty">Point</span> <span class="k">const</span> &amp; src );
+        ~<span class="ty">Point</span>( <span class="ty">void</span> );
+
+        <span class="ty">Point</span> &amp;   <span class="k">operator</span>=( <span class="ty">Point</span> <span class="k">const</span> &amp; rhs );
+
+        <span class="ty">Fixed</span> <span class="k">const</span> &amp;   <span class="fn">getX</span>( <span class="ty">void</span> ) <span class="k">const</span>;     <span class="cm">// "anything else useful"</span>
+        <span class="ty">Fixed</span> <span class="k">const</span> &amp;   <span class="fn">getY</span>( <span class="ty">void</span> ) <span class="k">const</span>;
+
+    <span class="k">private</span>:
+        <span class="ty">Fixed</span> <span class="k">const</span>      _x;
+        <span class="ty">Fixed</span> <span class="k">const</span>      _y;
+};
+
+<span class="ty">bool</span> <span class="fn">bsp</span>( <span class="ty">Point</span> <span class="k">const</span> a, <span class="ty">Point</span> <span class="k">const</span> b, <span class="ty">Point</span> <span class="k">const</span> c, <span class="ty">Point</span> <span class="k">const</span> point );
+
+<span class="k">#endif</span></pre>
+    </div>
+    <p class="body">The subject doesn't list a <code class="inline">bsp.hpp</code>: declaring <code class="inline">bsp</code> in <code class="inline">Point.hpp</code> and implementing it in <code class="inline">bsp.cpp</code> is one possible choice (advice, not a rule of the subject).</p>
+
+    <p class="body"><b>The geometric idea.</b> For each edge of the triangle, ask which side of the edge the point is on. The answer is the sign of a <b>cross product</b>: for the edge from <code class="inline">a</code> to <code class="inline">b</code>, it's <code class="inline">(b.x − a.x) × (p.y − a.y) − (b.y − a.y) × (p.x − a.x)</code>, which is twice the signed area of the triangle <code class="inline">a b p</code>. The point is <b>strictly inside</b> when the three products (edges <code class="inline">ab</code>, <code class="inline">bc</code>, <code class="inline">ca</code>) are non-zero <b>and have the same sign</b>. A zero product means the point is on the line of the edge: on the edge or on a vertex, so <code class="inline">false</code> according to the subject, or on its extension, so outside anyway. You can also compare the area of the big triangle with the sum of the three small ones: same result, but then remember to rule out the zero areas separately.</p>
+    <p class="body">Place the point in the demo: click on the drawing, or type its coordinates. Try the five example buttons, then look for a point outside where a product still cancels out (on the extension of an edge).</p>
+
+    <div class="demo" data-demo="cpp02-bsp">
+      <div class="demo-static"><p class="body">Demo: the triangle <code class="inline">a(0,0)</code>, <code class="inline">b(10,0)</code>, <code class="inline">c(5,10)</code> and a point you place. <code class="inline">bsp()</code> computes three cross products, one per edge: <code class="inline">(5,5)</code> gives <code class="inline">true</code> (all three are positive). <code class="inline">(5,0)</code> (on an edge), <code class="inline">(0,0)</code> (a vertex) and <code class="inline">(20,20)</code> (outside) give <code class="inline">false</code>.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Place a point and read the verdict of bsp( a, b, c, point )","xLabel":"x of the point","yLabel":"y of the point","presetsLabel":"Examples","hint":"Click or tap the drawing to place the point (rounded to a step of {step}), or type its coordinates. The point goes through Point( float, float ): its coordinates become Fixed values, so multiples of 1/256.","errNumber":"✗ Type two numbers (for example 5 and 0.5).","errRange":"✗ Value too large: stay between -{limit} and {limit}.","canvasAria":"Triangle a(0,0), b(10,0), c(5,10) and point p({x}, {y}): {verdict}.","canvasAriaEmpty":"Triangle a(0,0), b(10,0), c(5,10). No valid point to show.","s_inside":"inside, bsp() returns true","s_edge":"on edge {edge}, bsp() returns false","s_vertex":"on vertex {vertex}, bsp() returns false","s_line":"on the extension of edge {edge}, outside, bsp() returns false","s_outside":"outside, bsp() returns false","v_inside":"✓ bsp() returns true: the three cross products are non-zero and have the same sign, so the point is strictly inside.","v_edge":"✗ bsp() returns false: the product for edge {edge} is 0, the point is on that edge. The subject wants false on an edge (p. 16).","v_vertex":"✗ bsp() returns false: the point is vertex {vertex} (two products are 0). The subject wants false on a vertex (p. 16).","v_line":"✗ bsp() returns false: the product for edge {edge} is 0, but the point is beyond the segment: on the extension of the edge, so outside.","v_outside":"✗ bsp() returns false: the three products don't have the same sign, the point is outside.","pointLine":"Stored point: x = {x}, y = {y}","offNote":"The point is outside the drawn area (from {lo} to {hi}): the computation is still valid.","tableLabel":"The three cross products","colEdge":"Edge","colExpr":"Product","colValue":"Value","colSign":"Sign","sumLine":"Sum of the three: {sum} = 2 × the area of abc ({area}), for any point."}</script>
+    </div>
+
+    <p class="body"><b>The expected result.</b> The subject shows no output for this exercise: it asks for your own tests (p. 16). With the triangle <code class="inline">a(0,0)</code>, <code class="inline">b(10,0)</code>, <code class="inline">c(5,10)</code>, your function should answer:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Point</th><th>bsp()</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>(5, 5)</td><td>true</td><td>strictly inside</td></tr>
+          <tr><td>(5, 0)</td><td>false</td><td>on edge <code class="inline">ab</code></td></tr>
+          <tr><td>(0, 0)</td><td>false</td><td>vertex <code class="inline">a</code></td></tr>
+          <tr><td>(20, 20)</td><td>false</td><td>outside</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">The coordinates go through <code class="inline">Fixed</code>, so through 8 fractional bits: a point within half a step (1/512) of a line is rounded onto it. Observed with a test implementation compiled with clang (C++98): <code class="inline">Point( 5, 0.001f )</code> gives <code class="inline">false</code> (y becomes 0) and <code class="inline">Point( 5, 0.002f )</code> gives <code class="inline">true</code> (y becomes 0.00390625).</p>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">const</code> attributes and an <code class="inline">operator=</code>.</b> The subject wants <code class="inline">Fixed const</code> members in <code class="inline">Point</code> <i>and</i> an assignment operator (p. 16). But you can't modify a <code class="inline">const</code> member: an <code class="inline">operator=</code> that writes <code class="inline">_x = rhs._x;</code> doesn't compile, and without an <code class="inline">operator=</code> the compiler refuses to generate its own as soon as you write <code class="inline">a = b</code> (observed with clang). You have to decide what your operator should do, and be able to justify it at the defense. That's the point the subject makes you discover.</p></div>
+
+    <div class="callout"><span class="bulb">💡</span><p><b>Copies make noise.</b> <code class="inline">bsp</code> takes its four <code class="inline">Point</code> arguments by value (p. 16): each call builds copies. If your constructors print a message, your output will be long. Keep the messages for the exercises that ask for them, or turn them off for this one: it's your choice, the subject sets no output for ex03.</p></div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">09</span><h2>Step by <span class="accent">step</span></h2></div>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Read the whole subject.</b> It asks for it itself: read each module completely before starting (p. 4). One directory per exercise, each with its own <code class="inline">Makefile</code>.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>ex00.</b> The four canonical-form functions, each with its message, plus <code class="inline">getRawBits</code> and <code class="inline">setRawBits</code>. Run the subject's <code class="inline">main</code> and make the output match.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Count.</b> As many <code class="inline">Destructor called</code> as objects constructed, by default, by copy or from a value.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>ex01.</b> The two constructors, <code class="inline">toFloat</code>, <code class="inline">toInt</code>, then <code class="inline">&lt;&lt;</code> as a free function. Check <code class="inline">42.4219</code> and <code class="inline">1234.43</code>.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>ex02, in this order.</b> The comparisons (the simplest), then <code class="inline">+</code> and <code class="inline">-</code>, then <code class="inline">*</code> and <code class="inline">/</code> (the scale), then the four increments and decrements, finally <code class="inline">min</code> and <code class="inline">max</code>. Test each operator in your <code class="inline">main</code>.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>The subject's <code class="inline">main</code>.</b> Compare with the expected output (p. 14), then add your own cases: negative values, zero, very large values.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>ex03, if you do it.</b> <code class="inline">Point</code> first, then <code class="inline">bsp</code>. Test at least a point inside, a point outside, a vertex and a point on an edge.</span></div>
+      <div class="step on"><span class="n">8</span><span class="txt"><b>Compile everywhere.</b> <code class="inline">-Wall -Wextra -Werror</code>, and try <code class="inline">-std=c++98</code> too (p. 3). Check that a second <code class="inline">make</code> recompiles nothing.</span></div>
+    </div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">10</span><h2>Classic <span class="accent">pitfalls</span></h2></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">operator&lt;&lt;</code> as a method.</b> It has to be a free function: inside the class, <code class="inline">std::cout &lt;&lt; a</code> doesn't compile (see the overloading section). Declare it after the class, in the same header, and have it return the stream it received.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Prefix versus postfix.</b> The postfix is recognized by its dummy <code class="inline">int</code> parameter, which you leave unnamed: named and unused, it triggers <code class="inline">-Wunused-parameter</code>, hence an error with <code class="inline">-Werror</code> (observed). The postfix returns a copy of the old value: returning a reference to that local copy doesn't compile with <code class="inline">-Werror</code> ("reference to stack memory", observed with clang) and would be a bug anyway. Conversely, if the prefix returns a copy instead of a reference, <code class="inline">++(++a)</code> increments only once: the second increment acts on the copy (observed).</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Division by zero.</b> The subject accepts that the program crashes (p. 14). What really happens depends on your computation and your machine. Observed with clang on macOS: an integer division by zero doesn't crash on arm64 (the observed result is 0) but crashes on x86_64 (emulated with Rosetta; signal <code class="inline">SIGFPE</code>, exit code 136); a <code class="inline">float</code> division gives infinity, which the conversion to <code class="inline">int</code> turns into INT_MAX on arm64 and INT_MIN on x86_64. Choose what your operator does, and be able to say it; also check on your school's machine.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Overflow.</b> The raw value is an <code class="inline">int</code>: with 8 fractional bits, the <code class="inline">int</code> constructor only handles −8388608 to 8388607 correctly. Beyond that, the result is wrong and, for a left shift that leaves the range of a signed <code class="inline">int</code>, the behavior is undefined in C++98: with clang, <code class="inline">8388608 &lt;&lt; 8</code> gave −2147483648 and <code class="inline">−8388609 &lt;&lt; 8</code> gave a positive number; the ex01 demo shows it. A <code class="inline">float</code> that is too big causes the same problem at the conversion to <code class="inline">int</code>, whose result depends on the processor. And the product of two raw values in the multiplication overflows much sooner: 256000 × 256000 doesn't fit in an <code class="inline">int</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">min</code> and <code class="inline">max</code> with <code class="inline">const</code> objects.</b> With a <code class="inline">Fixed const b</code>, only the version taking constant references can apply, and it returns a constant reference. Writing <code class="inline">Fixed &amp; r = Fixed::max( a, b );</code> with a constant <code class="inline">b</code> doesn't compile ("drops const qualifier", observed). With two modifiable <code class="inline">Fixed</code> objects, the first version is chosen and you can keep a modifiable reference. If you only write the non-const version, a constant object is rejected; if you only write the const version, you can no longer get a modifiable reference back.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Comparing floating-point numbers.</b> Don't compare two <code class="inline">toFloat()</code> results with <code class="inline">==</code>: compare the raw values, which are integers. And don't expect arithmetic identities from a number that isn't representable: 0.1 doesn't exist exactly in fixed point (its raw value is 26, that is 0.1015625). <code class="inline">Fixed( 0.1f ) * Fixed( 10 )</code> gives the raw value 260, not 256: the result is 1.015625 and is not equal to <code class="inline">Fixed( 1 )</code> (observed). The same rounding explains why <code class="inline">Fixed( 42.42f ).toFloat()</code> doesn't return 42.42.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A <code class="inline">double</code> instead of a <code class="inline">float</code>.</b> <code class="inline">Fixed a( 5.05 );</code> is ambiguous: a <code class="inline">double</code> converts equally well to <code class="inline">int</code> and to <code class="inline">float</code>, and the compiler refuses ("call to constructor is ambiguous", observed). That's why the subject writes <code class="inline">5.05f</code>. Write the <code class="inline">f</code> suffix in your tests.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">toInt()</code> and negative numbers.</b> For a negative raw value, shifting (<code class="inline">raw &gt;&gt; 8</code>) rounds down: −1.5 gives −2, whereas <code class="inline">raw / 256</code> and the <code class="inline">( int )</code> cast of a float round toward zero and give −1 (observed with clang). The subject doesn't specify this case (p. 11). Choose, test, and be ready to justify it.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>The rules worth 0 or −42.</b> Code in a header (except templates), forgotten include guards, a header that doesn't compile on its own: 0 (p. 4). <code class="inline">using namespace</code>, <code class="inline">friend</code>, a container or <code class="inline">&lt;algorithm&gt;</code>: −42 (p. 4). <code class="inline">printf</code>, <code class="inline">malloc</code>, <code class="inline">free</code>: 0 (p. 3).</p></div>
+
+    <div class="callout"><span class="bulb">💡</span><p><b>Good practice: once the messages print, reread your output.</b> A number of <code class="inline">Destructor called</code> different from the number of constructions points to a forgotten object or a copy you didn't expect, for example a pass by value that should be a constant reference.</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">11</span><h2>How I <span class="accent">did it</span></h2></div>
+    <div class="how"><p class="body">I kept a single <code class="inline">Fixed</code> class, copied from one exercise to the next and then extended. Each canonical-form function prints its message, and the copy constructor relies on the assignment operator. The <code class="inline">int</code> constructor shifts the number by 8 bits; the <code class="inline">float</code> constructor multiplies by 256 then rounds with <code class="inline">roundf</code>; <code class="inline">toFloat()</code> and <code class="inline">toInt()</code> go the other way. For arithmetic, I go through floats and rebuild a <code class="inline">Fixed</code> with the <code class="inline">float</code> constructor. The comparisons and the four <code class="inline">min</code> / <code class="inline">max</code> work on the raw values, and <code class="inline">++</code> and <code class="inline">--</code> add or subtract 1 to the raw value. My <code class="inline">main</code> functions reuse the subject's. I haven't written exercise 03 yet: the directory exists, but <code class="inline">Point</code> and <code class="inline">bsp</code> are still to do.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 Takeaways (evaluation defense)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>Orthodox Canonical Form.</b> Default constructor, copy constructor, copy assignment operator, destructor. <code class="inline">Fixed b( a )</code> and <code class="inline">Fixed c = a</code> call the copy constructor; <code class="inline">c = b</code> calls the assignment, because <code class="inline">c</code> already exists. <code class="inline">operator=</code> returns <code class="inline">*this</code> by reference.</div></li>
+        <li><span class="chk">✓</span><div><b>The raw value.</b> Value × 256 with 8 fractional bits: <code class="inline">10</code> gives 2560, <code class="inline">42.42f</code> gives 10860 (that is 42.421875, printed 42.4219). ε = 1 / 256 = 0.00390625.</div></li>
+        <li><span class="chk">✓</span><div><b>Why <code class="inline">roundf</code>?</b> To round to the nearest instead of truncating. <code class="inline">toInt()</code> loses the fractional part.</div></li>
+        <li><span class="chk">✓</span><div><b>Why is <code class="inline">&lt;&lt;</code> a free function?</b> Its left operand is a <code class="inline">std::ostream</code>, not your class. No <code class="inline">friend</code>: you go through <code class="inline">toFloat()</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Prefix and postfix.</b> The prefix returns a reference to the modified object; the postfix returns the old value by value, hence its copy, and takes a dummy <code class="inline">int</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Multiplication and division.</b> The scale: the product of two raw values is at scale 2<sup>16</sup>; the quotient has no scale left. Think about overflow and division by zero (the subject tolerates a crash, p. 14).</div></li>
+        <li><span class="chk">✓</span><div><b>Why two <code class="inline">min</code> and two <code class="inline">max</code>?</b> One version for modifiable references, one for constant references: a <code class="inline">const</code> object can only bind to the second.</div></li>
+        <li><span class="chk">✓</span><div><b>BSP.</b> Three non-zero cross products with the same sign: inside. A vertex or an edge gives <code class="inline">false</code> (p. 16). The <code class="inline">Fixed const</code> attributes of <code class="inline">Point</code> complicate <code class="inline">operator=</code>: be able to explain your choice.</div></li>
+        <li><span class="chk">✓</span><div><b>The rules.</b> <code class="inline">-Wall -Wextra -Werror</code> and <code class="inline">-std=c++98</code>; nothing implemented in a header; include guards; no <code class="inline">using namespace</code>, no <code class="inline">friend</code>, no STL; no memory leaks.</div></li>
+        <li><span class="chk">✓</span><div><b>At the defense.</b> A brief modification may be requested (p. 17): know where each function lives and how to change it within a few minutes.</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

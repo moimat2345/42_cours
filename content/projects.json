@@ -49,5 +49,11 @@
     "summary": { "fr": "Polymorphisme, classes abstraites, interfaces et copie profonde.", "en": "Polymorphism, abstract classes, interfaces and deep copies." } },
   { "id": "cpp05", "group": "cpp", "order": 17, "icon": "🗂️", "accent": "#c79bff",
     "tag": { "fr": "C++ · Exceptions", "en": "C++ · Exceptions" }, "name": "CPP05",
-    "summary": { "fr": "Exceptions et héritage : Bureaucrat, formulaires et Intern.", "en": "Exceptions and inheritance: Bureaucrat, forms and the Intern." } }
+    "summary": { "fr": "Exceptions et héritage : Bureaucrat, formulaires et Intern.", "en": "Exceptions and inheritance: Bureaucrat, forms and the Intern." } },
+  { "id": "cpp06", "group": "cpp", "order": 18, "icon": "🎭", "accent": "#7fd4ff",
+    "tag": { "fr": "C++ · Conversions", "en": "C++ · Casts" }, "name": "CPP06",
+    "summary": { "fr": "Les casts du C++ : ScalarConverter, sérialisation et identification du vrai type.", "en": "C++ casts: ScalarConverter, serialization and identifying the real type." } },
+  { "id": "cpp07", "group": "cpp", "order": 19, "icon": "🧬", "accent": "#9ff0c4",
+    "tag": { "fr": "C++ · Templates", "en": "C++ · Templates" }, "name": "CPP07",
+    "summary": { "fr": "Les templates : fonctions génériques, iter et la classe Array.", "en": "Templates: generic functions, iter and the Array class." } }
 ]

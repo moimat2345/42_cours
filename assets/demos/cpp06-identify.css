@@ -1,0 +1,23 @@
+[data-demo="cpp06-identify"] .id-title{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+[data-demo="cpp06-identify"] .id-sel{display:flex;flex-direction:column;gap:6px;max-width:320px}
+[data-demo="cpp06-identify"] .id-sel select{width:100%}
+[data-demo="cpp06-identify"] .id-obj{margin:16px 0 0;overflow-wrap:anywhere;white-space:pre-wrap}
+[data-demo="cpp06-identify"] .id-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+[data-demo="cpp06-identify"] .id-col{border:1px solid var(--border-strong);border-radius:12px;padding:14px 16px;background:var(--surface-2);min-width:0}
+[data-demo="cpp06-identify"] .id-coltitle{font-family:var(--display);font-size:1rem;font-weight:600;margin-bottom:2px}
+[data-demo="cpp06-identify"] .id-sig{font-family:var(--mono);font-size:.76rem;color:var(--muted);margin-bottom:10px;overflow-wrap:anywhere}
+[data-demo="cpp06-identify"] .id-tries{list-style:none;display:flex;flex-direction:column;gap:6px;margin:0;padding:0}
+[data-demo="cpp06-identify"] .id-try{display:flex;flex-direction:column;gap:2px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:var(--mono);font-size:.78rem;min-width:0}
+[data-demo="cpp06-identify"] .id-code{color:var(--text);font-family:var(--mono);overflow-wrap:anywhere}
+[data-demo="cpp06-identify"] .id-res{color:var(--muted);overflow-wrap:anywhere}
+[data-demo="cpp06-identify"] .id-wait,[data-demo="cpp06-identify"] .id-skip{border-style:dashed}
+[data-demo="cpp06-identify"] .id-fail{border-color:rgba(255,93,115,.38)}
+[data-demo="cpp06-identify"] .id-fail .id-res{color:var(--err)}
+[data-demo="cpp06-identify"] .id-ok{border-color:color-mix(in srgb,var(--accent) 55%,transparent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+[data-demo="cpp06-identify"] .id-ok .id-res{color:var(--accent);font-weight:700}
+[data-demo="cpp06-identify"] .id-out{font-family:var(--mono);font-size:.82rem;margin-top:10px;color:var(--text)}
+[data-demo="cpp06-identify"] .id-result{margin-top:16px}
+[data-demo="cpp06-identify"] button:disabled{opacity:.5;cursor:not-allowed}
+@media (max-width:640px){
+  [data-demo="cpp06-identify"] .id-cols{grid-template-columns:1fr}
+}

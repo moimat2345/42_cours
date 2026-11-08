@@ -1,0 +1,48 @@
+/* the course accent is red (same value as --err): "good" states are forced to green here, and every state also carries a glyph and a word */
+[data-demo="cpp03-ctor-order"]{--ok:#3ee6b0;--ok-bg:rgba(62,230,176,.12);--ok-line:rgba(62,230,176,.42);--c-clap:var(--ptr);--c-scav:var(--heap);--c-frag:var(--ref)}
+[data-demo="cpp03-ctor-order"] .co-title{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+[data-demo="cpp03-ctor-order"] .co-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+[data-demo="cpp03-ctor-order"] .co-col{min-width:0}
+[data-demo="cpp03-ctor-order"] .co-lbl{display:block;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px;padding:0}
+[data-demo="cpp03-ctor-order"] .co-col > .co-lbl:first-child{margin-top:0}
+[data-demo="cpp03-ctor-order"] .co-pick{border:0;margin:0;padding:0;min-width:0;display:flex;flex-wrap:wrap;gap:8px}
+[data-demo="cpp03-ctor-order"] .co-pick .co-lbl{flex:0 0 100%;margin:0 0 2px}
+[data-demo="cpp03-ctor-order"] .co-opt{position:relative;display:inline-flex}
+[data-demo="cpp03-ctor-order"] .co-opt input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+[data-demo="cpp03-ctor-order"] .co-opt label{font-family:var(--mono);font-size:.8rem;color:var(--muted);border:1px solid var(--border-strong);border-radius:9px;padding:9px 14px;background:var(--surface-2);cursor:pointer;transition:.2s}
+[data-demo="cpp03-ctor-order"] .co-opt label:hover{color:var(--text)}
+[data-demo="cpp03-ctor-order"] .co-opt input:checked + label{color:var(--text);border-color:var(--ok);background:var(--ok-bg);font-weight:700}
+/* the selected option is also marked with a check mark (generated content: the label text and its accessible name do not change) */
+[data-demo="cpp03-ctor-order"] .co-opt input:checked + label::before{content:"\2713\00a0";content:"\2713\00a0" / ""}
+[data-demo="cpp03-ctor-order"] .co-opt input:focus-visible + label{outline:2px solid var(--text);outline-offset:2px}
+[data-demo="cpp03-ctor-order"] .co-code{margin:0;padding:12px 14px;overflow-x:auto}
+[data-demo="cpp03-ctor-order"] .co-cl{display:flex;gap:8px;align-items:baseline;padding:1px 4px;border-radius:5px}
+[data-demo="cpp03-ctor-order"] .co-cl code{font-family:var(--mono);font-size:.8rem;color:#dfe3ec;font-variant-ligatures:none;background:transparent;border:0;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
+[data-demo="cpp03-ctor-order"] .co-cl .co-mark{flex:none;width:1ch;color:var(--ok);font-size:.7rem}
+[data-demo="cpp03-ctor-order"] .co-cl.cur{background:var(--ok-bg);box-shadow:inset 3px 0 0 var(--ok)}
+[data-demo="cpp03-ctor-order"] .demo-actions button[aria-disabled="true"]{opacity:.45;cursor:default}
+[data-demo="cpp03-ctor-order"] .demo-actions button[aria-disabled="true"]:hover{border-color:var(--border-strong);color:var(--text)}
+[data-demo="cpp03-ctor-order"] .co-layers{display:flex;flex-direction:column-reverse;gap:8px}
+[data-demo="cpp03-ctor-order"] .co-row{display:flex;gap:8px}
+[data-demo="cpp03-ctor-order"] .co-layer{flex:1 1 0;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;border:1px solid var(--border-strong);border-radius:10px;padding:10px 12px;background:var(--surface-2);transition:.2s}
+[data-demo="cpp03-ctor-order"] .co-lname{font-family:var(--mono);font-weight:700;font-size:.9rem;color:var(--text)}
+[data-demo="cpp03-ctor-order"] .co-shared{font-family:var(--mono);font-size:.68rem;color:var(--muted);border:1px solid var(--border-strong);border-radius:100px;padding:0 7px}
+[data-demo="cpp03-ctor-order"] .co-lstate{flex:0 0 100%;font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+[data-demo="cpp03-ctor-order"] .co-layer.none{border-style:dashed;opacity:.7}
+[data-demo="cpp03-ctor-order"] .co-layer.alive{border-color:var(--ok);background:var(--ok-bg)}
+[data-demo="cpp03-ctor-order"] .co-layer.alive .co-lstate{color:var(--ok);font-weight:700}
+[data-demo="cpp03-ctor-order"] .co-layer.gone{border-style:dotted;opacity:.8}
+[data-demo="cpp03-ctor-order"] .co-layer.gone .co-lstate{color:var(--amber);font-weight:700}
+[data-demo="cpp03-ctor-order"] .co-log{list-style:none;margin:0;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:#0c0f15;display:flex;flex-direction:column;gap:4px;min-height:60px}
+[data-demo="cpp03-ctor-order"] .co-ln{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+[data-demo="cpp03-ctor-order"] .co-num{flex:none;font-family:var(--mono);font-size:.7rem;color:var(--muted);min-width:1.6ch;text-align:right}
+[data-demo="cpp03-ctor-order"] .co-ln code{font-family:var(--mono);font-size:.8rem;color:#dfe3ec;font-variant-ligatures:none;background:transparent;border:0;padding:0;overflow-wrap:anywhere}
+[data-demo="cpp03-ctor-order"] .co-tag{font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;text-transform:uppercase;border-radius:100px;padding:0 8px;border:1px solid var(--border-strong);color:var(--muted)}
+[data-demo="cpp03-ctor-order"] .co-ln.ctor .co-tag{color:var(--ok);border-color:var(--ok-line)}
+[data-demo="cpp03-ctor-order"] .co-ln.dtor .co-tag{color:var(--amber);border-color:rgba(255,180,84,.45)}
+[data-demo="cpp03-ctor-order"] .co-empty{color:var(--muted);font-family:var(--mono);font-size:.78rem}
+[data-demo="cpp03-ctor-order"] .verdict-box.show{background:var(--surface-2);color:var(--text);border:1px dashed var(--border-strong)}
+@media (max-width:680px){
+  [data-demo="cpp03-ctor-order"] .co-grid{grid-template-columns:minmax(0,1fr)}
+  [data-demo="cpp03-ctor-order"] .co-row{flex-direction:column}
+}

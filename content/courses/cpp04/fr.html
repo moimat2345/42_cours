@@ -1,0 +1,412 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C++ · Module 04 · Polymorphisme</span>
+  <h1 class="title">Le module <span class="g">CPP04</span></h1>
+  <p class="lead">Pourquoi un <b>pointeur sur <code class="inline">Animal</code></b> fait aboyer un <code class="inline">Dog</code>, ce que change <b><code class="inline">virtual</code></b>, pourquoi une copie doit être <b>profonde</b>, et à quoi sert une <b>classe abstraite</b>.</p>
+  <p class="subj">sujet : CPP Module 04 · version 13.1 · C++98 · c++ -Wall -Wextra -Werror -std=c++98</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>Le module en <span class="accent">bref</span></h2></div>
+    <p class="body">Le CPP04 fait passer de « des classes qui héritent » à « des classes qu'on utilise sans savoir exactement laquelle on a en main ». Tu écris une petite famille <code class="inline">Animal</code>, <code class="inline">Dog</code>, <code class="inline">Cat</code>. Quand tu appelles <code class="inline">makeSound()</code> sur un pointeur d'<code class="inline">Animal</code>, c'est le son de l'animal <b>réellement pointé</b> qui doit sortir (ex00).</p>
+    <p class="body">Ensuite chaque chien et chaque chat reçoit un <code class="inline">Brain</code> alloué avec <code class="inline">new</code> (ex01) : il faut des <b>copies profondes</b> et des <b>destructeurs corrects</b>. L'ex02 rend <code class="inline">Animal</code> <b>abstraite</b>. L'ex03, optionnel, fait écrire des « interfaces » : <code class="inline">AMateria</code>, <code class="inline">ICharacter</code>, <code class="inline">IMateriaSource</code>.</p>
+    <div class="callout"><span class="bulb">🧭</span><p><b>Trois questions pour tout le module.</b> Quelle fonction est appelée : celle du type du pointeur, ou celle du type de l'objet ? Qui détruit quoi, et dans quel ordre ? Quand je copie, est-ce que je copie l'objet, ou seulement l'adresse de ce qu'il possède ?</p></div>
+    <div class="callout"><span class="bulb">📖</span><p>Les numéros de page entre parenthèses, comme <b>(p. 8)</b>, sont ceux imprimés en bas des pages du sujet (version 13.1) ; la page du fichier PDF est ce numéro plus 1. Garde le PDF ouvert à côté : ce cours explique ce que le sujet demande et ce qu'il laisse libre, il ne le remplace pas.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>La carte du <span class="accent">module</span></h2></div>
+    <div class="map">
+      <div class="map-item"><span class="ex">Compiler</span><div><h4>Les flags</h4><p><code class="inline">c++ -Wall -Wextra -Werror</code>, et le code doit aussi compiler avec <code class="inline">-std=c++98</code> (p. 3).</p></div></div>
+      <div class="map-item"><span class="ex">Interdits</span><div><h4>Fonctions et mots-clés</h4><p><code class="inline">*printf()</code>, <code class="inline">*alloc()</code> et <code class="inline">free()</code> : note 0 (p. 3). <code class="inline">using namespace</code> et <code class="inline">friend</code> : -42 (p. 4). Pas de STL (conteneurs, <code class="inline">&lt;algorithm&gt;</code>) avant les modules 08 et 09 : -42 (p. 4).</p></div></div>
+      <div class="map-item"><span class="ex">Conception</span><div><h4>Forme canonique et headers</h4><p>Forme canonique orthodoxe du module 02 au 09, sauf mention contraire. Aucune fuite mémoire. Aucune fonction écrite dans un header (sauf templates) : 0 à l'exercice. Headers utilisables seuls, avec gardes d'inclusion, sinon 0 (p. 4).</p></div></div>
+      <div class="map-item"><span class="ex">Nommage</span><div><h4>Dossiers et classes</h4><p>Dossiers <code class="inline">ex00</code>, <code class="inline">ex01</code>… Classes en UpperCamelCase, fichiers nommés d'après la classe. Chaque message de sortie finit par un saut de ligne, sur la sortie standard, sauf indication contraire (p. 3).</p></div></div>
+      <div class="map-item"><span class="ex">Tests</span><div><h4>Messages et tests</h4><p>Le constructeur et le destructeur de chaque classe affichent un message précis, <b>différent d'une classe à l'autre</b> (p. 8 et 10). Les tests les plus complets possible, plus que ceux du sujet (p. 8, 9, 11 et 16).</p></div></div>
+      <div class="map-item"><span class="ex">Sons</span><div><h4>Aucun texte imposé</h4><p>Le sujet demande « an appropriate sound (cats don't bark) » (p. 8) sans donner le texte. Les sons des démos (<code class="inline">Woof</code>, <code class="inline">Meow</code>…) sont des exemples du cours.</p></div></div>
+      <div class="map-item"><span class="ex">ex00</span><div><h4>Polymorphism</h4><p><code class="inline">Animal</code>, <code class="inline">Dog</code>, <code class="inline">Cat</code>, plus <code class="inline">WrongAnimal</code> et <code class="inline">WrongCat</code> (p. 8-9). À rendre : <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>.</p></div></div>
+      <div class="map-item"><span class="ex">ex01</span><div><h4>I don't want to set the world on fire</h4><p><code class="inline">Brain</code>, tableau d'animaux, copies profondes (p. 10-11). À rendre : les fichiers de l'exercice précédent + les nouveaux <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>.</p></div></div>
+      <div class="map-item"><span class="ex">ex02</span><div><h4>Abstract class</h4><p><code class="inline">Animal</code> ne doit plus être instanciable (p. 12). À rendre : les fichiers de l'exercice précédent + les nouveaux.</p></div></div>
+      <div class="map-item"><span class="ex">ex03</span><div><h4>Interface &amp; recap</h4><p><code class="inline">AMateria</code>, <code class="inline">Ice</code>, <code class="inline">Cure</code>, <code class="inline">Character</code>, <code class="inline">MateriaSource</code> (p. 13-16). À rendre : <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>.</p></div></div>
+    </div>
+    <div class="callout"><span class="bulb">❓</span><p><b>L'ex03 est-il obligatoire ou bonus ?</b> Ni l'un ni l'autre dans les termes du sujet : il n'y a pas de partie bonus, et la dernière page de l'exercice dit qu'on peut valider le module sans l'ex03 (p. 16). Comment il est compté s'il est rendu n'est pas écrit dans le sujet : à vérifier dans ta grille d'évaluation.</p></div>
+    <div class="callout"><span class="bulb">🚫</span><p>Les quatre fiches d'exercice indiquent <code class="inline">Forbidden: None</code> (p. 8, 10, 12 et 13) : aucun interdit propre à l'exercice, mais les règles générales ci-dessus restent valables.</p></div>
+  </section>
+
+  <section id="polymorphism">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Le <span class="accent">polymorphisme</span> en pratique</h2></div>
+    <p class="body">Un <code class="inline">Animal*</code> peut contenir l'adresse d'un <code class="inline">Dog</code> : un chien est un animal. C'est le polymorphisme de sous-typage dont parle le titre du sujet. Mais alors, deux types sont en jeu :</p>
+    <div class="duo">
+      <div class="card">
+        <span class="ic">🏷️</span>
+        <h3>Le type du pointeur</h3>
+        <ul>
+          <li><span class="m">→</span><span>Celui que tu écris à la déclaration : <code class="inline">Animal*</code>.</span></li>
+          <li><span class="m">→</span><span>Le compilateur le connaît, il ne change jamais.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">🐕</span>
+        <h3>Le type de l'objet</h3>
+        <ul>
+          <li><span class="m">→</span><span>Celui de l'objet vraiment créé : <code class="inline">new Dog()</code>.</span></li>
+          <li><span class="m">→</span><span>Il n'est connu qu'à l'exécution.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="editor" style="margin-top:18px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">l'idée</span></div>
+<pre><span class="ty">Animal</span>* a = <span class="k">new</span> <span class="ty">Dog</span>();   <span class="cm">// type du pointeur : Animal*   |   type de l'objet : Dog</span>
+a-&gt;<span class="fn">makeSound</span>();          <span class="cm">// la version d'Animal, ou celle de Dog ?</span></pre>
+    </div>
+    <p class="body">Sans <code class="inline">virtual</code>, le compilateur ne regarde que le type du pointeur et choisit la fonction <b>à la compilation</b> (liaison statique) : ce sera <code class="inline">Animal::makeSound</code>. Avec <code class="inline">virtual</code> dans la classe de base, le choix est repoussé <b>à l'exécution</b> (liaison dynamique) : le vrai type de l'objet décide, donc <code class="inline">Dog::makeSound</code>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Déclaration</th><th>makeSound virtuelle ?</th><th>Fonction appelée</th><th>Qui décide</th></tr></thead>
+        <tbody>
+          <tr><td>Animal* a = new Dog();</td><td>oui</td><td><code class="inline">Dog::makeSound</code></td><td>l'objet, à l'exécution</td></tr>
+          <tr><td>Animal* a = new Dog();</td><td>non</td><td><code class="inline">Animal::makeSound</code></td><td>le pointeur, à la compilation</td></tr>
+          <tr><td>Dog* d = new Dog();</td><td>peu importe</td><td><code class="inline">Dog::makeSound</code></td><td>le pointeur : c'est déjà un <code class="inline">Dog*</code></td></tr>
+          <tr><td>WrongAnimal* w = new WrongCat();</td><td>non (c'est le but de WrongAnimal)</td><td><code class="inline">WrongAnimal::makeSound</code></td><td>le pointeur, à la compilation</td></tr>
+          <tr><td>WrongCat* c = new WrongCat();</td><td>non</td><td><code class="inline">WrongCat::makeSound</code></td><td>le pointeur : c'est un <code class="inline">WrongCat*</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:22px"><b>Comment ça marche ?</b> Le standard C++ dit ce que doit faire un appel virtuel, pas comment. Mais les compilateurs courants font tous la même chose : chaque classe qui a une fonction virtuelle reçoit une <b>table virtuelle</b> (vtable), un tableau de pointeurs vers ses fonctions virtuelles, et chaque objet de cette classe contient un <b>pointeur caché</b> (le vptr) vers la table de sa classe. Un appel virtuel lit le vptr de l'objet, prend la case de la fonction dans la table, et saute à l'adresse trouvée. Un indice : constaté avec clang sur macOS (arm64), une classe vide pèse 1 octet, et la même classe avec un destructeur virtuel en pèse 8, la taille d'un pointeur.</p>
+
+    <p class="body">Joue avec la démo : change le type du pointeur, le type de l'objet et l'interrupteur <code class="inline">virtual</code>. Les deux cas du sujet sont dans les boutons.</p>
+    <div class="demo" data-demo="cpp04-vtable-dispatch">
+      <div class="demo-static"><p class="body">Démo : un pointeur d'un type, un objet d'un autre type, et un interrupteur <code class="inline">virtual</code> sur <code class="inline">makeSound</code>. Avec <code class="inline">Animal* a = new Dog();</code> et <code class="inline">virtual</code>, l'appel <code class="inline">a-&gt;makeSound()</code> passe par la table virtuelle de <code class="inline">Dog</code> et affiche <code class="inline">Woof</code>. Avec <code class="inline">WrongAnimal* w = new WrongCat();</code> sans <code class="inline">virtual</code>, l'appel est lié à la compilation à <code class="inline">WrongAnimal::makeSound</code> et affiche <code class="inline">WrongAnimal sound</code> : le <code class="inline">WrongCat</code> est ignoré.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Choisis le type du pointeur, le type de l'objet et l'interrupteur virtual : vois quelle fonction est appelée, et par quel chemin.","ptrLabel":"Type du pointeur","objLabel":"Objet créé avec new","virtualLabel":"virtual sur {base}::makeSound","presetVirtual":"Cas du sujet : Animal* vers un Dog, avec virtual","presetStatic":"Cas WrongAnimal : WrongAnimal* vers un WrongCat, sans virtual","hint":"Dans l'ex02, new Animal() ne compile plus (classe abstraite) ; ici il reste possible pour comparer. Les textes des sons sont des exemples : le sujet n'en impose aucun.","codeLabel":"Le code","stepsLabel":"Le chemin de l'appel p->makeSound()","whenCompile":"Compilation","whenRun":"Exécution","stStatic1":"Le compilateur ne voit que le type du pointeur, {base}*. makeSound n'est pas virtual dans {base} : il lie l'appel tout de suite à {fn}.","stStatic2":"Le programme saute directement à {fn}. Le vrai type de l'objet ({obj}) n'est jamais consulté.","stDyn1":"makeSound est virtual dans {base} : le compilateur ne choisit aucune fonction. Il écrit un appel qui passe par la table virtuelle.","stDyn2":"L'appel suit le pointeur caché de l'objet *p (son vptr) jusqu'à la table virtuelle de sa vraie classe, {obj}.","stDyn3Own":"Dans cette table, la case de makeSound pointe vers {fn} : {obj} redéfinit makeSound.","stDyn3Base":"Dans cette table, la case de makeSound pointe vers {fn} : l'objet est un {obj} lui-même, il n'y a rien à redéfinir.","vtTitle":"Table virtuelle de {obj} (simplifiée)","vtUsed":"case lue par l'appel","vtOff":"absente de la table : makeSound n'est pas virtual, aucune case n'est lue","outputLabel":"Affichage","soundAnimal":"Animal sound","soundDog":"Woof","soundCat":"Meow","soundWrongAnimal":"WrongAnimal sound","soundWrongCat":"Wrong meow","vDyn":"{fn} est appelée et affiche « {out} » : c'est le vrai type de l'objet ({obj}) qui décide, à l'exécution.","vStaticSame":"{fn} est appelée et affiche « {out} » : c'est le type du pointeur qui décide, à la compilation. Ici il est égal au vrai type de l'objet, donc tu ne vois pas encore de différence.","vStaticLost":"{fn} est appelée et affiche « {out} », et non {own} : sans virtual, le type du pointeur ({base}*) décide à la compilation et le vrai type de l'objet ({obj}) est ignoré."}</script>
+    </div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Redéfinir, c'est la même signature.</b> En C++98 il n'y a pas de mot-clé <code class="inline">override</code>. Si <code class="inline">Dog::makeSound()</code> n'a pas le même <code class="inline">const</code> qu'<code class="inline">Animal::makeSound() const</code>, tu ne redéfinis rien : tu crées une autre fonction qui cache la première, et l'appel via un <code class="inline">Animal*</code> affiche toujours le son d'<code class="inline">Animal</code>. Constaté avec Apple clang sur macOS : <code class="inline">-Wall -Wextra -Werror</code> refuse ce code (<code class="inline">-Woverloaded-virtual</code>). À vérifier avec le compilateur de ton école. Répéter <code class="inline">virtual</code> dans les classes dérivées est facultatif mais rend l'intention lisible.</p></div>
+
+    <p class="body" style="margin-top:22px"><b>Le destructeur virtuel.</b> Quand tu écris <code class="inline">delete a;</code> avec <code class="inline">a</code> de type <code class="inline">Animal*</code>, le même choix se pose : quel destructeur appeler ? Sans <code class="inline">virtual</code> sur <code class="inline">~Animal()</code>, le compilateur appelle celui du type du pointeur, et seulement lui. Le destructeur de <code class="inline">Dog</code> ne tourne pas, donc ce qu'il libérait (le <code class="inline">Brain</code> de l'ex01) est perdu : c'est une fuite, et selon la norme C++ un comportement indéfini. La règle à retenir : dès qu'une classe sert de base et qu'on détruit ses objets via un pointeur de base, son destructeur est <b>virtuel</b>.</p>
+    <p class="body">Avec un destructeur virtuel, <code class="inline">delete a;</code> détruit d'abord la partie <code class="inline">Dog</code> (qui libère son <code class="inline">Brain</code>), puis la partie <code class="inline">Animal</code>. La construction suit l'ordre inverse : <code class="inline">Animal</code> d'abord, puis <code class="inline">Dog</code>. C'est ce que le sujet appelle appeler les destructeurs dans l'ordre attendu (p. 10).</p>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Le polymorphisme passe par un pointeur ou une référence.</b> Si tu passes un <code class="inline">Dog</code> à une fonction qui prend un <code class="inline">Animal</code> <b>par valeur</b>, l'objet est copié en <code class="inline">Animal</code> : la partie <code class="inline">Dog</code> est perdue (on appelle ça le <i>slicing</i>) et <code class="inline">makeSound()</code> affiche le son d'<code class="inline">Animal</code>. Constaté avec clang sur macOS ; avec une référence (<code class="inline">const Animal&amp;</code>), le son du chien sort.</p></div>
+  </section>
+
+  <section id="ex00">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>ex00 · <span class="accent">Polymorphism</span></h2></div>
+    <p class="body">Le sujet décrit une classe de base <code class="inline">Animal</code> avec <b>un attribut protégé</b> <code class="inline">std::string type;</code> (p. 8). <code class="inline">Dog</code> et <code class="inline">Cat</code> en héritent et règlent leur <code class="inline">type</code> à <code class="inline">"Dog"</code> et <code class="inline">"Cat"</code> ; celui d'<code class="inline">Animal</code> peut rester vide ou valoir ce que tu veux (p. 8). Chaque animal sait faire <code class="inline">makeSound()</code>. Pour vérifier que tu as compris, tu ajoutes <code class="inline">WrongAnimal</code> et <code class="inline">WrongCat</code> : en remplaçant <code class="inline">Animal</code> et <code class="inline">Cat</code> par les « wrong » dans le <code class="inline">main</code> du sujet, le <code class="inline">WrongCat</code> doit afficher le son de <code class="inline">WrongAnimal</code> (p. 9).</p>
+
+    <p class="body"><b>Fichiers à rendre</b> (p. 8) : <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>. Soit, pour toi : <code class="inline">Animal</code>, <code class="inline">Dog</code>, <code class="inline">Cat</code>, <code class="inline">WrongAnimal</code>, <code class="inline">WrongCat</code>, chacune avec son <code class="inline">.hpp</code> et son <code class="inline">.cpp</code>.</p>
+
+    <p class="body"><b>Le header d'Animal</b> (déclarations seulement, la forme canonique est exigée depuis le module 02) :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex00/Animal.hpp</span></div>
+<pre><span class="op">#ifndef ANIMAL_HPP</span>
+<span class="op">#define ANIMAL_HPP</span>
+
+<span class="op">#include</span> <span class="st">&lt;string&gt;</span>
+
+<span class="k">class</span> <span class="ty">Animal</span>
+{
+    <span class="k">protected</span>:
+        <span class="ty">std::string</span>     type;                   <span class="cm">// imposé : attribut protégé (p. 8)</span>
+
+    <span class="k">public</span>:
+        <span class="fn">Animal</span>();
+        <span class="fn">Animal</span>(<span class="k">const</span> <span class="ty">Animal</span>&amp; other);
+        <span class="ty">Animal</span>&amp; <span class="k">operator</span>=(<span class="k">const</span> <span class="ty">Animal</span>&amp; other);
+        <span class="k">virtual</span> ~<span class="fn">Animal</span>();                  <span class="cm">// virtuel : voir « polymorphisme »</span>
+
+        <span class="k">virtual</span> <span class="ty">void</span>    <span class="fn">makeSound</span>() <span class="k">const</span>;   <span class="cm">// virtual ET const</span>
+        <span class="ty">std::string</span>     <span class="fn">getType</span>() <span class="k">const</span>;
+};
+
+<span class="op">#endif</span></pre>
+    </div>
+    <p class="body"><code class="inline">getType()</code> et <code class="inline">makeSound()</code> sont des noms que le <code class="inline">main</code> du sujet utilise (p. 9). Ce <code class="inline">main</code> manipule des <code class="inline">const Animal*</code> : les deux fonctions doivent donc être <code class="inline">const</code>, sinon le compilateur refuse l'appel. <code class="inline">Dog</code> et <code class="inline">Cat</code> se ressemblent :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex00/Dog.hpp</span></div>
+<pre><span class="op">#include</span> <span class="st">"Animal.hpp"</span>
+
+<span class="k">class</span> <span class="ty">Dog</span> : <span class="k">public</span> <span class="ty">Animal</span>
+{
+    <span class="k">public</span>:
+        <span class="fn">Dog</span>();                                  <span class="cm">// règle type à "Dog", affiche son message</span>
+        <span class="fn">Dog</span>(<span class="k">const</span> <span class="ty">Dog</span>&amp; other);
+        <span class="ty">Dog</span>&amp; <span class="k">operator</span>=(<span class="k">const</span> <span class="ty">Dog</span>&amp; other);
+        <span class="k">virtual</span> ~<span class="fn">Dog</span>();
+
+        <span class="k">virtual</span> <span class="ty">void</span> <span class="fn">makeSound</span>() <span class="k">const</span>;     <span class="cm">// même signature que celle d'Animal</span>
+};</pre>
+    </div>
+    <p class="body"><b><code class="inline">WrongAnimal</code></b> est la copie d'<code class="inline">Animal</code> avec <b>une seule différence</b> : <code class="inline">makeSound()</code> n'y est <b>pas</b> <code class="inline">virtual</code>. Garde quand même son destructeur virtuel : l'exercice porte sur <code class="inline">makeSound</code>, pas sur une destruction fautive. <code class="inline">WrongCat</code> hérite de <code class="inline">WrongAnimal</code> et redéfinit <code class="inline">makeSound()</code> comme <code class="inline">Cat</code>. Sans <code class="inline">virtual</code>, cette redéfinition n'est jamais choisie à travers un <code class="inline">WrongAnimal*</code> : c'est exactement ce que l'exercice veut te faire constater.</p>
+
+    <p class="body"><b>Le résultat attendu.</b> Les messages des constructeurs et destructeurs sont libres (un message propre à chaque classe). Pour le reste, avec le <code class="inline">main</code> du sujet, tu dois voir ceci (les sons sont des exemples) :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">./a.out | cat -e (sans les messages de construction)</span></div>
+<pre>Dog $
+Cat $
+Meow$
+Woof$
+Animal sound$</pre>
+    </div>
+    <p class="body">Le <code class="inline">$</code> marque la fin de chaque ligne (<code class="inline">cat -e</code>). Les deux premières lignes sont les <code class="inline">getType()</code> de <code class="inline">j</code> puis de <code class="inline">i</code> : l'espace avant le <code class="inline">$</code> vient du <code class="inline">&lt;&lt; " "</code> que le <code class="inline">main</code> du sujet écrit (p. 9). Les trois sons suivent l'ordre des appels (<code class="inline">i</code>, <code class="inline">j</code>, <code class="inline">meta</code>). Avec les classes « wrong », <code class="inline">makeSound()</code> sur un <code class="inline">const WrongAnimal*</code> qui pointe un <code class="inline">WrongCat</code> doit afficher le son de <code class="inline">WrongAnimal</code>.</p>
+    <div class="callout"><span class="bulb">🧪</span><p><b>Ce que ton <code class="inline">main</code> doit tester.</b> Le sujet réclame plus de tests que les siens (p. 9). Au minimum : les trois appels du sujet, les cas « wrong », et un <code class="inline">delete</code> pour chaque <code class="inline">new</code> (le <code class="inline">main</code> du sujet n'en montre aucun, il finit par « ... », p. 9). Vérifie aussi l'ordre des messages : constructeur d'<code class="inline">Animal</code> puis de <code class="inline">Dog</code>, destructeur de <code class="inline">Dog</code> puis d'<code class="inline">Animal</code>.</p></div>
+  </section>
+
+  <section id="ex01">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>ex01 · Brain et la <span class="accent">copie profonde</span></h2></div>
+    <p class="body">Le sujet (p. 10) te demande une classe <code class="inline">Brain</code> qui contient <b>un tableau de 100 <code class="inline">std::string</code> nommé <code class="inline">ideas</code></b>. <code class="inline">Dog</code> et <code class="inline">Cat</code> reçoivent chacun un attribut <b>privé</b> <code class="inline">Brain*</code> : ils créent leur cerveau avec <code class="inline">new Brain()</code> à la construction et le <code class="inline">delete</code> à la destruction. Dans ton <code class="inline">main</code>, tu crées et remplis un tableau d'animaux, moitié <code class="inline">Dog</code>, moitié <code class="inline">Cat</code>, puis tu le parcours à la fin pour <b>détruire chaque animal directement comme un <code class="inline">Animal</code></b>. Enfin, une copie de <code class="inline">Dog</code> ou de <code class="inline">Cat</code> ne doit pas être superficielle, et tu dois le <b>tester</b>.</p>
+    <p class="body"><b>Fichiers à rendre</b> (p. 10) : ceux de l'exercice précédent + <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>. Il s'ajoute donc <code class="inline">Brain.hpp</code> et <code class="inline">Brain.cpp</code>, et <code class="inline">Dog</code> et <code class="inline">Cat</code> changent.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex01/Brain.hpp</span></div>
+<pre><span class="op">#include</span> <span class="st">&lt;string&gt;</span>
+
+<span class="k">class</span> <span class="ty">Brain</span>
+{
+    <span class="k">private</span>:
+        <span class="ty">std::string</span>     ideas[<span class="nm">100</span>];        <span class="cm">// imposé : 100 std::string, nommées ideas (p. 10)</span>
+
+    <span class="k">public</span>:
+        <span class="fn">Brain</span>();
+        <span class="fn">Brain</span>(<span class="k">const</span> <span class="ty">Brain</span>&amp; other);
+        <span class="ty">Brain</span>&amp; <span class="k">operator</span>=(<span class="k">const</span> <span class="ty">Brain</span>&amp; other);
+        ~<span class="fn">Brain</span>();
+
+        <span class="cm">// de quoi lire et écrire une idée : noms libres, le sujet n'en donne pas</span>
+};</pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex01/Dog.hpp (Cat est pareil)</span></div>
+<pre><span class="k">class</span> <span class="ty">Dog</span> : <span class="k">public</span> <span class="ty">Animal</span>
+{
+    <span class="k">private</span>:
+        <span class="ty">Brain</span>*  brain;                         <span class="cm">// imposé : attribut privé Brain* (p. 10)</span>
+
+    <span class="k">public</span>:
+        <span class="fn">Dog</span>();                                 <span class="cm">// new Brain()</span>
+        <span class="fn">Dog</span>(<span class="k">const</span> <span class="ty">Dog</span>&amp; other);                  <span class="cm">// copie PROFONDE</span>
+        <span class="ty">Dog</span>&amp; <span class="k">operator</span>=(<span class="k">const</span> <span class="ty">Dog</span>&amp; other);       <span class="cm">// copie PROFONDE</span>
+        <span class="k">virtual</span> ~<span class="fn">Dog</span>();                         <span class="cm">// delete brain</span>
+
+        <span class="k">virtual</span> <span class="ty">void</span> <span class="fn">makeSound</span>() <span class="k">const</span>;
+};</pre>
+    </div>
+
+    <p class="body"><b>Superficielle ou profonde ?</b> Si tu ne définis pas de constructeur de copie, le compilateur en écrit un qui copie chaque attribut tel quel. Pour un <code class="inline">Brain*</code>, il copie <b>l'adresse</b>, pas le cerveau : les deux chiens partagent alors le même <code class="inline">Brain</code>. Constaté avec clang sur macOS : modifier <code class="inline">ideas[0]</code> via la copie change aussi l'original, puis la destruction des deux chiens fait deux <code class="inline">delete</code> sur la même adresse ; le second <code class="inline">~Brain()</code> s'exécute encore une fois, puis le programme est tué (code de sortie 133). Une <b>copie profonde</b> alloue un nouveau <code class="inline">Brain</code> et y recopie le contenu. Essaie les deux dans la démo.</p>
+    <div class="demo" data-demo="cpp04-deep-copy">
+      <div class="demo-static"><p class="body">Démo : un <code class="inline">Dog</code> « original » possède un <code class="inline">Brain</code> dont <code class="inline">ideas[0]</code> vaut <code class="inline">food</code>. En copie superficielle, <code class="inline">Dog copy(original);</code> recopie seulement le pointeur : les deux chiens partagent le même <code class="inline">Brain</code>, changer <code class="inline">ideas[0]</code> de la copie change aussi l'original, et la destruction des deux libère le même <code class="inline">Brain</code> deux fois (double <code class="inline">delete</code>, comportement indéfini). En copie profonde, la copie reçoit son propre <code class="inline">Brain</code> : changer la copie ne touche pas l'original, et chaque <code class="inline">Brain</code> est libéré une seule fois.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Un Dog possède un Brain alloué avec new. Copie-le, modifie la copie, puis détruis les deux : compare les deux modes.","modeLegend":"Type de copie","modeShallow":"Copie superficielle (copie générée par le compilateur)","modeDeep":"Copie profonde (ton constructeur de copie)","copyBtn":"Copier : Dog copy(original);","destroyBtn":"Détruire les deux (fin de portée)","resetBtn":"Recommencer","editLabel":"Nouvelle valeur de ideas[0] pour la copie","editBtn":"Modifier : copy.brain->ideas[0] = …","defaultEdit":"sleep","initialIdea":"food","hint":"Les adresses sont inventées : seul compte de savoir si deux pointeurs portent la même. Change de mode pour recommencer avec l'autre copie.","sceneLabel":"La mémoire","nameOriginal":"original","nameCopy":"copy","alive":"vivant","destroyed":"détruit","notCopied":"pas encore copié","brainAlive":"alloué","brainFreed":"libéré (delete fait)","pointersHere":"Dogs qui pointent ici : {n}","counterAlive":"Brains vivants","counterDouble":"Double delete","yes":"oui","no":"non","logLabel":"Ce qui s'est passé","logEmpty":"Rien pour l'instant.","idle":"L'original a son Brain, dont ideas[0] vaut « food ». Choisis un mode si besoin, puis clique sur « Copier ».","modeChanged":"Mode changé : tout est remis à zéro. L'original a son Brain, dont ideas[0] vaut « food ».","logCopyShallow":"Dog copy(original); copie générée : brain = original.brain, soit {addr}. Aucun nouveau Brain.","logCopyDeep":"Dog copy(original); ta copie : brain = new Brain(*original.brain), soit {addr}. ideas[0] = « {idea} » est recopiée.","logEdit":"copy.brain->ideas[0] = « {idea} » : le Brain en {addr} contient maintenant « {idea} ».","logFree":"~Dog() ({who}) : delete brain ; le Brain en {addr} est libéré.","logDouble":"~Dog() ({who}) : delete brain ; mais le Brain en {addr} est déjà libéré. Double delete.","mCopyShallow":"Les deux Dogs pointent vers le même Brain ({addr}). Seule l'adresse a été copiée.","mCopyDeep":"Un nouveau Brain ({addr}) a été alloué et son contenu recopié. L'original garde le sien ({orig}).","mEditShared":"La copie a modifié le Brain en {addr}, qui est aussi celui de l'original : son ideas[0] vaut maintenant « {idea} » lui aussi.","mEditDeep":"Seule la copie a changé. L'original dit toujours « {orig} » : les deux Brains sont indépendants.","mDouble":"Double delete : le Brain en {addr} a été libéré par le premier destructeur, puis une seconde fois par l'autre. Comportement indéfini : le programme plante souvent.","mClean":"Chaque Brain a été libéré une seule fois : ni fuite, ni double delete.","errOver":"Les deux Dogs sont détruits. Clique sur « Recommencer ».","errAlready":"La copie existe déjà. Modifie-la, détruis les deux, ou clique sur « Recommencer ».","errNeedCopy":"Il n'y a pas encore de copie : clique d'abord sur « Copier ».","errEmpty":"Écris une idée non vide pour ideas[0].","errLong":"Idée trop longue : {max} caractères maximum."}</script>
+    </div>
+
+    <p class="body" style="margin-top:22px"><b>Ce que doit faire une copie profonde dans <code class="inline">Dog</code> et <code class="inline">Cat</code></b> (le code, c'est à toi) :</p>
+    <div class="duo">
+      <div class="card">
+        <span class="ic">📋</span>
+        <h3>Constructeur de copie</h3>
+        <ul>
+          <li><span class="m">→</span><span>Appelle le constructeur de copie d'<code class="inline">Animal</code> dans la liste d'initialisation (<code class="inline">: Animal(other)</code>). Sinon, c'est le constructeur par défaut d'<code class="inline">Animal</code> qui tourne et le <code class="inline">type</code> n'est pas recopié (constaté avec clang : aucun avertissement).</span></li>
+          <li><span class="m">→</span><span>Alloue un <b>nouveau</b> <code class="inline">Brain</code> construit à partir de celui de l'autre : <code class="inline">new Brain(*other.brain)</code>.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">🟰</span>
+        <h3>operator=</h3>
+        <ul>
+          <li><span class="m">→</span><span>Protège l'<b>auto-affectation</b> (<code class="inline">this != &amp;other</code>), voir les pièges.</span></li>
+          <li><span class="m">→</span><span>Copie la partie <code class="inline">Animal</code>, puis soit recopie le contenu dans le <code class="inline">Brain</code> existant, soit libère l'ancien et en alloue un nouveau.</span></li>
+          <li><span class="m">→</span><span>Dans tous les cas, jamais de pointeur partagé. Retourne <code class="inline">*this</code>.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="body" style="margin-top:22px"><b>Le tableau d'animaux.</b> Pour détruire chaque élément « directement comme un <code class="inline">Animal</code> » (p. 10), le tableau contient des <b>pointeurs</b> <code class="inline">Animal*</code>. Un tableau d'<code class="inline">Animal</code> par valeur ne peut rien contenir de plus qu'un <code class="inline">Animal</code> (les chiens y seraient tronqués). L'idée tient en quelques lignes :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">main.cpp (l'idée)</span></div>
+<pre><span class="ty">Animal</span>* animals[<span class="nm">4</span>];                       <span class="cm">// des POINTEURS ; prends un nombre pair pour « moitié-moitié »</span>
+<span class="cm">// ... la moitié des cases reçoit new Dog(), l'autre moitié new Cat() ...</span>
+<span class="k">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; <span class="nm">4</span>; i++)
+    <span class="k">delete</span> animals[i];                   <span class="cm">// un delete par élément, via un Animal*</span></pre>
+    </div>
+    <div class="callout"><span class="bulb">🔎</span><p><b>Vérifier les fuites.</b> Le sujet insiste : « Don't forget to check for memory leaks » (p. 10). Sur macOS : <code class="inline">leaks --atExit -- ./ton_programme</code> (testé ici). Sous Linux : <code class="inline">valgrind --leak-check=full ./ton_programme</code> (non testé ici). Pour la copie profonde, le test minimal : modifie <code class="inline">ideas[0]</code> de la copie, affiche l'original, vérifie qu'il n'a pas bougé, puis fais le même test pour <code class="inline">operator=</code>.</p></div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ordre attendu pour un Dog détruit via un Animal*</span></div>
+<pre>Animal constructor called   <span class="cm">← messages de l'exemple : les tiens seront différents</span>
+Brain constructor called
+Dog constructor called
+...
+Dog destructor called       <span class="cm">← d'abord la classe la plus dérivée</span>
+Animal destructor called    <span class="cm">← puis la base (le Brain a été libéré dans ~Dog)</span></pre>
+    </div>
+  </section>
+
+  <section id="ex02">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>ex02 · <span class="accent">Classe abstraite</span></h2></div>
+    <p class="body">Le sujet (p. 12) constate qu'un <code class="inline">Animal</code> « tout court » n'a pas de sens : il ne fait aucun son. Il demande de corriger la classe pour que <b>personne ne puisse l'instancier</b>, et précise que tout doit fonctionner comme avant. Tu peux, si tu veux, renommer la classe avec le préfixe <code class="inline">A</code> (<code class="inline">AAnimal</code>). <b>Fichiers à rendre</b> : ceux de l'exercice précédent + <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>.</p>
+    <p class="body">En C++, une classe est <b>abstraite</b> dès qu'elle a au moins une fonction virtuelle <b>pure</b> : on la déclare avec <code class="inline">= 0</code> au lieu de lui donner un corps. Le changement tient en une ligne dans le header :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex02/Animal.hpp (le changement)</span></div>
+<pre>        <span class="k">virtual</span> <span class="ty">void</span>    <span class="fn">makeSound</span>() <span class="k">const</span> = <span class="nm">0</span>;   <span class="cm">// pure : Animal devient abstraite</span></pre>
+    </div>
+    <div class="duo" style="margin-top:14px">
+      <div class="card">
+        <span class="ic">🚫</span>
+        <h3>Ce qui ne compile plus</h3>
+        <ul>
+          <li><span class="m">→</span><span><code class="inline">new Animal()</code> et <code class="inline">Animal a;</code> : retire-les du <code class="inline">main</code> de l'ex00.</span></li>
+          <li><span class="m">→</span><span>Une classe dérivée qui oublie de redéfinir <code class="inline">makeSound</code> est abstraite à son tour.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">✅</span>
+        <h3>Ce qui marche toujours</h3>
+        <ul>
+          <li><span class="m">→</span><span>Les pointeurs et références <code class="inline">Animal*</code> / <code class="inline">Animal&amp;</code>.</span></li>
+          <li><span class="m">→</span><span>Le constructeur et le destructeur d'<code class="inline">Animal</code> : <code class="inline">Dog</code> et <code class="inline">Cat</code> les appellent. <code class="inline">WrongAnimal</code> reste instanciable : le sujet ne parle que d'<code class="inline">Animal</code>.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ce que dit le compilateur (Apple clang, macOS)</span></div>
+<pre>error: allocating an object of abstract class type 'Animal'
+note: unimplemented pure virtual method 'makeSound' in 'Animal'</pre>
+    </div>
+    <p class="body">Le texte exact varie d'un compilateur à l'autre. Si tu renommes en <code class="inline">AAnimal</code>, les fichiers deviennent <code class="inline">AAnimal.hpp</code> et <code class="inline">AAnimal.cpp</code> (un fichier de classe porte le nom de la classe, p. 3), et <code class="inline">Dog</code> et <code class="inline">Cat</code> héritent d'<code class="inline">AAnimal</code>. Le <code class="inline">main</code> de test garde les mêmes scénarios, sauf les lignes qui instancient la classe : garde-les en commentaire pour montrer en défense que le compilateur les refuse.</p>
+  </section>
+
+  <section id="ex03">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>ex03 · <span class="accent">Interfaces</span> (optionnel)</h2></div>
+    <div class="callout"><span class="bulb">📌</span><p><b>Statut.</b> « You can pass this module without doing exercise 03 » (p. 16). Fais d'abord ex00 à ex02 parfaitement.</p></div>
+    <p class="body">Le sujet rappelle qu'en C++ il n'y a pas d'« interface » au sens strict, mais qu'on appelle couramment ainsi une <b>classe abstraite pure</b> (p. 13), c'est-à-dire sans attribut ni code, que des fonctions virtuelles pures. Ici : <code class="inline">ICharacter</code> et <code class="inline">IMateriaSource</code>, dont le sujet donne les définitions complètes (p. 14 et 15). Toi, tu écris les classes concrètes. <b>Fichiers à rendre</b> (p. 13) : <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Classe</th><th>Ce que dit le sujet</th></tr></thead>
+        <tbody>
+          <tr><td>AMateria</td><td>Classe abstraite : <code class="inline">AMateria(std::string const &amp; type)</code>, <code class="inline">getType()</code>, <code class="inline">clone()</code> virtuelle pure, <code class="inline">use(ICharacter&amp;)</code> virtuelle (p. 13). Copier le <code class="inline">type</code> lors d'une affectation « n'a pas de sens » (p. 14).</td></tr>
+          <tr><td>Ice, Cure</td><td>Types <code class="inline">"ice"</code> et <code class="inline">"cure"</code> en minuscules. <code class="inline">clone()</code> renvoie une nouvelle instance du même type. <code class="inline">use</code> affiche <code class="inline">* shoots an ice bolt at &lt;name&gt; *</code> et <code class="inline">* heals &lt;name&gt;'s wounds *</code>, sans les chevrons (p. 14).</td></tr>
+          <tr><td>Character</td><td>Implémente <code class="inline">ICharacter</code>. Inventaire de 4 emplacements, vide à la construction. <code class="inline">equip</code> prend le premier emplacement libre (0 à 3). Inventaire plein, ou <code class="inline">use</code> / <code class="inline">unequip</code> sur un emplacement inexistant : rien ne se passe, mais pas de bug. <code class="inline">unequip</code> ne doit <b>pas</b> faire de <code class="inline">delete</code> (p. 14). Constructeur avec le nom. Toute copie est profonde, et les Materias sont supprimées avant d'être remplacées, et à la destruction (p. 15).</td></tr>
+          <tr><td>MateriaSource</td><td>Implémente <code class="inline">IMateriaSource</code>. <code class="inline">learnMateria</code> copie la Materia reçue et la garde, 4 au plus, pas forcément distinctes. <code class="inline">createMateria(type)</code> renvoie une copie neuve de la Materia apprise du même type, ou <code class="inline">0</code> si le type est inconnu (p. 15).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:22px">Deux headers montrent la forme (déclarations seulement) :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex03/AMateria.hpp</span></div>
+<pre><span class="op">#ifndef AMATERIA_HPP</span>
+<span class="op">#define AMATERIA_HPP</span>
+
+<span class="op">#include</span> <span class="st">&lt;string&gt;</span>
+
+<span class="k">class</span> <span class="ty">ICharacter</span>;               <span class="cm">// déclaration anticipée, pas d'#include "ICharacter.hpp"</span>
+
+<span class="k">class</span> <span class="ty">AMateria</span>
+{
+    <span class="k">protected</span>:
+        <span class="ty">std::string</span>     type;           <span class="cm">// le sujet écrit [...] : le contenu est à toi</span>
+
+    <span class="k">public</span>:
+        <span class="fn">AMateria</span>(<span class="ty">std::string</span> <span class="k">const</span> &amp; type);
+        <span class="cm">// + forme canonique ; sans oublier un destructeur virtuel</span>
+
+        <span class="ty">std::string</span> <span class="k">const</span> &amp; <span class="fn">getType</span>() <span class="k">const</span>;
+        <span class="k">virtual</span> <span class="ty">AMateria</span>*   <span class="fn">clone</span>() <span class="k">const</span> = <span class="nm">0</span>;
+        <span class="k">virtual</span> <span class="ty">void</span>        <span class="fn">use</span>(<span class="ty">ICharacter</span>&amp; target);
+};
+
+<span class="op">#endif</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex03/Character.hpp</span></div>
+<pre><span class="op">#include</span> <span class="st">"ICharacter.hpp"</span>   <span class="cm">// doit déclarer « class AMateria; »</span>
+
+<span class="k">class</span> <span class="ty">Character</span> : <span class="k">public</span> <span class="ty">ICharacter</span>
+{
+    <span class="k">private</span>:
+        <span class="ty">std::string</span>     name;
+        <span class="ty">AMateria</span>*       inventory[<span class="nm">4</span>];       <span class="cm">// 4 emplacements (p. 14)</span>
+        <span class="cm">// + de quoi retenir les Materias « laissées au sol » (p. 14 : comme tu veux)</span>
+
+    <span class="k">public</span>:
+        <span class="fn">Character</span>(<span class="ty">std::string</span> <span class="k">const</span> &amp; name);
+        <span class="cm">// + forme canonique, copies PROFONDES</span>
+
+        <span class="k">virtual</span> <span class="ty">std::string</span> <span class="k">const</span> &amp; <span class="fn">getName</span>() <span class="k">const</span>;
+        <span class="k">virtual</span> <span class="ty">void</span> <span class="fn">equip</span>(<span class="ty">AMateria</span>* m);
+        <span class="k">virtual</span> <span class="ty">void</span> <span class="fn">unequip</span>(<span class="ty">int</span> idx);
+        <span class="k">virtual</span> <span class="ty">void</span> <span class="fn">use</span>(<span class="ty">int</span> idx, <span class="ty">ICharacter</span>&amp; target);
+};</pre>
+    </div>
+
+    <p class="body"><b>Le résultat attendu.</b> Le sujet fournit un <code class="inline">main</code> (p. 16) : une source qui apprend <code class="inline">Ice</code> et <code class="inline">Cure</code>, un personnage <code class="inline">me</code> qui crée et équipe les deux Materias, puis les utilise sur <code class="inline">bob</code>. La sortie doit être, avec <code class="inline">| cat -e</code> :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">./a.out | cat -e</span></div>
+<pre>* shoots an ice bolt at bob *$
+* heals bob's wounds *$</pre>
+    </div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Qui possède la Materia passée à <code class="inline">learnMateria</code> ?</b> Le <code class="inline">main</code> du sujet fait <code class="inline">src-&gt;learnMateria(new Ice())</code>. Si ta fonction clone la Materia, garde le clone et oublie l'original, cet <code class="inline">Ice</code> n'est jamais libéré. Constaté avec <code class="inline">leaks</code> sur macOS : 2 fuites avec exactement le <code class="inline">main</code> du sujet. Le sujet dit que <code class="inline">learnMateria</code> « copie » la Materia (p. 15) : cloner puis supprimer l'original est donc la lecture qui suit le sujet. Garder le pointeur reçu (la source en devient propriétaire) donne aussi 0 fuite (testé), mais s'écarte du mot « copie » : à valider avec ton évaluateur. Choisis, applique la règle aussi quand les 4 emplacements sont pleins, et sache l'expliquer.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Des headers qui s'incluent en boucle.</b> <code class="inline">AMateria</code> parle d'<code class="inline">ICharacter</code> dans <code class="inline">use</code>, et <code class="inline">ICharacter</code> parle d'<code class="inline">AMateria</code> dans <code class="inline">equip</code>. Si chacun inclut l'autre, ça ne compile pas. Mets une <b>déclaration anticipée</b> (<code class="inline">class ICharacter;</code>) dans le header, et inclus le vrai header dans le <code class="inline">.cpp</code> qui appelle <code class="inline">getName()</code>. Chaque header doit rester utilisable seul (p. 4) : compile-les un par un pour le vérifier.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Le <code class="inline">{}</code> du sujet.</b> Les interfaces du sujet écrivent <code class="inline">virtual ~ICharacter() {}</code> avec un corps vide dans le header (p. 14 et 15), alors que la règle générale interdit toute fonction écrite dans un header (p. 4). Le sujet ne dit pas comment concilier les deux : à vérifier avec ton évaluateur. Une solution sûre est de déclarer le destructeur dans le header et de le définir dans un <code class="inline">.cpp</code>.</p></div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Étape par <span class="accent">étape</span></h2></div>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>ex00 : Animal, Dog, Cat.</b> Les quatre éléments de la forme canonique dans chaque classe, avec un message propre. <code class="inline">makeSound</code> et <code class="inline">getType</code> en <code class="inline">const</code>, <code class="inline">makeSound</code> et le destructeur en <code class="inline">virtual</code>. Recopie le <code class="inline">main</code> du sujet et ajoute les <code class="inline">delete</code>.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>ex00 : WrongAnimal, WrongCat.</b> Même chose sans <code class="inline">virtual</code> sur <code class="inline">makeSound</code>. Compare les deux familles dans le <code class="inline">main</code> : tu dois voir le son du <code class="inline">WrongAnimal</code> à travers un <code class="inline">WrongAnimal*</code>.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Vérifie l'ordre.</b> Construction : base puis dérivée. Destruction : dérivée puis base. Retire temporairement le <code class="inline">virtual</code> du destructeur pour voir la différence, puis remets-le.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>ex01 : Brain.</b> Un tableau de 100 <code class="inline">std::string</code> nommé <code class="inline">ideas</code>, la forme canonique, de quoi lire et écrire une idée. Teste-le seul avant de le brancher.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>ex01 : Brain dans Dog et Cat.</b> <code class="inline">new Brain()</code> au constructeur, <code class="inline">delete</code> au destructeur. Vérifie les fuites avant d'aller plus loin.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>ex01 : copies profondes.</b> Constructeur de copie, puis <code class="inline">operator=</code>, dans <code class="inline">Dog</code> et dans <code class="inline">Cat</code>. Test : remplis <code class="inline">ideas[0]</code> de l'original, copie, change la copie, affiche les deux. Teste aussi l'auto-affectation.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>ex01 : le tableau.</b> Un nombre pair d'<code class="inline">Animal*</code>, moitié <code class="inline">Dog</code>, moitié <code class="inline">Cat</code>, puis un <code class="inline">delete</code> par case. Contrôle les fuites.</span></div>
+      <div class="step on"><span class="n">8</span><span class="txt"><b>ex02 : rends Animal abstraite.</b> <code class="inline">makeSound() const = 0</code>. Corrige le <code class="inline">main</code> (plus de <code class="inline">new Animal()</code>) et vérifie que tout le reste est identique. Garde en commentaire les lignes que le compilateur doit refuser.</span></div>
+      <div class="step on"><span class="n">9</span><span class="txt"><b>ex03 (optionnel) : dans l'ordre.</b> <code class="inline">AMateria</code>, <code class="inline">Ice</code>, <code class="inline">Cure</code>, puis <code class="inline">Character</code>, puis <code class="inline">MateriaSource</code>. Teste le <code class="inline">main</code> du sujet avec <code class="inline">| cat -e</code>, puis tes propres cas : inventaire plein, mauvais indice, copie d'un personnage, type inconnu.</span></div>
+    </div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">09</span><h2>Pièges <span class="accent">classiques</span></h2></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Un destructeur de base non virtuel.</b> <code class="inline">Animal* a = new Dog(); delete a;</code> n'appelle que <code class="inline">~Animal()</code> : le <code class="inline">Brain</code> du chien n'est jamais libéré. Constaté sur macOS avec <code class="inline">leaks</code> : 1 fuite. Avec Apple clang et les flags du sujet, ce code ne compile même pas (<code class="inline">-Wdelete-non-abstract-non-virtual-dtor</code>) ; ce n'est pas garanti avec un autre compilateur, ne compte pas dessus. Mets <code class="inline">virtual</code> sur le destructeur d'<code class="inline">Animal</code> (et de <code class="inline">WrongAnimal</code>).</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Un <code class="inline">const</code> oublié sur <code class="inline">makeSound</code>.</b> Deux cas, constatés avec Apple clang. Si <code class="inline">Animal::makeSound</code> n'est pas <code class="inline">const</code>, l'appel sur un <code class="inline">const Animal*</code> du sujet ne compile pas. Si seule <code class="inline">Dog::makeSound</code> n'est pas <code class="inline">const</code>, la fonction ne redéfinit rien : <code class="inline">-Wall -Wextra -Werror</code> refuse, mais sans <code class="inline">-Werror</code> le programme tourne et affiche le son d'<code class="inline">Animal</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>La copie superficielle du <code class="inline">Brain*</code>.</b> Pas de constructeur de copie, ou un constructeur de copie qui fait <code class="inline">brain = other.brain</code> : les deux animaux partagent un cerveau, et le second <code class="inline">delete</code> est un double <code class="inline">delete</code> (voir la démo). Le même piège existe dans <code class="inline">operator=</code> : n'écris pas <code class="inline">this-&gt;brain = other.brain</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>L'auto-affectation dans <code class="inline">operator=</code>.</b> Si tu fais <code class="inline">delete brain;</code> puis <code class="inline">brain = new Brain(*other.brain);</code> sans te demander si <code class="inline">other</code> est <code class="inline">*this</code>, tu lis un cerveau que tu viens de libérer. Constaté sur macOS : l'idée <code class="inline">"food"</code> a disparu (chaîne vide) ou, avec <code class="inline">MallocScribble=1</code>, le programme plante. Teste avec une référence (<code class="inline">Dog&amp; r = a; a = r;</code>) : un <code class="inline">a = a;</code> écrit tel quel est refusé par clang avec <code class="inline">-Werror</code> (<code class="inline">-Wself-assign-overloaded</code>). Protège avec <code class="inline">if (this != &amp;other)</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Instancier la classe abstraite.</b> <code class="inline">new Animal()</code>, <code class="inline">Animal a;</code> ou un tableau d'<code class="inline">Animal</code> par valeur ne compilent plus après l'ex02. Même chose pour une classe dérivée qui oublie de redéfinir <code class="inline">makeSound</code> : elle est abstraite à son tour.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Le tableau d'<code class="inline">Animal*</code> à remplir puis à détruire.</b> Le tableau contient des pointeurs, pas des <code class="inline">Animal</code>. Pour le remplir, écris un <code class="inline">if</code> / <code class="inline">else</code> : <code class="inline">cond ? new Dog() : new Cat()</code> ne compile pas en C++98 (« incompatible operand types », constaté avec clang). Pour le détruire, un <code class="inline">delete</code> sur <b>chaque case</b>, pas un seul <code class="inline">delete</code> sur le tableau. Si tu as alloué le tableau de pointeurs lui-même (<code class="inline">new Animal*[n]</code>), il lui faut en plus son <code class="inline">delete[]</code> (oublié, <code class="inline">leaks</code> signale 1 fuite sur macOS). Prends un nombre pair pour que « moitié-moitié » ait un sens, et contrôle les fuites.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Un seul message pour toutes les classes.</b> Le sujet demande un message <b>spécifique</b> par classe (p. 8) : sinon, la trace de construction et de destruction ne prouve plus rien. Reprendre le même texte en changeant le nom de la classe suffit.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>ex03 : <code class="inline">unequip</code> qui supprime, ou qui perd le pointeur.</b> Le sujet interdit le <code class="inline">delete</code> dans <code class="inline">unequip</code> (p. 14). Mais si tu mets simplement l'emplacement à <code class="inline">0</code> sans garder l'adresse, la Materia est perdue : fuite. Garde l'adresse quelque part (au sol, dans le personnage, ou dans ton <code class="inline">main</code>) et libère-la à la fin.</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">10</span><h2>Comment je <span class="accent">l'ai fait</span></h2></div>
+    <div class="how"><p class="body">J'ai avancé exercice par exercice, en repartant du dossier précédent. Dès l'ex00, <code class="inline">Animal</code> a un destructeur virtuel et un <code class="inline">makeSound</code> virtuel constant ; <code class="inline">WrongAnimal</code> est son jumeau sans <code class="inline">virtual</code> sur <code class="inline">makeSound</code>. Chaque classe affiche un message propre dans ses constructeurs, son opérateur d'affectation et son destructeur. <code class="inline">Brain</code> recopie ses cent idées dans une boucle. Dans <code class="inline">Dog</code> et <code class="inline">Cat</code>, le constructeur de copie alloue un nouveau cerveau copié, et <code class="inline">operator=</code> teste l'auto-affectation avant de libérer l'ancien cerveau et d'en allouer un nouveau. Mon <code class="inline">main</code> est découpé en petits tests titrés, dont une preuve de copie profonde : je change l'idée 0 de la copie et j'affiche les deux. En ex02, j'ai rendu <code class="inline">makeSound</code> pure et mis en commentaire les lignes qui instancient <code class="inline">Animal</code>. Je n'ai pas fait l'ex03.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 À retenir (défense d'éval)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>Qui décide de la fonction appelée ?</b> Sans <code class="inline">virtual</code>, le type du pointeur, à la compilation. Avec <code class="inline">virtual</code>, le type réel de l'objet, à l'exécution.</div></li>
+        <li><span class="chk">✓</span><div><b>Comment ça marche ?</b> Une table virtuelle par classe et un pointeur caché dans chaque objet. Le standard n'impose pas ce mécanisme, mais les compilateurs courants l'utilisent.</div></li>
+        <li><span class="chk">✓</span><div><b>Pourquoi un destructeur virtuel ?</b> Pour que <code class="inline">delete</code> sur un <code class="inline">Animal*</code> appelle d'abord le destructeur de <code class="inline">Dog</code> (qui libère son <code class="inline">Brain</code>), puis celui d'<code class="inline">Animal</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>À quoi sert WrongAnimal ?</b> À montrer ce qui se passe quand <code class="inline">makeSound</code> n'est pas virtuelle : le son du <code class="inline">WrongCat</code> n'est jamais utilisé via un <code class="inline">WrongAnimal*</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Copie superficielle ou profonde ?</b> Superficielle : on copie l'adresse du <code class="inline">Brain</code>, les deux animaux le partagent, et le <code class="inline">delete</code> est fait deux fois. Profonde : un nouveau <code class="inline">Brain</code> avec le même contenu.</div></li>
+        <li><span class="chk">✓</span><div><b>Que fait ton <code class="inline">operator=</code> ?</b> Il protège l'auto-affectation, copie la partie <code class="inline">Animal</code>, ne partage jamais de pointeur, et retourne <code class="inline">*this</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Classe abstraite.</b> Au moins une fonction virtuelle pure (<code class="inline">= 0</code>). On ne l'instancie pas, mais on l'utilise par pointeur ou référence. Ses dérivées doivent redéfinir la fonction pure.</div></li>
+        <li><span class="chk">✓</span><div><b>Le tableau d'animaux.</b> Des <code class="inline">Animal*</code>, moitié <code class="inline">Dog</code> moitié <code class="inline">Cat</code>, un <code class="inline">delete</code> par case, zéro fuite.</div></li>
+        <li><span class="chk">✓</span><div><b>Interface en C++98.</b> Pas de mot-clé : une classe abstraite pure. <code class="inline">ICharacter</code> et <code class="inline">IMateriaSource</code> n'ont que des fonctions virtuelles pures et un destructeur virtuel. L'ex03 est optionnel (p. 16).</div></li>
+        <li><span class="chk">✓</span><div><b>Règles générales.</b> <code class="inline">c++ -Wall -Wextra -Werror -std=c++98</code>, forme canonique, pas de <code class="inline">using namespace</code> ni de <code class="inline">friend</code>, pas de STL, pas de fonction dans un header, gardes d'inclusion, un message propre par classe.</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

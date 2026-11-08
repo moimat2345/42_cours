@@ -9,14 +9,14 @@ import { makeFixture, project, REPO } from './helpers.mjs';
 
 const EXPECTED = [
   'libft', 'ft_printf', 'get_next_line', 'born2beroot', 'push_swap', 'pipex', 'minishell', 'fractol',
-  'philosophers', 'netpractice', 'cub3d', 'cpp00', 'cpp01', 'cpp02', 'cpp03', 'cpp04', 'cpp05',
+  'philosophers', 'netpractice', 'cub3d', 'cpp00', 'cpp01', 'cpp02', 'cpp03', 'cpp04', 'cpp05', 'cpp06', 'cpp07',
 ];
 
 test('the real content files are valid', () => {
   assert.deepEqual(validateContent(REPO), []);
 });
 
-test('the 17 projects are present, in curriculum order', () => {
+test('the 19 projects are present, in curriculum order', () => {
   assert.deepEqual(loadProjects(REPO).map((p) => p.id), EXPECTED);
 });
 

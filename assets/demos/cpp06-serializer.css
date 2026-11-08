@@ -1,0 +1,23 @@
+[data-demo="cpp06-serializer"] .sz-title{color:var(--muted);font-size:.9rem;margin-bottom:8px}
+[data-demo="cpp06-serializer"] .sz-sim{color:var(--muted);font-size:.84rem;font-weight:300;margin-bottom:14px;border-left:3px solid var(--amber);padding-left:12px}
+[data-demo="cpp06-serializer"] .sz-obj{border:1px solid var(--border-strong);border-radius:12px;padding:14px 16px;background:var(--surface-2)}
+[data-demo="cpp06-serializer"] .sz-objhead{font-family:var(--mono);font-size:.84rem;color:var(--text);margin-bottom:10px;overflow-wrap:anywhere}
+[data-demo="cpp06-serializer"] .sz-fields{display:flex;flex-wrap:wrap;gap:12px}
+[data-demo="cpp06-serializer"] .sz-f{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 160px}
+[data-demo="cpp06-serializer"] .sz-f input{width:100%;min-width:0}
+[data-demo="cpp06-serializer"] .sz-data{margin:12px 0 0;overflow-wrap:anywhere;white-space:pre-wrap}
+[data-demo="cpp06-serializer"] .sz-vals{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+[data-demo="cpp06-serializer"] .sz-row{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:7px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);font-family:var(--mono);font-size:.82rem}
+[data-demo="cpp06-serializer"] .sz-k{color:var(--muted);flex:0 0 auto;min-width:150px}
+[data-demo="cpp06-serializer"] .sz-v{color:var(--text);overflow-wrap:anywhere;min-width:0}
+[data-demo="cpp06-serializer"] .sz-edit{display:flex;flex-wrap:wrap;gap:0 14px;align-items:flex-end;margin-top:16px}
+[data-demo="cpp06-serializer"] .sz-edit .sz-f{max-width:420px}
+[data-demo="cpp06-serializer"] .sz-edit .demo-actions{margin-top:0}
+[data-demo="cpp06-serializer"] button:disabled{opacity:.5;cursor:not-allowed}
+[data-demo="cpp06-serializer"] .sz-result{margin-top:16px}
+[data-demo="cpp06-serializer"] .sz-msg{overflow-wrap:anywhere}
+[data-demo="cpp06-serializer"] .sz-deref,[data-demo="cpp06-serializer"] .sz-wrap{margin-top:8px;font-size:.82rem;color:var(--text);overflow-wrap:anywhere}
+[data-demo="cpp06-serializer"] .sz-deref:empty,[data-demo="cpp06-serializer"] .sz-wrap:empty{display:none}
+@media (max-width:560px){
+  [data-demo="cpp06-serializer"] .sz-k{min-width:0;flex-basis:100%}
+}

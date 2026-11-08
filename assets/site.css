@@ -70,7 +70,7 @@ h2{font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,4vw,2rem);l
 h2 .accent{color:var(--accent)}
 p.body{color:#c3c8d4;font-weight:300;margin-bottom:14px}
 p.body b{color:var(--text);font-weight:500}
-code.inline{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:.12em .42em;color:#dfe3ec}
+code.inline{overflow-wrap:anywhere;font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:.12em .42em;color:#dfe3ec}
 .map{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .map-item{border:1px solid var(--border);border-radius:14px;padding:18px 20px;background:var(--surface);display:flex;gap:14px;align-items:flex-start;transition:.25s}
 .map-item:hover{border-color:var(--border-strong);transform:translateY(-2px)}
@@ -92,7 +92,7 @@ code.inline{font-family:var(--mono);font-size:.86em;background:var(--surface-2);
 .editor .bar .fname{font-family:var(--mono);font-size:.76rem;color:var(--muted);margin-left:6px}
 pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.7}
 pre,code,kbd,samp,.mem-code{font-variant-ligatures:none} /* JetBrains Mono would draw -> as an arrow: code must show the characters typed */
-.k{color:#ff8fa3}.ty{color:#7fd4ff}.fn{color:#c9b8ff}.st{color:#9ff0c4}.cm{color:#5b6475;font-style:italic}.nm{color:#ffb454}.op{color:#ff9d54}
+.k{color:#ff8fa3}.ty{color:#7fd4ff}.fn{color:#c9b8ff}.st{color:#9ff0c4}.cm{color:#8a93a6;font-style:italic}.nm{color:#ffb454}.op{color:#ff9d54}
 .table-wrap{border:1px solid var(--border);border-radius:16px;overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.9rem}
 th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--border);vertical-align:top}

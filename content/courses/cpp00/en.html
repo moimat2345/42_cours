@@ -1,0 +1,558 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C++ · Module 00 · The basics</span>
+  <h1 class="title">Your first classes <span class="g">in C++</span></h1>
+  <p class="lead">Understand <b>streams</b>, <b>classes</b> and <code class="inline">static</code> to get through the module's three exercises: a <b>megaphone</b>, an <b>eight-contact phonebook</b> and an <code class="inline">Account.cpp</code> file to rebuild.</p>
+  <p class="subj">subject: en.subject-cpp_0.pdf · version 11.0 · c++ -Wall -Wextra -Werror (-std=c++98)</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>The project in <span class="accent">short</span></h2></div>
+    <p class="body">CPP00 is your first meeting with C++. The subject's cover announces it: namespaces, classes, member functions, stdio streams, initialization lists, <code class="inline">static</code>, <code class="inline">const</code> and a few other basics. You write three programs of increasing difficulty: a <b><code class="inline">megaphone</code></b> that shouts its arguments in uppercase (ex00, p. 8), a command-line <b>phonebook</b> (ex01, p. 9-10), and the <b>rebuilding of a lost file</b>, <code class="inline">Account.cpp</code>, from its header and a log file (ex02, p. 11-12).</p>
+    <p class="body">The module does not ask for deep theory: it makes you handle the basic building blocks of object-oriented programming, in C++98. The course follows this order: the tools (streams, <code class="inline">std::string</code>), classes, <code class="inline">static</code>, then each exercise.</p>
+    <div class="callout"><span class="bulb">📖</span><p>The page numbers in parentheses, like <b>(p. 8)</b>, are the ones printed at the bottom of the subject's pages (version 11.0): the cover has none and the table of contents is page 1. Keep the PDF open next to this page: this course explains the subject, it does not replace it.</p></div>
+    <p class="body" style="margin-top:20px">Three changes of reflex compared to C sum up the module:</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Streams instead of <code class="inline">printf</code>.</b> You write with <code class="inline">std::cout</code>, read with <code class="inline">std::cin</code> and <code class="inline">std::getline</code>, and format with <code class="inline">std::setw</code>. <code class="inline">printf</code> is forbidden (p. 3).</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Classes instead of loose functions.</b> Data and the functions that handle it live together, with what is <code class="inline">private</code> and what is <code class="inline">public</code>. Each class has its own <code class="inline">.hpp</code> and <code class="inline">.cpp</code>.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b><code class="inline">static</code> members.</b> A piece of data shared by every object of a class, like the number of open accounts: that is the heart of ex02.</span></div>
+    </div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>The project <span class="accent">map</span></h2></div>
+    <p class="body">First the rules that apply to the whole module (the subject's "General rules" chapter), then the three exercises.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Topic</th><th>What the subject says</th><th>Page</th></tr></thead>
+        <tbody>
+          <tr><td>Language</td><td>Your code follows the <b>C++98</b> standard.</td><td>p. 2</td></tr>
+          <tr><td>Compiling</td><td><code class="inline">c++</code> with <code class="inline">-Wall -Wextra -Werror</code>. The code must still compile when you add <code class="inline">-std=c++98</code>.</td><td>p. 3</td></tr>
+          <tr><td>Forbidden (grade 0)</td><td><code class="inline">*printf()</code>, <code class="inline">*alloc()</code> and <code class="inline">free()</code>. C++11 (and derived forms) and Boost are forbidden too.</td><td>p. 3</td></tr>
+          <tr><td>Forbidden (grade -42)</td><td><code class="inline">using namespace &lt;ns_name&gt;</code> and <code class="inline">friend</code>, unless the subject says otherwise.</td><td>p. 4</td></tr>
+          <tr><td>STL</td><td>No containers (<code class="inline">vector</code>, <code class="inline">list</code>, <code class="inline">map</code>…) and no algorithms (anything that requires <code class="inline">&lt;algorithm&gt;</code>) before modules 08 and 09. Otherwise -42.</td><td>p. 4</td></tr>
+          <tr><td>Names</td><td>Directories <code class="inline">ex00</code>, <code class="inline">ex01</code>… Class names in UpperCamelCase; the files of a class are named after it: <code class="inline">ClassName.hpp</code>, <code class="inline">ClassName.cpp</code>. In practice: one <code class="inline">.hpp</code> and one <code class="inline">.cpp</code> per class.</td><td>p. 3</td></tr>
+          <tr><td>Output</td><td>Every output message ends with a newline and goes to the standard output, unless specified otherwise.</td><td>p. 3</td></tr>
+          <tr><td>Headers</td><td>No function implementation in a header (except function templates): 0 for the exercise. Each header includes what it depends on <b>and</b> has include guards, otherwise 0.</td><td>p. 4</td></tr>
+          <tr><td>Memory</td><td>Every <code class="inline">new</code> must be paired: no leaks.</td><td>p. 4</td></tr>
+          <tr><td>Canonical form</td><td>Required from module 02 to module 09: not yet in CPP00.</td><td>p. 4</td></tr>
+          <tr><td>Makefile</td><td>Same rules as in C (see the Norm chapter of the C subject).</td><td>p. 4</td></tr>
+          <tr><td>Style</td><td>No Norm in C++. Write code your evaluators can read.</td><td>p. 3</td></tr>
+          <tr><td>Defense</td><td>A small modification of the project may be requested during the evaluation.</td><td>p. 13</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:22px">The three exercises (each box announces "Forbidden functions: None", but the general bans above still apply):</p>
+    <div class="map">
+      <div class="map-item"><span class="ex">ex00</span><div><h4>Megaphone</h4><p>Directory <code class="inline">ex00/</code>. Files to turn in: <code class="inline">Makefile</code>, <code class="inline">megaphone.cpp</code>. A program that prints its arguments in uppercase (p. 8). <a href="#ex00">See the section</a>.</p></div></div>
+      <div class="map-item"><span class="ex">ex01</span><div><h4>My Awesome PhoneBook</h4><p>Directory <code class="inline">ex01/</code>. Files to turn in: <code class="inline">Makefile</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>. Two classes, <code class="inline">PhoneBook</code> and <code class="inline">Contact</code>, and three commands (p. 9-10). <a href="#ex01">See the section</a>.</p></div></div>
+      <div class="map-item"><span class="ex">ex02</span><div><h4>The Job Of Your Dreams</h4><p>Directory <code class="inline">ex02/</code>. Files to turn in: <code class="inline">Makefile</code>, <code class="inline">Account.cpp</code>, <code class="inline">Account.hpp</code>, <code class="inline">tests.cpp</code> (p. 11). <b>Not mandatory</b> to pass the module (p. 12). <a href="#ex02">See the section</a>.</p></div></div>
+    </div>
+  </section>
+
+  <section id="basics">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Namespaces, streams and <span class="accent">std::string</span></h2></div>
+    <p class="body"><b>Namespaces.</b> In C, every name lives in the same space: two functions cannot have the same name. In C++, a <b>namespace</b> is a named space, and the standard library lives in the namespace <code class="inline">std</code>. The <code class="inline">::</code> operator ("scope") says where to look: <code class="inline">std::cout</code> reads as "the <code class="inline">cout</code> of <code class="inline">std</code>".</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">namespace.cpp</span></div>
+<pre><span class="op">#include</span> <span class="st">&lt;iostream&gt;</span>
+
+<span class="k">namespace</span> <span class="ty">Bank</span>
+{
+    <span class="k">const</span> <span class="ty">int</span> rate = <span class="nm">3</span>;
+}
+
+<span class="ty">int</span> <span class="fn">main</span>(<span class="ty">void</span>)
+{
+    std::cout &lt;&lt; <span class="ty">Bank</span>::rate &lt;&lt; std::endl;   <span class="cm">// prints 3</span>
+    <span class="k">return</span> (<span class="nm">0</span>);
+}</pre>
+    </div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>No <code class="inline">using namespace std;</code>.</b> The subject forbids it (grade -42, p. 4). The compiler, on the other hand, accepts it without complaint: nothing warns you, the evaluator is the one who penalizes. Always write the <code class="inline">std::</code> prefix.</p></div>
+    <p class="body" style="margin-top:20px"><b>Writing: <code class="inline">std::cout</code>.</b> With <code class="inline">#include &lt;iostream&gt;</code>, the <code class="inline">&lt;&lt;</code> operator sends a value into the output stream <i>and returns that stream</i>: you can chain them. No <code class="inline">%d</code> or <code class="inline">%s</code>: the stream knows the type of what you give it. <code class="inline">std::endl</code> writes a newline and flushes the buffer; the subject wants a newline at the end of every message (p. 3).</p>
+    <p class="body"><b>Reading: <code class="inline">std::cin</code> and <code class="inline">std::getline</code>.</b> <code class="inline">std::cin &gt;&gt; x</code> reads "a word" (up to the next space or newline). <code class="inline">std::getline(std::cin, line)</code> reads a <b>whole line</b> into a <code class="inline">std::string</code>, without the <code class="inline">'\n'</code>. Both return the stream, which counts as "false" in a condition when the read failed, for example at the end of the input (Ctrl-D in a terminal):</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">main.cpp</span></div>
+<pre><span class="op">#include</span> <span class="st">&lt;iostream&gt;</span>
+<span class="op">#include</span> <span class="st">&lt;<span class="ty">string</span>&gt;</span>
+
+<span class="ty">int</span> <span class="fn">main</span>(<span class="ty">void</span>)
+{
+    std::<span class="ty">string</span> name;
+
+    std::cout &lt;&lt; <span class="st">"Login: "</span>;
+    <span class="k">if</span> (!std::<span class="fn">getline</span>(std::cin, name))   <span class="cm">// end of input: stop cleanly</span>
+        <span class="k">return</span> (<span class="nm">1</span>);
+    std::cout &lt;&lt; <span class="st">"Hello "</span> &lt;&lt; name &lt;&lt; std::endl;
+    <span class="k">return</span> (<span class="nm">0</span>);
+}</pre>
+    </div>
+    <p class="body"><b>Strings: <code class="inline">std::string</code>.</b> No more <code class="inline">strlen</code> or <code class="inline">strcmp</code>: a <code class="inline">std::string</code> can do all of that, with <code class="inline">#include &lt;string&gt;</code>. The subject points to the reference pages for <code class="inline">string</code> and <code class="inline">iomanip</code> (p. 10); cppreference.com has very complete ones (<a href="https://en.cppreference.com/w/cpp/string/basic_string">std::string</a>, <a href="https://en.cppreference.com/w/cpp/io/manip/setw">std::setw</a>).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>You need</th><th>You write</th></tr></thead>
+        <tbody>
+          <tr><td>Length (in bytes)</td><td><code class="inline">s.length()</code></td></tr>
+          <tr><td>Is it empty?</td><td><code class="inline">s.empty()</code></td></tr>
+          <tr><td>The first 9 characters</td><td><code class="inline">s.substr(0, 9)</code></td></tr>
+          <tr><td>Join two strings</td><td><code class="inline">s + "."</code></td></tr>
+          <tr><td>Compare</td><td><code class="inline">s == "ADD"</code></td></tr>
+          <tr><td>The character number i</td><td><code class="inline">s[i]</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:22px"><b>Formatting: <code class="inline">&lt;iomanip&gt;</code>.</b> <code class="inline">std::setw(n)</code> sets the minimum width of the <b>next</b> item written: if it is shorter, the stream pads it on the left with spaces (right-aligned by default). Three things to know, checked with clang on macOS:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Code</th><th>Output</th><th>What to remember</th></tr></thead>
+        <tbody>
+          <tr><td><code class="inline">setw(10) &lt;&lt; "Bob"</code></td><td><code class="inline">       Bob</code></td><td>7 spaces then <code class="inline">Bob</code>: right-aligned.</td></tr>
+          <tr><td><code class="inline">setw(3) &lt;&lt; "abcdefgh"</code></td><td><code class="inline">abcdefgh</code></td><td><code class="inline">setw</code> never cuts: truncating is your job.</td></tr>
+          <tr><td><code class="inline">setw(10) &lt;&lt; "a" &lt;&lt; "b"</code></td><td><code class="inline">         ab</code></td><td>The width only applies to <code class="inline">"a"</code>, not to <code class="inline">"b"</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">By contrast, <code class="inline">std::setfill(c)</code> (the padding character) stays active until you change it: we come back to that in the pitfalls.</p>
+  </section>
+
+  <section id="classes">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2><span class="accent">Classes</span></h2></div>
+    <p class="body">A <b>class</b> groups <b>attributes</b> (the data) and <b>methods</b> (the functions that work on it). An <b>object</b> is an instance of the class: <code class="inline">Student s("mateon", 3);</code> builds an object. Like a C <code class="inline">struct</code>, but the functions are inside.</p>
+    <div class="duo">
+      <div class="card">
+        <h3>public</h3>
+        <ul>
+          <li><span class="m">•</span><span>What the rest of the program is allowed to use</span></li>
+          <li><span class="m">•</span><span>The methods you call from <code class="inline">main</code></span></li>
+          <li><span class="m">•</span><span>The accessors (<code class="inline">getLogin</code>…)</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>private</h3>
+        <ul>
+          <li><span class="m">•</span><span>What only the class itself uses</span></li>
+          <li><span class="m">•</span><span>Almost all the attributes</span></li>
+          <li><span class="m">•</span><span>Internal helper functions</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="body" style="margin-top:18px">The subject sets the rule for the split (p. 9): anything that will <b>always be used inside</b> a class is <code class="inline">private</code>, anything that can be used <b>outside</b> is <code class="inline">public</code>. In a <code class="inline">class</code>, everything is private until you write <code class="inline">public:</code>; in a <code class="inline">struct</code>, it is the opposite. Accessing a private member from outside does not compile. The <a href="/en/extras/public-vs-private/">public vs private</a> course explains this difference and encapsulation with a <code class="inline">Contact</code> class.</p>
+    <p class="body"><b>The header declares, the .cpp defines.</b> The <code class="inline">.hpp</code> holds the class declaration, with its include guards; the <code class="inline">.cpp</code> holds the code of the methods, prefixed by the class name and <code class="inline">::</code>. An implementation in a header is worth 0 for the exercise (p. 4). A tiny example, unrelated to the module:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Student.hpp</span></div>
+<pre><span class="op">#ifndef</span> STUDENT_HPP
+<span class="op"># define</span> STUDENT_HPP
+
+<span class="op"># include</span> <span class="st">&lt;<span class="ty">string</span>&gt;</span>
+
+<span class="k">class</span> <span class="ty">Student</span>
+{
+<span class="k">public</span>:
+    <span class="ty">Student</span>(<span class="k">const</span> std::<span class="ty">string</span> &amp;login, <span class="ty">int</span> level);   <span class="cm">// constructor</span>
+    ~<span class="ty">Student</span>(<span class="ty">void</span>);                                 <span class="cm">// destructor</span>
+
+    <span class="k">const</span> std::<span class="ty">string</span> &amp;<span class="fn">getLogin</span>(<span class="ty">void</span>) <span class="k">const</span>;
+    <span class="ty">int</span> <span class="fn">getLevel</span>(<span class="ty">void</span>) <span class="k">const</span>;
+    <span class="ty">void</span> <span class="fn">levelUp</span>(<span class="ty">void</span>);
+
+<span class="k">private</span>:
+    <span class="k">const</span> std::<span class="ty">string</span> _login;   <span class="cm">// set at construction, never changes</span>
+    <span class="ty">int</span> _level;
+};
+
+<span class="op">#endif</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Student.cpp</span></div>
+<pre><span class="op">#include</span> <span class="st">"Student.hpp"</span>
+
+<span class="ty">Student</span>::<span class="ty">Student</span>(<span class="k">const</span> std::<span class="ty">string</span> &amp;login, <span class="ty">int</span> level) : <span class="fn">_login</span>(login), <span class="fn">_level</span>(level)
+{
+}
+
+<span class="ty">void</span> <span class="ty">Student</span>::<span class="fn">levelUp</span>(<span class="ty">void</span>)
+{
+    <span class="k">this</span>-&gt;_level++;   <span class="cm">// this: the object the method was called on</span>
+}
+
+<span class="cm">// the destructor and the accessors are written the same way</span></pre>
+    </div>
+    <p class="body"><b>Constructor and destructor.</b> The constructor has the name of the class, has no return type, and runs when the object is created. The destructor (<code class="inline">~Student</code>) runs when the object goes away, for example at the end of the block where it was declared.</p>
+    <p class="body"><b><code class="inline">this</code>.</b> Inside a method, <code class="inline">this</code> is a <b>pointer to the current object</b>: <code class="inline">this-&gt;_level</code> is the attribute of the object you called the method on. Writing just <code class="inline">_level</code> is the same; <code class="inline">this-&gt;</code> removes the doubt when a parameter has the same name as the attribute.</p>
+    <p class="body"><b>The initialization list.</b> After the <code class="inline">:</code> of the constructor, <code class="inline">_login(login), _level(level)</code> initializes the attributes <i>before</i> the body runs. It is <b>mandatory</b> for a <code class="inline">const</code> attribute (or a reference), and it is the right habit for the others:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">clang (macOS) · compiler messages</span></div>
+<pre>error: constructor for 'Account' must explicitly initialize the const member '_id'
+error: cannot assign to non-static data member '_id' with const-qualified type 'const int'</pre>
+    </div>
+    <p class="body">Attributes are initialized in the order they are <b>declared</b> in the class, not in the order of your list. With <code class="inline">-Wall -Werror</code>, a list in the wrong order is a compile error: <code class="inline">field '_b' will be initialized after field '_a'</code> (observed with clang).</p>
+    <p class="body"><b><code class="inline">const</code>, two uses.</b> A <code class="inline">const</code> attribute does not change after construction. A <code class="inline">const</code> method (the word after the parentheses: <code class="inline">int getLevel(void) const;</code>) promises not to modify the object: modifying an attribute inside does not compile (<code class="inline">cannot assign to non-static data member within const member function</code>). Make <code class="inline">const</code> everything that modifies nothing, starting with the accessors.</p>
+    <div class="callout"><span class="bulb">💡</span><p><b>An array of objects needs a default constructor.</b> If <code class="inline">PhoneBook</code> has an attribute <code class="inline">Contact _contacts[8];</code>, each slot is built with no arguments: without a constructor that takes no parameters, it does not compile (<code class="inline">which does not have a default constructor</code>). As long as you declare no constructor in <code class="inline">Contact</code>, the compiler provides one for you.</p></div>
+  </section>
+
+  <section id="static">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2><span class="accent">static</span> members</h2></div>
+    <p class="body">An ordinary attribute exists <b>once per object</b>. A <code class="inline">static</code> attribute exists <b>once for the whole class</b>: every object shares it, and it exists even when no object has been created. It is the right place for an object counter or a total. A <code class="inline">static</code> method belongs to the class too, not to an object: it has no <code class="inline">this</code> and is called without an object, with <code class="inline">Class::method()</code>.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Ticket.hpp</span></div>
+<pre><span class="op">#ifndef</span> TICKET_HPP
+<span class="op"># define</span> TICKET_HPP
+
+<span class="k">class</span> <span class="ty">Ticket</span>
+{
+<span class="k">public</span>:
+    <span class="ty">Ticket</span>(<span class="ty">void</span>);
+
+    <span class="ty">int</span> <span class="fn">getNumber</span>(<span class="ty">void</span>) <span class="k">const</span>;
+    <span class="k">static</span> <span class="ty">int</span> <span class="fn">getCount</span>(<span class="ty">void</span>);   <span class="cm">// static method: called without an object</span>
+
+<span class="k">private</span>:
+    <span class="k">static</span> <span class="ty">int</span> _count;           <span class="cm">// ONE copy for the whole class</span>
+    <span class="ty">int</span> _number;                 <span class="cm">// one copy per ticket</span>
+};
+
+<span class="op">#endif</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Ticket.cpp</span></div>
+<pre><span class="op">#include</span> <span class="st">"Ticket.hpp"</span>
+
+<span class="ty">int</span> <span class="ty">Ticket</span>::_count = <span class="nm">0</span>;          <span class="cm">// the definition, written ONCE, in a .cpp</span>
+
+<span class="ty">Ticket</span>::<span class="ty">Ticket</span>(<span class="ty">void</span>) : <span class="fn">_number</span>(_count + <span class="nm">1</span>)
+{
+    _count++;                    <span class="cm">// shared: every ticket sees the same value</span>
+}
+
+<span class="ty">int</span> <span class="ty">Ticket</span>::<span class="fn">getCount</span>(<span class="ty">void</span>)
+{
+    <span class="k">return</span> (_count);             <span class="cm">// no this here: only static members</span>
+}</pre>
+    </div>
+    <p class="body">With this code, <code class="inline">Ticket::getCount()</code> is 0 before any ticket, then 2 after two tickets are created (checked). Three classic errors, checked with clang on macOS:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>What you do</th><th>What you get</th></tr></thead>
+        <tbody>
+          <tr><td>You declare <code class="inline">static int _count;</code> but never write <code class="inline">int Ticket::_count = 0;</code></td><td>Linker error: <code class="inline">Undefined symbols … "Ticket::_count"</code></td></tr>
+          <tr><td>You write the definition in the <code class="inline">.hpp</code>, included by two <code class="inline">.cpp</code> files</td><td><code class="inline">duplicate symbol 'Ticket::_count'</code>. And an implementation in a header is worth 0 (p. 4)</td></tr>
+          <tr><td>You use <code class="inline">this</code> or a non-static attribute inside a <code class="inline">static</code> method</td><td><code class="inline">invalid use of 'this' outside of a non-static member function</code>, or <code class="inline">invalid use of member … in static member function</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:20px">This is exactly the mechanism of ex02: the <code class="inline">Account</code> class keeps in four static members the number of accounts, the total of the amounts, the number of deposits and the number of withdrawals, shared by all the accounts. Play with the demo: the log imitates the subject's log file (its lines are detailed in the <a href="#ex02">ex02</a> section).</p>
+    <div class="demo" data-demo="cpp00-account-log">
+      <div class="demo-static">
+        <p class="body"><b>Demo (requires JavaScript):</b> buttons to create an account with an amount, deposit, withdraw and show the status of numbered accounts. The four static counters (<code class="inline">nbAccounts</code>, <code class="inline">totalAmount</code>, <code class="inline">totalNbDeposits</code>, <code class="inline">totalNbWithdrawals</code>) update and the log is written as operations happen.</p>
+        <p class="body">Example without JavaScript: create two accounts of 42 and 54, then deposit 10 into the first one.<br>After the two creations: <code class="inline">nbAccounts = 2</code>, <code class="inline">totalAmount = 96</code>.<br>After depositing 10 into account 0: <code class="inline">totalAmount = 106</code>, <code class="inline">totalNbDeposits = 1</code>.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Create accounts, deposit, withdraw: the static counters follow along and the log is written like the subject's log file.","countersLabel":"The four static counters of the Account class","nbAccounts":"nbAccounts","totalAmount":"totalAmount","totalNbDeposits":"totalNbDeposits","totalNbWithdrawals":"totalNbWithdrawals","amountLabel":"Amount (integer from 0 to 1000000)","amountPh":"e.g. 42","accountLabel":"Account","accountOption":"index {index} (amount {amount})","noAccount":"no account","create":"Create an account (amount)","deposit":"Deposit","withdraw":"Withdraw","show":"Show the status","reset":"Start over","logCaption":"Log (what std::cout would write)","logLabel":"Operations log, one line per call","errAmount":"✗ Enter an integer from 0 to {max}, with no sign and no decimal point.","errNoAccount":"✗ Create an account first.","errMax":"✗ This demo stops at {max} accounts.","okCreate":"✓ Account {index} created with {amount}.","okDeposit":"✓ {amount} deposited into account {index}.","okWithdraw":"✓ {amount} withdrawn from account {index}.","refused":"✗ Withdrawal refused: {amount} is more than the balance of account {index} ({balance}). No counter moves.","okShow":"✓ Status shown: displayAccountsInfos() then displayStatus() of each account.","okReset":"Everything is back to zero.","idle":"No operation yet.","ts":"[{y}{mo}{d}_{h}{mi}{s}] ","logCreated":"index:{index};amount:{amount};created","logDeposit":"index:{index};p_amount:{prev};deposit:{value};amount:{amount};nb_deposits:{nb}","logWithdraw":"index:{index};p_amount:{prev};withdrawal:{value};amount:{amount};nb_withdrawals:{nb}","logRefused":"index:{index};p_amount:{prev};withdrawal:refused","logInfos":"accounts:{accounts};total:{total};deposits:{deposits};withdrawals:{withdrawals}","logStatus":"index:{index};amount:{amount};deposits:{deposits};withdrawals:{withdrawals}"}</script>
+    </div>
+    <p class="body">What the demo shows you, to reproduce yourself:</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>A shared counter.</b> Create an account of 42 then one of 54: <code class="inline">nbAccounts</code> becomes 2 and <code class="inline">totalAmount</code> becomes 96. Neither account "owns" these values, they belong to the class.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>A deposit touches the account and the total.</b> Deposit 10 into account 0: its amount becomes 52, <code class="inline">totalAmount</code> becomes 106 and <code class="inline">totalNbDeposits</code> becomes 1.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>A refused withdrawal changes nothing.</b> Withdraw more than the balance: a <code class="inline">withdrawal:refused</code> line is written, but no counter moves.</span></div>
+    </div>
+  </section>
+
+  <section id="ex00">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>ex00 · <span class="accent">Megaphone</span></h2></div>
+    <p class="body">The subject (p. 8) asks for "a program that produces the following output": it puts its arguments in uppercase, and if you give it none, it prints a "noise" message. It adds "Solve the exercises in a C++ manner": <code class="inline">std::cout</code> and <code class="inline">std::string</code>, no <code class="inline">puts</code> or <code class="inline">printf</code>.</p>
+    <p class="body"><b>Files to turn in</b> (p. 8), in <code class="inline">ex00/</code>: <code class="inline">Makefile</code> and <code class="inline">megaphone.cpp</code>.</p>
+    <p class="body"><b>The expected result</b>, as the subject gives it:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">output required by the subject (p. 8)</span></div>
+<pre>$&gt;./megaphone "shhhhh... I think the students are asleep..."
+SHHHHH... I THINK THE STUDENTS ARE ASLEEP...
+$&gt;./megaphone Damnit " ! " "Sorry students, I thought this thing was off."
+DAMNIT ! SORRY STUDENTS, I THOUGHT THIS THING WAS OFF.
+$&gt;./megaphone
+* LOUD AND UNBEARABLE FEEDBACK NOISE *
+$&gt;</pre>
+    </div>
+    <p class="body">Three details can be read in these examples:</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Arguments are glued together as is.</b> In the second example, <code class="inline">Damnit</code>, <code class="inline">" ! "</code> (with its spaces) and the sentence give <code class="inline">DAMNIT ! SORRY…</code>: the program adds no space between two arguments.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>With no argument, a fixed message.</b> In <code class="inline">main</code>, <code class="inline">argc == 1</code> means "no argument": <code class="inline">argv[0]</code> is the name of the program.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>A newline at the end.</b> The subject requires it for every output (p. 3), including the noise message.</span></div>
+    </div>
+    <p class="body" style="margin-top:20px"><b>Uppercasing.</b> <code class="inline">std::toupper</code> (header <code class="inline">&lt;cctype&gt;</code>) takes a character and returns its uppercase version, but as an <code class="inline">int</code>: sent as is to <code class="inline">std::cout</code>, it would print as a number (<code class="inline">65</code> instead of <code class="inline">A</code>, checked). Convert it back to <code class="inline">char</code> before writing it. The C standard requires the argument to be representable as an <code class="inline">unsigned char</code> (or to be <code class="inline">EOF</code>): convert the character first, it is the safe case, especially for accented characters.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">snippet · an idea, not the program</span></div>
+<pre>std::cout &lt;&lt; static_cast&lt;<span class="ty">char</span>&gt;(std::<span class="fn">toupper</span>(static_cast&lt;<span class="ty">unsigned</span> <span class="ty">char</span>&gt;(c)));</pre>
+    </div>
+    <p class="body"><b>The Makefile.</b> The subject says the Makefile rules are the same as in C (p. 4); the exact rules are in the Norm, so reread it. A skeleton that compiles with <code class="inline">c++</code>, rebuilds nothing when nothing changed (checked by running <code class="inline">make</code> twice in a row) and provides <code class="inline">all</code>, <code class="inline">clean</code>, <code class="inline">fclean</code> and <code class="inline">re</code>:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Makefile</span></div>
+<pre>NAME     = megaphone
+CXX      = c++
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+SRC      = megaphone.cpp
+OBJ      = $(SRC:.cpp=.o)
+
+all: $(NAME)
+
+$(NAME): $(OBJ)
+	$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $&lt; -o $@
+
+clean:
+	rm -f $(OBJ)
+
+fclean: clean
+	rm -f $(NAME)
+
+re: fclean all
+
+.PHONY: all clean fclean re</pre>
+    </div>
+    <p class="body">For the next exercises, only the <code class="inline">SRC</code> list changes (and the <code class="inline">NAME</code>: the ex01 subject asks for "a relevant name" for the executable, p. 10). Careful: this rule does not depend on the <code class="inline">.hpp</code> files. If you modify a header, <code class="inline">make</code> recompiles nothing by itself (observed): run <code class="inline">make re</code>, or add your headers as dependencies of the <code class="inline">%.o</code> rule.</p>
+  </section>
+
+  <section id="ex01">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>ex01 · <span class="accent">My Awesome PhoneBook</span></h2></div>
+    <p class="body">A "1980s-style" phonebook (p. 9), on the command line. <b>Files to turn in</b> (p. 9), in <code class="inline">ex01/</code>: <code class="inline">Makefile</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>. The executable's name is free but must be relevant (p. 10).</p>
+    <div class="map">
+      <div class="map-item"><span class="ex">Classes</span><div><h4>PhoneBook and Contact</h4><p>Two classes, and the phonebook must be an <b>instance</b> of <code class="inline">PhoneBook</code>, each contact an instance of <code class="inline">Contact</code> (p. 9). You are free to design them, with the public/private rule from the <a href="#classes">classes</a> section.</p></div></div>
+      <div class="map-item"><span class="ex">Storage</span><div><h4>8 contacts, no new</h4><p><code class="inline">PhoneBook</code> has an array of contacts, 8 at most. A 9th contact <b>replaces the oldest one</b>. Dynamic allocation is <b>forbidden</b> (p. 9).</p></div></div>
+      <div class="map-item"><span class="ex">ADD</span><div><h4>Save a contact</h4><p>The fields are entered one at a time: first name, last name, nickname, phone number, "darkest secret". No field can be empty (p. 10).</p></div></div>
+      <div class="map-item"><span class="ex">SEARCH</span><div><h4>Display a contact</h4><p>A list of 4 columns (index, first name, last name, nickname), then a prompt for an index, then the contact is displayed, one field per line. Wrong index: you define a relevant behavior (p. 10).</p></div></div>
+      <div class="map-item"><span class="ex">EXIT</span><div><h4>Quit</h4><p>The program quits and the contacts are lost. Any other input is ignored; after each command is executed, the program waits for another one (p. 10).</p></div></div>
+    </div>
+    <p class="body" style="margin-top:22px"><b>The headers.</b> Here is one way to write them: declarations only, two classes, nothing more. The names are suggestions (the subject dictates no method name here).</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Contact.hpp</span></div>
+<pre><span class="op">#ifndef</span> CONTACT_HPP
+<span class="op"># define</span> CONTACT_HPP
+
+<span class="op"># include</span> <span class="st">&lt;<span class="ty">string</span>&gt;</span>
+
+<span class="k">class</span> <span class="ty">Contact</span>
+{
+<span class="k">public</span>:
+    <span class="ty">void</span> <span class="fn">setFirstName</span>(<span class="k">const</span> std::<span class="ty">string</span> &amp;value);
+    <span class="ty">void</span> <span class="fn">setLastName</span>(<span class="k">const</span> std::<span class="ty">string</span> &amp;value);
+    <span class="ty">void</span> <span class="fn">setNickname</span>(<span class="k">const</span> std::<span class="ty">string</span> &amp;value);
+    <span class="ty">void</span> <span class="fn">setPhoneNumber</span>(<span class="k">const</span> std::<span class="ty">string</span> &amp;value);
+    <span class="ty">void</span> <span class="fn">setDarkestSecret</span>(<span class="k">const</span> std::<span class="ty">string</span> &amp;value);
+
+    <span class="k">const</span> std::<span class="ty">string</span> &amp;<span class="fn">getFirstName</span>(<span class="ty">void</span>) <span class="k">const</span>;
+    <span class="k">const</span> std::<span class="ty">string</span> &amp;<span class="fn">getLastName</span>(<span class="ty">void</span>) <span class="k">const</span>;
+    <span class="k">const</span> std::<span class="ty">string</span> &amp;<span class="fn">getNickname</span>(<span class="ty">void</span>) <span class="k">const</span>;
+    <span class="k">const</span> std::<span class="ty">string</span> &amp;<span class="fn">getPhoneNumber</span>(<span class="ty">void</span>) <span class="k">const</span>;
+    <span class="k">const</span> std::<span class="ty">string</span> &amp;<span class="fn">getDarkestSecret</span>(<span class="ty">void</span>) <span class="k">const</span>;
+
+<span class="k">private</span>:
+    std::<span class="ty">string</span> _firstName;
+    std::<span class="ty">string</span> _lastName;
+    std::<span class="ty">string</span> _nickname;
+    std::<span class="ty">string</span> _phoneNumber;    <span class="cm">// a std::string: an int would lose a leading 0</span>
+    std::<span class="ty">string</span> _darkestSecret;
+};
+
+<span class="op">#endif</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">PhoneBook.hpp</span></div>
+<pre><span class="op">#ifndef</span> PHONEBOOK_HPP
+<span class="op"># define</span> PHONEBOOK_HPP
+
+<span class="op"># include</span> <span class="st">"Contact.hpp"</span>
+
+<span class="k">class</span> <span class="ty">PhoneBook</span>
+{
+<span class="k">public</span>:
+    <span class="ty">PhoneBook</span>(<span class="ty">void</span>);
+
+    <span class="ty">void</span> <span class="fn">add</span>(<span class="ty">void</span>);             <span class="cm">// the ADD command</span>
+    <span class="ty">void</span> <span class="fn">search</span>(<span class="ty">void</span>) <span class="k">const</span>;    <span class="cm">// the SEARCH command</span>
+
+<span class="k">private</span>:
+    <span class="ty">Contact</span> _contacts[<span class="nm">8</span>];       <span class="cm">// a fixed array: no new</span>
+    <span class="ty">int</span> _count;                 <span class="cm">// how many contacts are stored (0 to 8)</span>
+    <span class="ty">int</span> _next;                  <span class="cm">// where to put the next one; when full: the oldest one's slot</span>
+};
+
+<span class="op">#endif</span></pre>
+    </div>
+    <p class="body"><b>The oldest is replaced in a circle.</b> As long as the phonebook is not full, the contact goes into the first free slot. After that, it replaces <b>the oldest one</b> (not the last one added!). A position <code class="inline">_next</code> that advances by 1 and comes back to 0 after 7 (the computation <code class="inline">(_next + 1) % 8</code>) is enough: the first slot overwritten is 0, then 1, and so on.</p>
+
+    <p class="body"><b>The SEARCH display.</b> Each column is 10 characters wide, right-aligned, and the columns are separated by <code class="inline">|</code> (p. 10). Text that is too long is truncated and its last visible character is replaced by a dot: for <code class="inline">Alexandria-Long</code>, you print <code class="inline">Alexandri.</code> (9 characters then the dot). Text of exactly 10 characters is left alone. The subject does not mention a bar at the start or the end of the line: that is your choice. Play with the demo, then read the equivalent code:</p>
+    <div class="demo" data-demo="cpp00-setw-columns">
+      <div class="demo-static">
+        <p class="body"><b>Demo (requires JavaScript):</b> a form (first name, last name, nickname) that adds rows to a PhoneBook-style table, with 10-character columns right-aligned and separated by <code class="inline">|</code>. Any text longer than 10 characters is truncated to 9 characters followed by a dot. Next to it, the equivalent <code class="inline">std::setw(10)</code> code.</p>
+        <p class="body">Example without JavaScript: the first name <code class="inline">Alexandria-Long</code> is displayed as <code class="inline">Alexandri.</code>; the first name <code class="inline">Bob</code> is displayed as <code class="inline">       Bob</code> (7 spaces then <code class="inline">Bob</code>).</p>
+<pre>     Index|First Name| Last Name|  Nickname
+         0|Alexandri.|       Bob|     Bobby</pre>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Fill in the three fields: each added row is formatted like the SEARCH of your PhoneBook.","firstLabel":"First name","lastLabel":"Last name","nickLabel":"Nickname","firstPh":"e.g. Alexandria-Long","lastPh":"e.g. Bob","nickPh":"e.g. Bobby","add":"Add the contact","presetLong":"Long name example","presetShort":"Short name example","clear":"Clear the phonebook","tableCaption":"What SEARCH would print","tableLabel":"Contact table: 4 columns of 10 characters separated by a vertical bar","empty":"The phonebook is empty: add a contact.","codeCaption":"The equivalent code (last row added)","codeLabel":"C++ code that prints the last row added","codeNone":"// add a contact to see the code","notesCaption":"What happened, field by field","noteCut":"{field}: length {n} (in bytes), more than 10 → 9 characters and a dot: {cell}","notePad":"{field}: length {n} (in bytes), at most 10 → setw(10) adds spaces on the left: {pad}","markCut":"✂","markPad":"␣","byteNote":"Careful: a non-ASCII character (ü, ñ, €…) takes several bytes in UTF-8. std::string and setw count bytes, not characters: the column looks shorter, and the cut can land in the middle of a character.","errEmpty":"✗ No field may be empty: the contact is not added.","added":"✓ Contact added at index {index}.","replaced":"✓ The phonebook is full ({max} contacts): the oldest one, at index {index}, is replaced.","cleared":"Phonebook cleared.","idle":"No contact yet.","colIndex":"Index","colFirst":"First Name","colLast":"Last Name","colNick":"Nickname","longFirst":"Alexandria-Long","longLast":"Montgomery-Smith","longNick":"Alex","shortFirst":"Bob","shortLast":"Lee","shortNick":"Bo"}</script>
+    </div>
+    <p class="body">What the demo shows you, to reproduce yourself:</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Truncating is your job.</b> Type <code class="inline">Alexandria-Long</code> as the first name: <code class="inline">setw</code> cut nothing, it is a <code class="inline">substr(0, 9)</code> followed by a dot that gives <code class="inline">Alexandri.</code>. The column is always exactly 10 characters.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Padding is <code class="inline">setw</code>.</b> Type <code class="inline">Bob</code>: <code class="inline">setw(10)</code> adds the 7 spaces on the left.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Eight contacts, not nine.</b> Add nine of them: the ninth takes the place of index 0, the oldest.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>An empty field is refused.</b> Leave a field empty: the contact is not added, as the subject requires.</span></div>
+    </div>
+    <p class="body" style="margin-top:20px"><b>The expected result.</b> The messages (prompts, errors) are free; the list format follows the subject's rule. An example session:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">./phonebook · example (free messages)</span></div>
+<pre>Enter command (ADD, SEARCH, EXIT): ADD
+First name: Ada
+Last name: Lovelace
+Nickname: countess
+Phone number: 0600000000
+Darkest secret: counts in binary
+Contact added!
+Enter command (ADD, SEARCH, EXIT): SEARCH
+     Index|First Name| Last Name|  Nickname
+         0|       Ada|  Lovelace|  countess
+Enter index: 0
+First name: Ada
+Last name: Lovelace
+Nickname: countess
+Phone number: 0600000000
+Darkest secret: counts in binary
+Enter command (ADD, SEARCH, EXIT): HELLO
+Enter command (ADD, SEARCH, EXIT): EXIT</pre>
+    </div>
+    <p class="body"><b>The requested index.</b> "Out of range or wrong," says the subject (p. 10): you define the behavior. An error message, then back to the command prompt, is a simple and accepted choice. Think of every case: not a number, negative, greater than 7, or valid but in a slot that is still empty. The details are in the <a href="#pitfalls">pitfalls</a>.</p>
+  </section>
+
+  <section id="ex02">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>ex02 · <span class="accent">The Job Of Your Dreams</span></h2></div>
+    <p class="body">The subject's story (p. 11-12): a source file was deleted by mistake at a bank, <code class="inline">GlobalBanksters United</code>. You get back <code class="inline">Account.hpp</code> and <code class="inline">tests.cpp</code>, plus a log file. Compiling <code class="inline">tests.cpp</code> reveals that the missing file is <code class="inline">Account.cpp</code>. Your mission: rewrite it so that the program's output <b>matches the log perfectly</b>, timestamps excepted (p. 12).</p>
+    <p class="body"><b>Files to turn in</b> (p. 11), in <code class="inline">ex02/</code>: <code class="inline">Makefile</code>, <code class="inline">Account.cpp</code>, <code class="inline">Account.hpp</code>, <code class="inline">tests.cpp</code>. <code class="inline">Account.hpp</code>, <code class="inline">tests.cpp</code> and the log are available for download on the module's page on the intranet (p. 11). This exercise is <b>not mandatory</b> to pass the module (p. 12). The subject adds that the order in which destructors are called may differ depending on the compiler and the system, so the order of the <code class="inline">closed</code> lines too (p. 12).</p>
+    <p class="body"><b>What the provided header contains</b> (excerpt; your copy is the reference):</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Account.hpp (excerpt)</span></div>
+<pre><span class="k">class</span> <span class="ty">Account</span> {
+
+<span class="k">public</span>:
+    <span class="k">typedef</span> <span class="ty">Account</span> t;
+
+    <span class="k">static</span> <span class="ty">int</span>  <span class="fn">getNbAccounts</span>( <span class="ty">void</span> );
+    <span class="k">static</span> <span class="ty">int</span>  <span class="fn">getTotalAmount</span>( <span class="ty">void</span> );
+    <span class="k">static</span> <span class="ty">int</span>  <span class="fn">getNbDeposits</span>( <span class="ty">void</span> );
+    <span class="k">static</span> <span class="ty">int</span>  <span class="fn">getNbWithdrawals</span>( <span class="ty">void</span> );
+    <span class="k">static</span> <span class="ty">void</span> <span class="fn">displayAccountsInfos</span>( <span class="ty">void</span> );
+
+    <span class="ty">Account</span>( <span class="ty">int</span> initial_deposit );
+    ~<span class="ty">Account</span>( <span class="ty">void</span> );
+
+    <span class="ty">void</span> <span class="fn">makeDeposit</span>( <span class="ty">int</span> deposit );
+    <span class="ty">bool</span> <span class="fn">makeWithdrawal</span>( <span class="ty">int</span> withdrawal );
+    <span class="ty">int</span>  <span class="fn">checkAmount</span>( <span class="ty">void</span> ) <span class="k">const</span>;
+    <span class="ty">void</span> <span class="fn">displayStatus</span>( <span class="ty">void</span> ) <span class="k">const</span>;
+
+<span class="k">private</span>:
+    <span class="k">static</span> <span class="ty">int</span>  _nbAccounts;
+    <span class="k">static</span> <span class="ty">int</span>  _totalAmount;
+    <span class="k">static</span> <span class="ty">int</span>  _totalNbDeposits;
+    <span class="k">static</span> <span class="ty">int</span>  _totalNbWithdrawals;
+
+    <span class="k">static</span> <span class="ty">void</span> <span class="fn">_displayTimestamp</span>( <span class="ty">void</span> );
+
+    <span class="ty">int</span> _accountIndex;
+    <span class="ty">int</span> _amount;
+    <span class="ty">int</span> _nbDeposits;
+    <span class="ty">int</span> _nbWithdrawals;
+
+    <span class="ty">Account</span>( <span class="ty">void</span> );
+};</pre>
+    </div>
+    <p class="body">Everything the <a href="#static">static</a> section taught you is here: four shared counters (to be <b>defined</b> in your <code class="inline">Account.cpp</code>, with their starting value), four static accessors, a static display method, and a private static method <code class="inline">_displayTimestamp</code> that all the others use. The default constructor is <b>private</b>: an account is only created with an initial deposit. <code class="inline">displayStatus</code> and <code class="inline">checkAmount</code> are <code class="inline">const</code>: they do not modify the account.</p>
+    <p class="body"><b>The log is your specification.</b> Each call writes a line: a timestamp in brackets, then <code class="inline">key:value</code> pairs separated by <code class="inline">;</code>. Here are the shapes to reproduce, taken from the output of a complete program with the amounts of <code class="inline">tests.cpp</code>. Always compare them with YOUR log file: it is the reference.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>When</th><th>Line (after the timestamp)</th><th>Written by</th></tr></thead>
+        <tbody>
+          <tr><td>An account is created</td><td><code class="inline">index:0;amount:42;created</code></td><td>the constructor</td></tr>
+          <tr><td>An account is closed</td><td><code class="inline">index:0;amount:47;closed</code></td><td>the destructor</td></tr>
+          <tr><td>Counters summary</td><td><code class="inline">accounts:8;total:20049;deposits:0;withdrawals:0</code></td><td><code class="inline">displayAccountsInfos</code></td></tr>
+          <tr><td>An account's status</td><td><code class="inline">index:0;amount:42;deposits:0;withdrawals:0</code></td><td><code class="inline">displayStatus</code></td></tr>
+          <tr><td>Deposit</td><td><code class="inline">index:0;p_amount:42;deposit:5;amount:47;nb_deposits:1</code></td><td><code class="inline">makeDeposit</code></td></tr>
+          <tr><td>Accepted withdrawal</td><td><code class="inline">index:1;p_amount:819;withdrawal:34;amount:785;nb_withdrawals:1</code></td><td><code class="inline">makeWithdrawal</code></td></tr>
+          <tr><td>Refused withdrawal</td><td><code class="inline">index:0;p_amount:47;withdrawal:refused</code></td><td><code class="inline">makeWithdrawal</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">Read this table together with the demo of the <a href="#static">static</a> section: it produces these same lines. Two hints come from the log itself. First, <code class="inline">p_amount</code> is the amount <b>before</b> the operation and <code class="inline">amount</code> the amount <b>after</b>: a deposit line is therefore written in two steps, half before the account is updated, half after. Second, a withdrawal larger than the balance is refused (<code class="inline">makeWithdrawal</code> returns a <code class="inline">bool</code>) and changes no counter. The amounts of <code class="inline">tests.cpp</code> contain no withdrawal equal to the exact balance: that case is up to you.</p>
+    <p class="body"><b>The timestamp.</b> According to the shapes listed above, each line starts with the date and time in brackets, in the form <code class="inline">[YYYYMMDD_HHMMSS]</code> (a complete run prints for example <code class="inline">[20261108_204015]</code>): check it in your log file. The <code class="inline">&lt;ctime&gt;</code> library provides what you need to write it: <code class="inline">std::time</code>, <code class="inline">std::localtime</code> and <code class="inline">std::strftime</code> (the format <code class="inline">"%Y%m%d_%H%M%S"</code> gives <code class="inline">20261108_204015</code>, checked). The digits must be padded with zeros (see the <a href="#pitfalls">pitfalls</a>). The times change from one run to the next, but the rest of the line must be identical to the log's.</p>
+    <p class="body"><b>The expected result.</b> With the amounts of <code class="inline">tests.cpp</code>, the start of the output looks like this (timestamps vary, lines omitted between the <code class="inline">…</code>):</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">./account · excerpt</span></div>
+<pre>[20261108_204015] index:0;amount:42;created
+[20261108_204015] index:1;amount:54;created
+…
+[20261108_204015] accounts:8;total:20049;deposits:0;withdrawals:0
+[20261108_204015] index:0;amount:42;deposits:0;withdrawals:0
+…
+[20261108_204015] index:0;p_amount:42;deposit:5;amount:47;nb_deposits:1
+…
+[20261108_204015] index:0;p_amount:47;withdrawal:refused
+[20261108_204015] index:1;p_amount:819;withdrawal:34;amount:785;nb_withdrawals:1
+…
+[20261108_204015] index:7;amount:8942;closed</pre>
+    </div>
+    <p class="body">The provided <code class="inline">tests.cpp</code> uses <code class="inline">std::vector</code> and <code class="inline">&lt;algorithm&gt;</code> (that is what the copy consulted shows; check yours). This file comes from the subject: the STL rule (p. 4) applies to the code you write (if in doubt, ask your evaluators).</p>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">09</span><h2>Step by <span class="accent">step</span></h2></div>
+    <p class="body">A work order that avoids debugging everything at once. The breakdown is advice, not a requirement: the subject sets the files and the behaviors, not your organization.</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Set up the ground.</b> One directory per exercise (<code class="inline">ex00</code>, <code class="inline">ex01</code>, <code class="inline">ex02</code>), a Makefile with <code class="inline">c++ -Wall -Wextra -Werror -std=c++98</code>, and a "hello" that compiles. From now on, never type <code class="inline">using namespace</code>.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>ex00 first.</b> A single file. Make the subject's three examples work identically, comparing with <code class="inline">diff</code> if needed. It is the warm-up: <code class="inline">argc</code>/<code class="inline">argv</code>, a loop, <code class="inline">std::toupper</code>.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>ex01: draw before you code.</b> Who knows what? <code class="inline">Contact</code> only knows how to store five strings. <code class="inline">PhoneBook</code> stores the contacts, picks the next slot and handles the <code class="inline">ADD</code> and <code class="inline">SEARCH</code> commands.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>ex01: <code class="inline">Contact</code> then <code class="inline">ADD</code>.</b> Write the class with no logic, then the input of one field: a small function that reads with <code class="inline">std::getline</code>, asks again while the line is empty, and reports failure when the input is closed.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>ex01: <code class="inline">SEARCH</code> and <code class="inline">main</code>.</b> Display the list first (demo above), then read the index and validate it. Finally the command loop, which stops on <code class="inline">EXIT</code> <i>and</i> at the end of the input.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>ex01: test with scripted input.</b> <code class="inline">printf 'ADD\nAda\n…' | ./phonebook</code> (the shell's <code class="inline">printf</code>, not the one in your code) lets you replay a scenario. Also test <code class="inline">./phonebook &lt; /dev/null</code> and Ctrl-D at every prompt: it must neither loop nor crash.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>ex02: let the linker make the list.</b> Compile <code class="inline">tests.cpp</code> without <code class="inline">Account.cpp</code>: the <code class="inline">Undefined symbols</code> name what the test calls (constructor, destructor, <code class="inline">makeDeposit</code>, <code class="inline">makeWithdrawal</code>, <code class="inline">displayAccountsInfos</code>, <code class="inline">displayStatus</code>, checked). The static accessors are not listed, but <code class="inline">displayAccountsInfos</code> needs them.</span></div>
+      <div class="step on"><span class="n">8</span><span class="txt"><b>ex02: in the log's order.</b> The definitions of the static members, the constructor and the destructor, the accessors, then deposits and withdrawals, then the displays, and the timestamp last. Compare with the log by stripping the timestamp on both sides, for example with <code class="inline">sed 's/^\[[^]]*\] //'</code>, then <code class="inline">diff</code>. Reminder: the order of the <code class="inline">closed</code> lines may legitimately differ (p. 12).</span></div>
+    </div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">10</span><h2>Classic <span class="accent">pitfalls</span></h2></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Truncating without breaking the alignment.</b> Text longer than 10 characters becomes 9 characters + a dot = 10 in all. Text of exactly 10 characters stays intact; <code class="inline">012345678.</code> for 11 characters (checked). Do not truncate to 10 and then add a dot: you would have 11 characters and everything shifts. Do not forget that <code class="inline">setw</code> never cuts and only applies to the next item.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Accented characters count double.</b> <code class="inline">std::string</code> and <code class="inline">setw</code> count <b>bytes</b>. In UTF-8, <code class="inline">ü</code> weighs 2: <code class="inline">setw(10) &lt;&lt; "ü"</code> writes 8 spaces and the column looks like 9 characters; a name made of six <code class="inline">ü</code> (12 bytes) is cut at 9 bytes, in the middle of a character (checked). The subject says nothing about this: own your choices (for example accept only ASCII) and be ready to explain them.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">std::cin</code> and end of file (Ctrl-D).</b> When the input closes, <code class="inline">std::getline</code> fails, and it fails on every following call. A <code class="inline">while (1)</code> loop that does not test the return value spins forever on empty commands; if the input ends without a trailing newline (<code class="inline">printf 'ADD' | ./phonebook</code>), the string even keeps its last value and the program replays <code class="inline">ADD</code> endlessly (checked). Always test <code class="inline">if (!std::getline(std::cin, s))</code> and quit cleanly. Try <code class="inline">&lt; /dev/null</code> and Ctrl-D at every prompt: at the start of a line, Ctrl-D closes the input in a terminal (checked).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Empty input refused.</b> "A saved contact can't have empty fields" (p. 10): ask for the field again, or cancel the <code class="inline">ADD</code>. But an "ask again while it is empty" loop must also exit when the input is closed, otherwise it spins forever (checked). The subject says nothing about a field filled with spaces: <code class="inline">empty()</code> considers it non-empty, so it is up to you. As for commands: only <code class="inline">ADD</code>, <code class="inline">SEARCH</code> and <code class="inline">EXIT</code> are accepted, any other input is ignored (p. 10).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Out-of-range index.</b> Read the index as a line (<code class="inline">std::getline</code>), then validate it yourself: empty, not a digit, negative, greater than 7, or valid but in a slot that is still empty. With <code class="inline">std::cin &gt;&gt; index</code>, an input such as <code class="inline">abc</code> puts the stream in a failed state and leaves the text in the buffer: every following read fails until you call <code class="inline">std::cin.clear()</code> and discard the line (checked). Do not confuse "index 0" with "not a number" if you use <code class="inline">atoi</code>, which returns 0 in both cases.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">std::getline</code> after <code class="inline">std::cin &gt;&gt;</code>.</b> <code class="inline">std::cin &gt;&gt; n</code> stops before the newline and leaves it in the buffer: the next <code class="inline">std::getline</code> reads an empty line (checked). The simplest fix: use only <code class="inline">std::getline</code>, including for commands and the index.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Eight contacts maximum.</b> The array is fixed (<code class="inline">new</code> is forbidden here, p. 9). The 9th contact replaces the <b>oldest</b>, not the last one added. Test by adding 9 then 10 contacts, then display the list: indexes 0 and 1 must be the two new ones, and <code class="inline">SEARCH</code> must only show filled slots.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>The log timestamp.</b> You need padding zeros: without them, November 8, 2026 at 20:40:28 would be written <code class="inline">2026118_204028</code> instead of <code class="inline">20261108_204028</code> (checked). With <code class="inline">std::setfill('0')</code>, be careful: the fill is <b>sticky</b>. After it, a <code class="inline">setw(5) &lt;&lt; "Bob"</code> writes <code class="inline">00Bob</code> (checked); put <code class="inline">std::setfill(' ')</code> back or prefer <code class="inline">std::strftime</code>. And remember that the log differs from yours by its timestamps only (p. 12).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Compilation pitfalls.</b> <code class="inline">std::toupper</code> needs <code class="inline">&lt;cctype&gt;</code>: on clang/macOS, a program that only includes <code class="inline">&lt;iostream&gt;</code> compiles anyway, but nothing guarantees it elsewhere (to check with your school's compiler). A static member never defined, or defined in the header, breaks linking. An initialization list in the wrong order is an error with <code class="inline">-Werror</code>. An implementation in a <code class="inline">.hpp</code> or a missing include guard is worth 0 (p. 4).</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">11</span><h2>How <span class="accent">I did it</span></h2></div>
+    <div class="how"><p class="body">For megaphone, I walk through the arguments character by character, turn each letter into uppercase, and add nothing between arguments; with no argument, I print the noise message. In the PhoneBook, Contact holds only five private strings with their accessors. PhoneBook keeps an array of eight contacts, the number of stored contacts and the position of the oldest one, which advances in a circle once the phonebook is full. I read everything with getline, in a small function that asks again while the input is empty and stops cleanly if the input closes. The display combines setw(10) with a cut to nine characters followed by a dot. For Account, I read the log line by line to deduce each method, then I built the timestamp with setw and setfill.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 Key takeaways (for your defense)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>The module's rules.</b> C++98, <code class="inline">c++ -Wall -Wextra -Werror</code> (and it compiles with <code class="inline">-std=c++98</code>). No <code class="inline">*printf</code>, <code class="inline">*alloc</code>, <code class="inline">free</code> (0), no <code class="inline">using namespace</code>, <code class="inline">friend</code> or STL (-42).</div></li>
+        <li><span class="chk">✓</span><div><b>Streams.</b> <code class="inline">std::cout &lt;&lt;</code> writes, <code class="inline">std::getline(std::cin, s)</code> reads a line; test its return value to handle Ctrl-D. A newline at the end of every message.</div></li>
+        <li><span class="chk">✓</span><div><b>Formatting.</b> <code class="inline">setw(n)</code> pads on the left, never cuts, and only applies to the next item. Truncating = <code class="inline">substr(0, 9)</code> + a dot.</div></li>
+        <li><span class="chk">✓</span><div><b>Classes.</b> What is always used inside is <code class="inline">private</code>, what is used outside is <code class="inline">public</code> (p. 9). Declarations in the <code class="inline">.hpp</code> with include guards, code in the <code class="inline">.cpp</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Initialization and const.</b> Initialization list mandatory for a <code class="inline">const</code> attribute, in declaration order. A <code class="inline">const</code> method does not modify the object. <code class="inline">this</code> is the pointer to the current object.</div></li>
+        <li><span class="chk">✓</span><div><b>static.</b> A static attribute is shared by the whole class and is <b>defined</b> once in a <code class="inline">.cpp</code>. A static method has no <code class="inline">this</code> and is called with <code class="inline">Class::method()</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>ex00.</b> Arguments in uppercase, glued with no added space; with no argument, <code class="inline">* LOUD AND UNBEARABLE FEEDBACK NOISE *</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>ex01.</b> <code class="inline">PhoneBook</code> and <code class="inline">Contact</code>, 8 contacts max in an array (no <code class="inline">new</code>), the 9th replaces the oldest. <code class="inline">ADD</code>, <code class="inline">SEARCH</code>, <code class="inline">EXIT</code>; no empty field; 10-wide columns, right-aligned, separated by <code class="inline">|</code>, a final dot if truncated.</div></li>
+        <li><span class="chk">✓</span><div><b>ex02 (optional).</b> Rewrite <code class="inline">Account.cpp</code> to reproduce the log, timestamps excepted. The order of the <code class="inline">closed</code> lines may vary depending on the compiler (p. 12).</div></li>
+        <li><span class="chk">✓</span><div><b>Defense questions.</b> Why no <code class="inline">using namespace std</code>? Why an initialization list? What does <code class="inline">const</code> after a method mean? Why is a <code class="inline">static</code> member defined in the <code class="inline">.cpp</code>? What happens at the end of the input? Why is <code class="inline">setw</code> not enough to truncate? Also expect a small live modification (p. 13).</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

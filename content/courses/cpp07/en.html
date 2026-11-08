@@ -1,0 +1,378 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C++ · Module 07 · Templates</span>
+  <h1 class="title"><span class="g">Generic</span> code</h1>
+  <p class="lead">Write a function or a class <b>once</b> and have it work for <b>every type</b>: <code class="inline">swap</code>, <code class="inline">min</code>, <code class="inline">max</code>, <code class="inline">iter</code>, then an <code class="inline">Array&lt;T&gt;</code>. What the subject asks for, and the traps the compiler has in store for you.</p>
+  <p class="subj">subject: en.subject (1).pdf · version 10.1 · c++ -Wall -Wextra -Werror -std=c++98</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>The module in <span class="accent">brief</span></h2></div>
+    <p class="body">Module 07 introduces <b>templates</b>. Instead of writing one <code class="inline">swap</code> for <code class="inline">int</code>, another for <code class="inline">std::string</code>, another for your own classes, you write <b>a single model</b>: the compiler builds the version it needs for each type you use.</p>
+    <p class="body">Three exercises, each richer than the last. <b>ex00</b>: three small functions, <code class="inline">swap</code>, <code class="inline">min</code> and <code class="inline">max</code>. <b>ex01</b>: an <code class="inline">iter</code> function that calls a function on every element of an array, whether the array is <code class="inline">const</code> or not. <b>ex02</b>: an <code class="inline">Array&lt;T&gt;</code> class, a dynamic array with a deep copy and access checked by <code class="inline">operator[]</code>.</p>
+    <p class="body">There is little code to write, but many compilation details: where to put the code, which type the compiler deduces, what is <code class="inline">const</code>. That is where this course helps.</p>
+    <div class="callout"><span class="bulb">📖</span><p>The page numbers in parentheses, like <b>(p. 8)</b>, are the ones printed at the bottom of the subject's pages (version 10.1): the PDF page number is one higher. Keep the PDF open next to this page: this course explains the subject, it does not replace it. The compiler messages quoted come from Apple clang 17 on macOS (<code class="inline">c++ -std=c++98 -Wall -Wextra -Werror</code>); g++ on your school machine may word them differently: to check.</p></div>
+    <div class="callout"><span class="bulb">🧠</span><p>The subject devotes a chapter to AI (p. 6-7): reason first, and do not ask for ready-made answers. This course explains the concepts and the traps; the code of your files is yours to write.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>The module <span class="accent">map</span></h2></div>
+    <div class="map">
+      <div class="map-item"><span class="ex">ex00</span><div><h4>swap, min, max</h4><p>Three function templates in a single header. Files (p. 8): <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">whatever.{h, hpp}</code>.</p></div></div>
+      <div class="map-item"><span class="ex">ex01</span><div><h4>iter</h4><p>A function template that calls a function on every element. Files (p. 10): <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">iter.{h, hpp}</code>.</p></div></div>
+      <div class="map-item"><span class="ex">ex02</span><div><h4>Array</h4><p>A class template. Files (p. 11): <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">Array.{h, hpp}</code> and, optionally, <code class="inline">Array.tpp</code>.</p></div></div>
+      <div class="map-item"><span class="ex">Defense</span><div><h4>Small modification</h4><p>During the evaluation you may be asked for a change that takes a few minutes: a behavior, a display, a few lines (p. 12).</p></div></div>
+    </div>
+    <p class="body" style="margin-top:18px">Each exercise lives in its own directory, <code class="inline">ex00/</code>, <code class="inline">ex01/</code>, <code class="inline">ex02/</code> (p. 3). The three exercises say "Forbidden: None" (p. 8, 10, 11): nothing is forbidden specifically for the exercise, but the general rules below still apply.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rule</th><th>What the subject says</th><th>Page</th></tr></thead>
+        <tbody>
+          <tr><td>Compilation</td><td><code class="inline">c++</code> with <code class="inline">-Wall -Wextra -Werror</code>; the code must also compile with <code class="inline">-std=c++98</code>.</td><td>p. 3</td></tr>
+          <tr><td>Forbidden functions</td><td><code class="inline">*printf()</code>, <code class="inline">*alloc()</code> and <code class="inline">free()</code>: grade 0. C++11 (and derived forms) and Boost are forbidden.</td><td>p. 3</td></tr>
+          <tr><td>File names</td><td>Files holding a class are named after the class: <code class="inline">ClassName.hpp</code> or <code class="inline">.h</code>, <code class="inline">ClassName.cpp</code>, or <code class="inline">ClassName.tpp</code>.</td><td>p. 3</td></tr>
+          <tr><td>Output</td><td>Unless specified otherwise, every message ends with a newline and goes to the standard output.</td><td>p. 3</td></tr>
+          <tr><td><code class="inline">using namespace</code>, <code class="inline">friend</code></td><td>Forbidden unless explicitly stated otherwise: grade -42.</td><td>p. 4</td></tr>
+          <tr><td>STL</td><td>Allowed only in modules 08 and 09: no containers, no algorithms (anything that requires <code class="inline">&lt;algorithm&gt;</code>). Otherwise, grade -42.</td><td>p. 4</td></tr>
+          <tr><td>Memory</td><td>Every object allocated with <code class="inline">new</code> must be released: no leaks.</td><td>p. 4</td></tr>
+          <tr><td>Canonical form</td><td>Classes in Orthodox Canonical Form, from module 02 to module 09, unless stated otherwise.</td><td>p. 4</td></tr>
+          <tr><td>Code in a header</td><td>Any function implementation in a header file, except function templates, means 0 for the exercise.</td><td>p. 4</td></tr>
+          <tr><td>Standalone headers</td><td>Each header includes its dependencies and has include guards, otherwise grade 0.</td><td>p. 4</td></tr>
+          <tr><td>Makefile</td><td>The same rules as in C.</td><td>p. 4</td></tr>
+          <tr><td>Templates</td><td>"Templates must be defined in the header files."</td><td>p. 8</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout"><span class="bulb">💡</span><p><b>The exception to the "no implementation in a <code class="inline">.hpp</code>" rule.</b> Templates are defined in header files (p. 8), and the rule on p. 4 exempts function templates. For ex02 the subject even provides an optional <code class="inline">Array.tpp</code> file (p. 11): your <code class="inline">Array.hpp</code> includes it, and <code class="inline">main.cpp</code> includes only <code class="inline">Array.hpp</code>. Everything that is not a template keeps the usual rule: declarations in the <code class="inline">.hpp</code>, code in the <code class="inline">.cpp</code>.</p></div>
+    <div class="callout"><span class="bulb">🚫</span><p><b>No <code class="inline">std::swap</code>, <code class="inline">std::min</code>, <code class="inline">std::max</code>.</b> In C++98 they are declared in <code class="inline">&lt;algorithm&gt;</code>, and the subject forbids algorithms before module 08 (p. 4). So you write your own, in the global namespace: that is the reason for the <code class="inline">::</code> in the subject's calls (see the next section).</p></div>
+  </section>
+
+  <section id="templates">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Templates, <span class="accent">demystified</span></h2></div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:8px 0 12px">A model, not a function</h3>
+    <p class="body">A function template is not a function: it is a <b>model</b>. The compiler only produces code from it when it is called with a specific type. Here is an invented example, unrelated to the subject:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">twice.cpp · an example model</span></div>
+<pre><span class="k">template</span> &lt;<span class="k">typename</span> <span class="ty">T</span>&gt;
+<span class="ty">T</span> <span class="fn">twice</span>(<span class="ty">T</span> x)
+{
+	<span class="k">return</span> x + x;
+}
+
+<span class="ty">int</span> <span class="fn">main</span>()
+{
+	<span class="ty">std</span>::cout &lt;&lt; <span class="fn">twice</span>(<span class="nm">21</span>) &lt;&lt; <span class="ty">std</span>::endl;    <span class="cm">// T = int</span>
+	<span class="ty">std</span>::cout &lt;&lt; <span class="fn">twice</span>(<span class="nm">1.5</span>) &lt;&lt; <span class="ty">std</span>::endl;   <span class="cm">// T = double</span>
+	<span class="k">return</span> <span class="nm">0</span>;
+}</pre>
+    </div>
+    <p class="body">The compiler <b>deduces T</b> by looking at the argument: <code class="inline">21</code> is an <code class="inline">int</code>, <code class="inline">1.5</code> a <code class="inline">double</code>. Here it builds two distinct functions. You can see them in the object file (observed with clang on macOS):</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal · addresses removed</span></div>
+<pre><span class="st">$ c++ -std=c++98 -c twice.cpp -o twice.o</span>
+<span class="st">$ nm -C twice.o | grep twice</span>
+T double twice&lt;double&gt;(double)
+T int twice&lt;int&gt;(int)</pre>
+    </div>
+    <p class="body">One version per type used, and only those. Two consequences: the compiler must <b>see the body</b> of the template at the point of the call, and an error in the body only appears <b>when a version is built</b>. A template that is never called is only half checked: test it with several types.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Why everything goes in the <code class="inline">.hpp</code></h3>
+    <p class="body">Try putting the body in a <code class="inline">.cpp</code>, as for an ordinary function: the <code class="inline">.hpp</code> holds only the declaration, the <code class="inline">.cpp</code> the body. Each file compiles without error. But <code class="inline">main.cpp</code> asks for <code class="inline">swap&lt;int&gt;</code> and only sees the declaration; the <code class="inline">.cpp</code> has the body but nobody there asks for <code class="inline">swap&lt;int&gt;</code>, so it builds nothing. What remains is a call to a function that exists nowhere:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal · link error (macOS)</span></div>
+<pre><span class="k">Undefined symbols for architecture arm64:</span>
+  "void swap&lt;int&gt;(int&amp;, int&amp;)", referenced from:
+      _main in wmain.o
+ld: symbol(s) not found for architecture arm64</pre>
+    </div>
+    <p class="body">That is why the subject requires templates to be defined in the headers (p. 8). On Linux the linker message is worded differently ("undefined reference to").</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px"><code class="inline">typename</code> or <code class="inline">class</code>?</h3>
+    <p class="body">In <code class="inline">template &lt;typename T&gt;</code> you may write <code class="inline">class</code> instead of <code class="inline">typename</code>: it is equivalent here (both versions compile). Pick one and stick to it throughout the module.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">The <code class="inline">::</code> in the subject's calls</h3>
+    <p class="body">In the subject's <code class="inline">main</code> (p. 9), everything is written <code class="inline">::swap(a, b)</code>, <code class="inline">::min(a, b)</code>. A <code class="inline">::</code> in front of a name means "look in the global namespace, and nowhere else": so it is <b>your</b> <code class="inline">swap</code>, not the one from <code class="inline">std</code>. Without it, the lookup may also find the standard library version, and the compiler refuses to choose. Checked with clang and libc++, without <code class="inline">using namespace</code>:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal · min(c, d) on two std::string, without ::</span></div>
+<pre><span class="k">error:</span> call to 'min' is ambiguous
+<span class="cm">note:</span> candidate function [with _Tp = std::string]
+<span class="cm">note:</span> candidate function [with T = std::string]</pre>
+    </div>
+    <p class="body">The compiler also looks in the namespace of the arguments (<code class="inline">std</code>, for a <code class="inline">std::string</code>): it finds <code class="inline">std::min</code> in addition to yours. With <code class="inline">using namespace std;</code> (forbidden in this module, p. 4), even a call on <code class="inline">int</code> becomes ambiguous. With the <code class="inline">::</code> there is no ambiguity. This behavior comes from libc++; to check with your school's compiler.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Reading compilation errors</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Message (clang)</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>no matching function for call to 'min'<br>deduced conflicting types for parameter 'T' ('int' vs. 'double')</td><td>The two arguments do not have the same type, so <code class="inline">T</code> is deduced twice. The subject requires the same type (p. 8). You can also force <code class="inline">T</code> by hand: <code class="inline">::min&lt;double&gt;(a, 3.5)</code>.</td></tr>
+          <tr><td>call to 'min' is ambiguous</td><td>Your template and another one have the same name: add the <code class="inline">::</code>.</td></tr>
+          <tr><td>invalid operands to binary expression ('const V' and 'const V')<br>in instantiation of function template specialization 'max&lt;V&gt;'</td><td>The type <code class="inline">V</code> lacks the operator the template uses. The error is in the body, but the <code class="inline">in instantiation</code> line tells you which call caused it.</td></tr>
+          <tr><td>Undefined symbols … void swap&lt;int&gt;(int&amp;, int&amp;)</td><td>The body of the template is not visible from the file that calls it: put it in the <code class="inline">.hpp</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="ex00">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>ex00 · <span class="accent">swap, min, max</span><small>"Start with a few functions" (subject, p. 8)</small></h2></div>
+    <p class="body"><b>In plain words.</b> Three function templates. <code class="inline">swap</code> exchanges the values of two parameters and returns nothing. <code class="inline">min</code> returns the smaller of the two values, <code class="inline">max</code> the greater, and <b>if they are equal, both return the second one</b> (p. 8). The two arguments must have the same type, and that type must support all the comparison operators (p. 8).</p>
+    <p class="body"><b>Files to submit (p. 8):</b> <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">whatever.{h, hpp}</code>, in <code class="inline">ex00/</code>.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex00/whatever.hpp · skeleton</span></div>
+<pre><span class="op">#ifndef</span> <span class="ty">WHATEVER_HPP</span>
+<span class="op">#define</span> <span class="ty">WHATEVER_HPP</span>
+
+<span class="k">template</span> &lt;<span class="k">typename</span> <span class="ty">T</span>&gt;
+<span class="ty">void</span> <span class="fn">swap</span>(<span class="ty">T</span> &amp;a, <span class="ty">T</span> &amp;b) { <span class="cm">/* up to you */</span> }
+
+<span class="k">template</span> &lt;<span class="k">typename</span> <span class="ty">T</span>&gt;
+<span class="k">const</span> <span class="ty">T</span> &amp;<span class="fn">min</span>(<span class="k">const</span> <span class="ty">T</span> &amp;a, <span class="k">const</span> <span class="ty">T</span> &amp;b) { <span class="cm">/* up to you */</span> }
+
+<span class="k">template</span> &lt;<span class="k">typename</span> <span class="ty">T</span>&gt;
+<span class="k">const</span> <span class="ty">T</span> &amp;<span class="fn">max</span>(<span class="k">const</span> <span class="ty">T</span> &amp;a, <span class="k">const</span> <span class="ty">T</span> &amp;b) { <span class="cm">/* up to you */</span> }
+
+<span class="op">#endif</span></pre>
+    </div>
+    <p class="body">The names <code class="inline">swap</code>, <code class="inline">min</code>, <code class="inline">max</code> are imposed; the parameter names are free. The subject does not fix the return type of <code class="inline">min</code> and <code class="inline">max</code>: returning a <code class="inline">const</code> reference to one of the arguments avoids a copy, and lets you check <em>which</em> argument came out by comparing addresses (advice, not a rule).</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">The case of equal values</h3>
+    <p class="body">This is the detail that makes people fail. Depending on how you write the comparison, you return the first or the second argument when both are equal. With <code class="inline">int</code> you will never see the difference: two <code class="inline">42</code> are indistinguishable. To see it, test with a type whose comparison looks at only part of the object. The demo below does that: each variable carries a <b>key</b>, the only thing compared, and a <b>label</b> that lets you recognize the object returned.</p>
+    <p class="body">For your own tests, a small type is enough (a test, not a solution):</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">main.cpp · a test type</span></div>
+<pre><span class="k">struct</span> <span class="ty">Item</span>
+{
+	<span class="ty">int</span>			key;
+	<span class="ty">std</span>::<span class="ty">string</span>	label;
+	<span class="ty">bool</span> <span class="k">operator</span>&lt;(<span class="k">const</span> <span class="ty">Item</span> &amp;o) <span class="k">const</span> { <span class="k">return</span> key &lt; o.key; }
+	<span class="ty">bool</span> <span class="k">operator</span>&gt;(<span class="k">const</span> <span class="ty">Item</span> &amp;o) <span class="k">const</span> { <span class="k">return</span> key &gt; o.key; }
+};</pre>
+    </div>
+    <p class="body">With two <code class="inline">Item</code> of key 5 and different labels, look at the label returned by <code class="inline">::min</code> and by <code class="inline">::max</code>: it is the one of the second argument (checked by compiling).</p>
+
+    <div class="demo" data-demo="cpp07-min-max">
+      <div class="demo-static">
+        <p class="body">Demo: two variables, each with a key (compared) and a label (ignored), and three calls <code class="inline">::swap</code>, <code class="inline">::min</code>, <code class="inline">::max</code>. Control cases:</p>
+        <p class="body"><code class="inline">a = 2</code>, <code class="inline">b = 3</code>: after <code class="inline">::swap(a, b)</code>, <code class="inline">a = 3, b = 2</code>; <code class="inline">min(a, b) = 2</code>; <code class="inline">max(a, b) = 3</code>.</p>
+        <p class="body"><code class="inline">c = chaine1</code>, <code class="inline">d = chaine2</code>: after <code class="inline">::swap(c, d)</code>, <code class="inline">c = chaine2, d = chaine1</code>; <code class="inline">min(c, d) = chaine1</code>; <code class="inline">max(c, d) = chaine2</code>.</p>
+        <p class="body">Equal keys (5 and 5), labels "first" and "second": <code class="inline">min</code> and <code class="inline">max</code> both return the second one.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Two variables, three calls: which one comes back?","presets":"Ready-made cases","presetInt":"Subject: int, a = 2 and b = 3","presetStr":"Subject: std::string, c and d","presetEq":"Equal keys, different labels","typeLabel":"Type T","keyOf":"Key of {name}","labelOf":"Label of {name}","keyHint":"compared by < and >","labelHint":"ignored by the comparison","returned":"← returned","bodyTitle":"The bodies that decide (a and b stand for the first and the second argument)","reset":"Reset the starting case","logLabel":"Program output","hint":"Pick a call: swap, min or max.","errInt":"The key of {name} must be an integer between {min} and {max}.","expl":"In {fn}, {expr} is {v}: the ternary operator therefore returns {ret}.","retFirst":"the first argument ({name})","retSecond":"the second argument ({name})","tie":"The keys are equal: neither < nor > is true, so min and max both return the second argument (subject, p. 8).","swapped":"The two variables exchanged their contents (key and label).","eqLabelA":"first","eqLabelB":"second"}</script>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">The expected result</h3>
+    <p class="body">The subject gives a <code class="inline">main</code> and the output it must produce (p. 9). Its calls begin like this:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">subject's main (p. 9) · beginning</span></div>
+<pre><span class="ty">int</span> a = <span class="nm">2</span>;
+<span class="ty">int</span> b = <span class="nm">3</span>;
+::<span class="fn">swap</span>( a, b );
+<span class="ty">std</span>::cout &lt;&lt; <span class="st">"a = "</span> &lt;&lt; a &lt;&lt; <span class="st">", b = "</span> &lt;&lt; b &lt;&lt; <span class="ty">std</span>::endl;</pre>
+    </div>
+    <p class="body">and the announced output is:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">announced output (p. 9)</span></div>
+<pre>a = 3, b = 2
+min(a, b) = 2
+max(a, b) = 3
+c = chaine2, d = chaine1
+min(c, d) = chaine1
+max(c, d) = chaine2</pre>
+    </div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>The subject is not consistent to the character.</b> In the <code class="inline">main</code> on p. 9, the messages are written <code class="inline">"min( a, b ) = "</code> (with spaces inside the parentheses), while the announced output shows <code class="inline">min(a, b) = 2</code>. Compiled as is, the subject's <code class="inline">main</code> prints the form with spaces; the values are the right ones. To check with your evaluator if a character-by-character comparison worries you.</p></div>
+    <div class="callout"><span class="bulb">🧪</span><p><b>What your <code class="inline">main</code> should test.</b> The subject's <code class="inline">main</code> (<code class="inline">int</code> then <code class="inline">std::string</code>); a type other than the subject's (<code class="inline">double</code>, <code class="inline">char</code>); two equal values with a key-and-label type, to <em>see</em> that the second one is returned.</p></div>
+  </section>
+
+  <section id="ex01">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>ex01 · <span class="accent">iter</span><small>"Iter" (subject, p. 10)</small></h2></div>
+    <p class="body"><b>In plain words.</b> A function template <code class="inline">iter</code> with three parameters, returning nothing (p. 10): (1) the address of an array, (2) its length, "passed as a const value", (3) a function called on every element. It must work with any type of array, and the third parameter can be an instantiated function template. The function passed may take its argument by <code class="inline">const</code> or non-<code class="inline">const</code> reference, "depending on the context".</p>
+    <p class="body"><b>Files to submit (p. 10):</b> <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">iter.{h, hpp}</code>, in <code class="inline">ex01/</code>. The subject also asks for a <code class="inline">main.cpp</code> with your tests, complete enough to produce a test executable.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">The three parameters</h3>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>The address of the array</b>: a <code class="inline">T *</code> pointer. The compiler deduces <code class="inline">T</code> from the array. For a <code class="inline">const int[3]</code> it deduces <code class="inline">T = const int</code>: that is how the same template accepts <code class="inline">const</code> arrays.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>The length, <code class="inline">const</code>.</b> A <code class="inline">const</code> on a by-value parameter does not change the signature (checked: <code class="inline">void g(std::size_t)</code> and <code class="inline">void g(const std::size_t)</code> are the same function); it only forbids you to modify the length inside the function. If you choose <code class="inline">int</code> instead of <code class="inline">std::size_t</code> (from <code class="inline">&lt;cstddef&gt;</code>), compare it with a counter of the same signedness: otherwise <code class="inline">-Wsign-compare</code> becomes an error with <code class="inline">-Werror</code>.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>The function.</b> This is the hard parameter: its type must accept an ordinary function, an instantiated template like <code class="inline">print&lt;int&gt;</code>, a <code class="inline">const</code> or non-<code class="inline">const</code> reference, on a <code class="inline">const</code> or non-<code class="inline">const</code> array.</span></div>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Three ways to type the third parameter</h3>
+    <p class="body">"Think carefully about how to support both const and non-const elements" (p. 10): this is the key sentence of the exercise. There are at least three candidates. <b>A</b>: a second template parameter <code class="inline">F</code> for the function, whatever it is. <b>B</b>: a function pointer <code class="inline">void (*)(T &amp;)</code>. <b>C</b>: two overloads, one with <code class="inline">T *</code> and <code class="inline">void (*)(T &amp;)</code>, the other with <code class="inline">const T *</code> and <code class="inline">void (*)(const T &amp;)</code>. The demo compiled all of them, on both arrays, with the three kinds of function and the three ways of passing it.</p>
+    <div class="demo" data-demo="cpp07-iter-const">
+      <div class="demo-static">
+        <p class="body">Demo: "does the compiler accept this call?". Each verdict comes from a program compiled with Apple clang 17 (<code class="inline">c++ -std=c++98 -Wall -Wextra -Werror</code>). Control cases:</p>
+        <p class="body"><code class="inline">const int tab[3]</code> and a function <code class="inline">void f(int &amp;)</code>: ✗ (with signature A: <code class="inline">error: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier</code>).</p>
+        <p class="body"><code class="inline">int tab[3]</code> and a function <code class="inline">void f(const int &amp;)</code>: ✓ with signatures A and C, ✗ with B.</p>
+        <p class="body">An instantiated template <code class="inline">f&lt;int&gt;</code> (<code class="inline">const T &amp;</code> function): ✓ with signature A, on both arrays.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Does the compiler accept this call?","presets":"Cases to find","p1":"const array and a void(int &) function","p2":"Modifiable array and a void(const int &) function","p3":"Instantiated template: f<int>","arrLabel":"Array","fnLabel":"Parameter of the function passed","formLabel":"How the function is passed","sigLabel":"Signature of iter","arr0":"modifiable: int tab[3]","arr1":"const: const int tab[3]","fn0":"T &: modifies the element","fn1":"const T &: reads the element","fn2":"T: receives a copy","form0":"ordinary function: f","form1":"instantiated template: f<int>","form2":"template name alone: f","sig0":"A: T * and a generic parameter F","sig1":"B: T * and void (*)(T &)","sig2":"C: two overloads, T * and const T *","shownSig":"iter (body not shown)","shownFn":"The function passed","shownMain":"In main","ok":"The program compiles and runs.","ko":"The program does not compile.","whyOk":"The compiler deduces every type, and each element can be given to the function.","whyInfer":"A template name alone has no type: the compiler cannot deduce the generic parameter F from it. You have to write f<int>.","whyConflict":"T is deduced twice, with two different types: first from the array, then from the function. The compiler does not pick one: it rejects the call.","whyNomatchfn":"No version of the template f has the shape that the function parameter of iter expects: the call is rejected.","whyShape":"The function passed does not match the void (*)(T &) shape that the signature expects: the call is rejected.","whyConstbody":"The call is accepted, but the error is in the body of iter: it gives a const element to a function that expects a non-const reference.","whyConstfn":"The call is accepted, but f is then instantiated with T = const int: its body modifies a const value.","msgTitle":"Message from {compiler} (position removed)","meta":"Each verdict comes from a program really compiled with {compiler}: {flags}. Programs compiled: {n}. With g++ the message may be worded differently: check with your school's compiler."}</script>
+    </div>
+
+    <p class="body">What the demo's table shows, with Apple clang:</p>
+    <div class="steps">
+      <div class="step on"><span class="n">A</span><span class="txt"><b>Generic parameter <code class="inline">F</code>.</b> The most flexible: ordinary function, instantiated template, <code class="inline">const</code> or non-<code class="inline">const</code> reference, by value. It only refuses what the body refuses (giving a <code class="inline">const</code> to a function that modifies it) and a template name alone.</span></div>
+      <div class="step on"><span class="n">B</span><span class="txt"><b><code class="inline">void (*)(T &amp;)</code>.</b> Only one shape of function gets through. A <code class="inline">const</code> array gives <code class="inline">T = const int</code> on one side and <code class="inline">int</code> on the other: conflict. A <code class="inline">const T &amp;</code> function on a modifiable array: conflict too.</span></div>
+      <div class="step on"><span class="n">C</span><span class="txt"><b>Two overloads.</b> A <code class="inline">T &amp;</code> function gets through on a modifiable array, a <code class="inline">const T &amp;</code> function on both. A by-value function is refused, except in a curious case of a template name alone.</span></div>
+    </div>
+    <div class="callout"><span class="bulb">💡</span><p><b>The third parameter can be an instantiated template (p. 10).</b> <code class="inline">iter(tab, 3, print&lt;int&gt;)</code> passes the address of the version of <code class="inline">print</code> built for <code class="inline">int</code>. Writing <code class="inline">iter(tab, 3, print)</code>, the template name without <code class="inline">&lt;int&gt;</code>, fails with signature A: <code class="inline">couldn't infer template argument 'F'</code>. You will also see cases where stricter signatures manage to pick the right version on their own; better to write <code class="inline">&lt;int&gt;</code>.</p></div>
+    <p class="body">There is no single answer: choose a signature, test the subject's cases (<code class="inline">const</code> array or not, <code class="inline">const</code> reference or not, instantiated template), and be able to explain what your signature refuses.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex01/main.cpp · test ideas</span></div>
+<pre><span class="k">template</span> &lt;<span class="k">typename</span> <span class="ty">T</span>&gt;
+<span class="ty">void</span> <span class="fn">print</span>(<span class="k">const</span> <span class="ty">T</span> &amp;x) { <span class="ty">std</span>::cout &lt;&lt; x &lt;&lt; <span class="st">" "</span>; }
+
+<span class="ty">int</span>         numbers[<span class="nm">3</span>] = {<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>};
+<span class="k">const</span> <span class="ty">int</span>   fixed[<span class="nm">3</span>]   = {<span class="nm">4</span>, <span class="nm">5</span>, <span class="nm">6</span>};
+
+<span class="fn">iter</span>(numbers, <span class="nm">3</span>, print&lt;<span class="ty">int</span>&gt;);   <span class="cm">// modifiable array, instantiated template</span>
+<span class="fn">iter</span>(fixed, <span class="nm">3</span>, print&lt;<span class="ty">int</span>&gt;);     <span class="cm">// const array</span>
+<span class="fn">iter</span>(numbers, <span class="nm">0</span>, print&lt;<span class="ty">int</span>&gt;);   <span class="cm">// length 0: nothing must happen</span></pre>
+    </div>
+    <p class="body">Add an array of another type (<code class="inline">std::string</code>, <code class="inline">double</code>) and a function that <em>modifies</em> the elements. The subject imposes no output for this exercise: your <code class="inline">main</code> only has to show that everything works.</p>
+  </section>
+
+  <section id="ex02">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>ex02 · <span class="accent">Array</span><small>"Array" (subject, p. 11)</small></h2></div>
+    <p class="body"><b>In plain words.</b> A class template <code class="inline">Array&lt;T&gt;</code> that holds elements of type <code class="inline">T</code> (p. 11): a constructor with no parameter (empty array), a constructor with an <code class="inline">unsigned int n</code> (<code class="inline">n</code> elements "initialized by default"), a copy by constructor and by <code class="inline">operator=</code> after which the original and the copy are <b>independent</b>, access through <code class="inline">[]</code> that throws an <code class="inline">std::exception</code> when out of bounds, and a member function <code class="inline">size()</code>.</p>
+    <p class="body"><b>Files to submit (p. 11):</b> <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">Array.{h, hpp}</code>, and optionally <code class="inline">Array.tpp</code>, in <code class="inline">ex02/</code>.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex02/Array.hpp · skeleton</span></div>
+<pre><span class="op">#ifndef</span> <span class="ty">ARRAY_HPP</span>
+<span class="op">#define</span> <span class="ty">ARRAY_HPP</span>
+
+<span class="op">#include</span> <span class="st">&lt;cstddef&gt;</span>
+<span class="op">#include</span> <span class="st">&lt;exception&gt;</span>
+
+<span class="k">template</span> &lt;<span class="k">typename</span> <span class="ty">T</span>&gt;
+<span class="k">class</span> <span class="ty">Array</span>
+{
+	<span class="k">private</span>:
+		<span class="ty">T</span>				*_data;
+		<span class="k">unsigned</span> <span class="ty">int</span>	_size;
+
+	<span class="k">public</span>:
+		<span class="ty">Array</span>();                                <span class="cm">// empty array</span>
+		<span class="ty">Array</span>(<span class="k">unsigned</span> <span class="ty">int</span> n);                  <span class="cm">// n elements "by default"</span>
+		<span class="ty">Array</span>(<span class="k">const</span> <span class="ty">Array</span> &amp;other);              <span class="cm">// deep copy</span>
+		<span class="ty">Array</span> &amp;<span class="k">operator</span>=(<span class="k">const</span> <span class="ty">Array</span> &amp;other);   <span class="cm">// deep copy</span>
+		~<span class="ty">Array</span>();
+
+		<span class="ty">T</span>				&amp;<span class="k">operator</span>[](<span class="k">unsigned</span> <span class="ty">int</span> i);
+		<span class="k">const</span> <span class="ty">T</span>			&amp;<span class="k">operator</span>[](<span class="k">unsigned</span> <span class="ty">int</span> i) <span class="k">const</span>;
+		<span class="k">unsigned</span> <span class="ty">int</span>	<span class="fn">size</span>() <span class="k">const</span>;
+
+		<span class="k">class</span> <span class="ty">OutOfBoundsException</span> : <span class="k">public</span> <span class="ty">std</span>::<span class="ty">exception</span>
+		{
+			<span class="k">public</span>:
+				<span class="k">virtual</span> <span class="k">const</span> <span class="ty">char</span> *<span class="fn">what</span>() <span class="k">const</span> <span class="k">throw</span>();
+		};
+};
+
+<span class="op">#include</span> <span class="st">"Array.tpp"</span>   <span class="cm">// optional: the definitions may also stay here</span>
+
+<span class="op">#endif</span></pre>
+    </div>
+    <p class="body">Only <code class="inline">Array</code>, <code class="inline">size()</code>, <code class="inline">[]</code> and the <code class="inline">unsigned int</code> type of the constructor come from the subject; the name and number of attributes and the name of the exception are free. As in the whole module, the class is in Orthodox Canonical Form (p. 4): default constructor, copy constructor, <code class="inline">operator=</code>, destructor.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Constructing: <code class="inline">new[]</code>, "by default", no allocating ahead</h3>
+    <p class="body">The subject imposes <code class="inline">operator new[]</code> and forbids <b>preventive allocation</b> (reserving room in advance, p. 11): <code class="inline">Array(n)</code> allocates exactly <code class="inline">n</code> elements, and your program "must never access non-allocated memory". "Initialized by default": the subject suggests trying <code class="inline">int * a = new int();</code> then displaying <code class="inline">*a</code> (p. 11). Here is what clang gives on macOS:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal · clang, c++98</span></div>
+<pre>new int()       -&gt; 0
+new int[5]()    -&gt; 0 0 0 0 0
+new string[3]() -&gt; [][][]
+new int[5]      -&gt; -1431655766 -1431655766 ...   (with MallocPreScribble=1)</pre>
+    </div>
+    <p class="body">The empty parentheses <code class="inline">()</code> make the difference: with them, an <code class="inline">int</code> is 0 and a <code class="inline">std::string</code> is empty (the default constructor of <code class="inline">T</code> is called). Without them, the <code class="inline">int</code> values are <b>indeterminate</b>: reading them is undefined behavior. A clean value may come out by luck; the macOS environment variable <code class="inline">MallocPreScribble=1</code> fills fresh memory with a pattern and shows the truth (<code class="inline">-1431655766</code> is <code class="inline">0xAAAAAAAA</code>).</p>
+    <p class="body">Consequence: a <code class="inline">T</code> without a default constructor cannot be stored. Checked: <code class="inline">Array&lt;NoDefault&gt; a(3);</code> gives <code class="inline">error: no matching constructor for initialization of 'NoDefault[]'</code>. However, <code class="inline">Array&lt;NoDefault&gt; a;</code> alone compiles: the compiler only builds the member functions the program uses.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Copying: deep, for real</h3>
+    <p class="body">"Modifying either the original array or its copy after copying musn't affect the other array" (p. 11): a <b>deep</b> copy, in two places, the copy constructor and <code class="inline">operator=</code>. If you let the compiler generate the copy, it copies the <b>pointer</b> <code class="inline">_data</code>: both arrays share the same cells, and each destructor does <code class="inline">delete[]</code> on the same address. With clang on macOS the program dies with <code class="inline">Trace/BPT trap: 5</code>; this is undefined behavior, the symptom changes from system to system. The demo shows both versions side by side.</p>
+    <p class="body">For <code class="inline">operator=</code>, think about three things: <b>self-assignment</b> (<code class="inline">a = a</code>: if you free the old array before copying, you copy from freed memory); the <b>old content</b> (to be freed, otherwise a leak); the <b>size</b> (the target may have a different size). In a test, clang refuses an <code class="inline">a = a;</code> written as is (<code class="inline">-Wself-assign-overloaded</code> with <code class="inline">-Wall</code>): go through a reference, <code class="inline">Array&lt;int&gt; &amp;alias = a; a = alias;</code>.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Accessing: <code class="inline">[]</code> in two versions, and an exception</h3>
+    <p class="body"><code class="inline">operator[]</code> returns a <b>reference</b> <code class="inline">T &amp;</code>, otherwise <code class="inline">a[0] = 5</code> does not compile (<code class="inline">expression is not assignable</code>). You need a second, <code class="inline">const</code> one, returning <code class="inline">const T &amp;</code>: without it, an array received as <code class="inline">const Array&lt;int&gt; &amp;</code> cannot be read (<code class="inline">no viable overloaded operator[] for type 'const Array&lt;int&gt;'</code>). Both check the index: if it is out of bounds, they throw an exception (p. 11). The subject writes "an std::exception is thrown": a nested class that inherits from <code class="inline">std::exception</code> is one, and <code class="inline">catch (std::exception &amp;e)</code> catches it (checked); throwing <code class="inline">std::exception()</code> directly works too. In C++98, <code class="inline">what()</code> keeps the signature <code class="inline">virtual const char *what() const throw();</code>.</p>
+    <p class="body">The parameter is an <code class="inline">unsigned int</code>: a negative index is <b>converted</b> to it. <code class="inline">a[-1]</code> becomes <code class="inline">a[4294967295]</code> (checked), hence "out of bounds" and your test catches it, provided you compare with <code class="inline">&gt;=</code> against the size without converting to <code class="inline">int</code>. Mind your test loops too: <code class="inline">for (int i = 0; i &lt; a.size(); i++)</code> does not compile with <code class="inline">-Werror</code> (<code class="inline">comparison of integers of different signs</code>); use an <code class="inline">unsigned int</code>.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Measuring: <code class="inline">size()</code> and the <code class="inline">.tpp</code> file</h3>
+    <p class="body"><code class="inline">size()</code> takes no parameter and must not modify the instance (p. 11): it is <code class="inline">const</code>. Without <code class="inline">const</code>, an array received as <code class="inline">const Array&lt;int&gt; &amp;</code> cannot call <code class="inline">size()</code> (<code class="inline">'this' argument to member function 'size' has type 'const Array&lt;int&gt;', but function is not marked const</code>).</p>
+    <p class="body">About the optional <code class="inline">Array.tpp</code> file (p. 11): it receives the definitions of the member functions, your <code class="inline">Array.hpp</code> includes it on the last line before the <code class="inline">#endif</code>, and the Makefile does not compile it (it is not a <code class="inline">.cpp</code>). For the nested exception: a member of a template remains "templated", so <code class="inline">what()</code> can live in the <code class="inline">.tpp</code>; a free-standing exception class defined in the <code class="inline">.hpp</code> with a body would be an implementation in a header (rule on p. 4): to check with your evaluator.</p>
+
+    <div class="demo" data-demo="cpp07-array">
+      <div class="demo-static">
+        <p class="body">Demo: two arrays <code class="inline">a</code> and <code class="inline">b</code> shown as cells, with a "shallow copy (wrong)" mode and a "deep copy" mode. Control cases:</p>
+        <p class="body"><code class="inline">Array&lt;int&gt;(5)</code>: 5 cells, all <code class="inline">0</code> (<code class="inline">new int[5]()</code>).</p>
+        <p class="body">Deep copy then modifying the copy: the original does not change. Shallow copy: both arrays change together, and the end of scope reports a double free.</p>
+        <p class="body"><code class="inline">a[5]</code> on 5 cells: <code class="inline">std::exception</code> exception. <code class="inline">size()</code> of an empty array: <code class="inline">0</code>.</p>
+      </div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"An Array<int> in cells: what do a and b share?","modeLabel":"Kind of copy","modeDeep":"Deep copy (correct)","modeShallow":"Shallow copy (wrong)","modeNote":"Changing the kind of copy resets the demo.","nLabel":"n","iLabel":"Index i","vLabel":"Value v","whoLabel":"Array","declTitle":"Declare, copy, assign","accessTitle":"Read and write with []","scope":"End of scope (destructors)","reset":"Start over","logLabel":"Log","hint":"Start by declaring a, for example with Array<int> a(5); then copy it into b.","notDeclared":"not declared yet","nullPtr":"NULL pointer","sizeOf":"size() = {n}","bufferOf":"buffer #{id}","noCells":"no cell","sharedWith":"buffer shared with {other}","freedMark":"buffer freed","errDead":"The scope is over: the arrays no longer exist. Reset the demo.","errAlready":"{name} is already declared: you cannot redeclare a variable. Reset the demo to start over.","errN":"n must be an integer between 0 and {max}.","errNoSource":"{name} is not declared yet: declare it first.","errNotDeclared":"{name} is not declared yet: declare it first.","errI":"The index must be an integer between {min} and {max}.","errV":"The value must be an integer between {min} and {max}.","errNothing":"No array is declared: there is nothing to destroy.","lEmpty":"{name} is empty: size() = 0, no allocation.","lCtorN":"{name}: new int[{n}]() allocates buffer #{id}, every cell is 0.","lCopyEmpty":"{name} is empty, like the array copied.","lCopyShallow":"Only the pointer is copied: {name} and {src} share buffer #{id}.","lCopyDeep":"{name} gets its own buffer #{id}, with the same values as {src}.","lAssignEmpty":"b becomes empty, like a; its old buffer is freed (delete[]).","lAssignShallowEmpty":"The NULL pointer of a is copied: b is empty.","lAssignShallow":"The pointer is copied: b and a share buffer #{id}.","lLostOld":"The old buffer #{old} of b is no longer reachable: it will never be freed (leak).","lAssignDeep":"b gets a new buffer #{id} copied from a; its old buffer is freed if there was one.","lWrite":"{name}[{i}] is now {v} in buffer #{id}.","lSharedEffect":"Since the buffer is shared, {other}[{i}] is also {v}: the copy is not independent.","lRead":"{name}[{i}] is {v}.","lNeg":"The index {i}, converted to unsigned int, becomes {u}.","lThrow":"The index {u} is not less than size() = {size}: exception thrown, caught by catch (std::exception &).","lScopeEmpty":"Nothing to free, the pointer is NULL.","lScopeDouble":"delete[] of buffer #{id}, already freed: double free! The program crashes (undefined behavior).","lScopeFree":"delete[] of buffer #{id}.","lScopeOk":"End of scope: every buffer is freed, no leak.","lLeak":"Buffer #{id} was never freed: leak."}</script>
+    </div>
+
+    <div class="callout"><span class="bulb">🧪</span><p><b>What your <code class="inline">main</code> should test.</b> An empty array (<code class="inline">size()</code> is 0, <code class="inline">[0]</code> throws); <code class="inline">Array&lt;int&gt;(5)</code> with its five zeros; an <code class="inline">Array&lt;std::string&gt;</code>; a copy then a modification of the copy, with the original staying put; an assignment, including onto an array that is already filled; an index equal to the size and a negative index; reading through a <code class="inline">const Array&lt;T&gt; &amp;</code>; no leak.</p></div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Step by <span class="accent">step</span></h2></div>
+    <p class="body">An order that limits back and forth: each exercise reuses the idea of the previous one.</p>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Prepare the ground.</b> One directory per exercise (<code class="inline">ex00/</code>, <code class="inline">ex01/</code>, <code class="inline">ex02/</code>, p. 3), a Makefile that compiles with <code class="inline">-Wall -Wextra -Werror -std=c++98</code> and does not relink, headers with include guards. No <code class="inline">using namespace</code>, no <code class="inline">&lt;algorithm&gt;</code>.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>ex00.</b> Write <code class="inline">swap</code>, <code class="inline">min</code>, <code class="inline">max</code> in <code class="inline">whatever.hpp</code>. Compile first with the subject's <code class="inline">main</code> (p. 9) and compare the values. Then add a key-and-label type to check the equal-values case.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>ex01, one case at a time.</b> Make <code class="inline">iter</code> work with a modifiable <code class="inline">int[]</code> and a function taking a reference. Then the <code class="inline">const</code> array, the <code class="inline">const</code> reference, the instantiated template, another element type, a zero length. Each case that breaks teaches you something about your signature.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>ex02, skeleton first.</b> Declare the class, the default constructor and <code class="inline">size()</code>: an empty array that compiles. Add <code class="inline">Array(n)</code> and <code class="inline">[]</code> with the bounds check and the exception.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>The copy.</b> Copy constructor, then <code class="inline">operator=</code> (self-assignment, old content, new size). Test by modifying the copy, then the original.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>The <code class="inline">const</code> overload.</b> Add the second <code class="inline">operator[]</code> and test it with a function that receives a <code class="inline">const Array&lt;int&gt; &amp;</code>.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>Final check.</b> A test with an <code class="inline">Array&lt;std::string&gt;</code>, then memory: <code class="inline">leaks --atExit -- ./array</code> on macOS (it prints "0 leaks" when everything is freed), <code class="inline">valgrind</code> on Linux. Run <code class="inline">make</code> twice: the second run must do nothing. Check the names of files and directories (p. 12).</span></div>
+    </div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Classic <span class="accent">pitfalls</span></h2></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A template defined in a <code class="inline">.cpp</code>.</b> Every file compiles, then linking fails: <code class="inline">Undefined symbols … "void swap&lt;int&gt;(int&amp;, int&amp;)"</code> on macOS (checked). The body must be visible where the template is called: in the <code class="inline">.hpp</code> (p. 8), or in a <code class="inline">.tpp</code> it includes (p. 11).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">min</code> or <code class="inline">max</code> returning the first one when the values are equal.</b> The subject wants the second (p. 8). It depends on how you write the test: on a key-and-label type, a test written "backwards" returns the first label (checked by compiling). With <code class="inline">int</code> you will never see it: test with a type where the difference shows.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A <code class="inline">swap</code> without a temporary value.</b> Two assignments, <code class="inline">a = b; b = a;</code>, overwrite the first value: with 2 and 3 you get <code class="inline">a = 3, b = 3</code> (checked). You must keep one of the two values before overwriting it.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Calling without <code class="inline">::</code>, or with two types.</b> <code class="inline">min(c, d)</code> on <code class="inline">std::string</code> is ambiguous with <code class="inline">std::min</code> (clang, libc++). <code class="inline">::min(a, 3.5)</code> with an <code class="inline">int</code> and a <code class="inline">double</code> does not compile: both arguments must have the same type (p. 8).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>An <code class="inline">iter</code> that refuses a <code class="inline">const</code> array.</b> If the third parameter is typed <code class="inline">void (*)(T &amp;)</code>, a <code class="inline">const int[3]</code> does not get through: <code class="inline">T</code> is <code class="inline">const int</code> on one side, <code class="inline">int</code> on the other. And passing a template name without <code class="inline">&lt;int&gt;</code> fails with a generic parameter <code class="inline">F</code>. The demo shows each case.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A non-<code class="inline">const</code> length (ex01).</b> The subject wants it "passed as a const value" (p. 10). It does not change the signature, but your evaluator will look at it. And an <code class="inline">int</code> compared with a <code class="inline">std::size_t</code> counter does not compile with <code class="inline">-Werror</code> (<code class="inline">-Wsign-compare</code>).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Copying the pointer instead of the cells.</b> Shallow copy: two <code class="inline">Array</code> share the same <code class="inline">_data</code>, and the second destructor does a <code class="inline">delete[]</code> on an address already freed. With clang on macOS the program dies with <code class="inline">Trace/BPT trap: 5</code>. The subject requires the copy to be independent (p. 11).</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>An <code class="inline">operator=</code> that forgets self-assignment.</b> If you free the old array before copying, <code class="inline">a = a</code> copies from freed memory. One test prints "0 0 0" instead of "1 2 3", and pattern values with <code class="inline">MallocScribble=1</code>. Test through a reference: clang refuses a literal <code class="inline">a = a;</code>.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Allocating ahead, or going out of bounds.</b> Preventive allocation is forbidden and the program must never access non-allocated memory (p. 11). An <code class="inline">operator[]</code> with no bounds check reads or writes outside the array: undefined behavior, no exception.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Forgotten <code class="inline">const</code>.</b> A non-<code class="inline">const</code> <code class="inline">size()</code> cannot be called on a <code class="inline">const</code> array; a single non-<code class="inline">const</code> <code class="inline">operator[]</code> cannot be read on a <code class="inline">const</code> array; an <code class="inline">operator[]</code> that returns <code class="inline">T</code> by value does not allow <code class="inline">a[0] = 5</code>. All three errors were reproduced with clang.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>The negative index.</b> <code class="inline">a[-1]</code> is converted to <code class="inline">unsigned int</code>: <code class="inline">4294967295</code> with 32 bits. Your bounds test must stay correct for this value: it is ≥ the size, so an exception.</p></div>
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A <code class="inline">T</code> without a default constructor.</b> <code class="inline">Array&lt;T&gt;(n)</code> then does not exist: <code class="inline">new T[n]()</code> does not compile. The constructor with no parameter does compile (checked) since the body of <code class="inline">Array(n)</code> is not built.</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">09</span><h2>How I <span class="accent">did it</span></h2></div>
+    <div class="how"><p class="body">I followed the subject's order. For ex00, a single header with three functions that take and return <code class="inline">const</code> references; my <code class="inline">main</code> reuses the subject's, then adds <code class="inline">double</code>, <code class="inline">char</code> and two equal values whose address I compare with the second argument's. For ex01, <code class="inline">iter</code> has two template parameters, the element type and the function type: that is what accepts a <code class="inline">const</code> array, a reference and an instantiated template like <code class="inline">print&lt;int&gt;</code>. For ex02, <code class="inline">Array.hpp</code> includes <code class="inline">Array.tpp</code> at the end. The constructor with <code class="inline">n</code> elements uses <code class="inline">new T[n]()</code>; the copy is deep; <code class="inline">operator=</code> builds the new buffer before freeing the old one and guards against self-assignment; both <code class="inline">operator[]</code> throw the same nested exception. My test compares an <code class="inline">Array</code> with a mirror array of 750 integers, plus the empty case, a copy and an out-of-bounds access.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 Takeaways (defense checklist)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>Templates go in headers.</b> "Templates must be defined in the header files" (p. 8); it is the only implementation tolerated in a <code class="inline">.hpp</code> (p. 4). A <code class="inline">.cpp</code> gives a link error.</div></li>
+        <li><span class="chk">✓</span><div><b>The compiler builds one version per type used.</b> <code class="inline">T</code> is deduced from the arguments; two arguments of different types are rejected.</div></li>
+        <li><span class="chk">✓</span><div><b>Why <code class="inline">::</code>?</b> It limits the lookup to the global namespace: your <code class="inline">swap</code>, not the one from <code class="inline">std</code> (ambiguity otherwise). And <code class="inline">&lt;algorithm&gt;</code> is forbidden before module 08.</div></li>
+        <li><span class="chk">✓</span><div><b>Equal values: the second.</b> <code class="inline">min</code> and <code class="inline">max</code> return the second argument (p. 8); a <code class="inline">const</code> reference lets you check it.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">iter</code>: address, <code class="inline">const</code> length, function (p. 10).</b> It must accept <code class="inline">const</code> or non-<code class="inline">const</code> elements, a <code class="inline">const</code> or non-<code class="inline">const</code> reference, an instantiated template (<code class="inline">print&lt;int&gt;</code>). Be able to say what your signature refuses.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">Array</code>: <code class="inline">new[]</code>, no preventive allocation (p. 11).</b> <code class="inline">new T[n]()</code> initializes by default (0 for an <code class="inline">int</code>); without <code class="inline">()</code>, <code class="inline">int</code> values are indeterminate.</div></li>
+        <li><span class="chk">✓</span><div><b>Deep copy, twice.</b> Copy constructor and <code class="inline">operator=</code>: original and copy independent (p. 11). <code class="inline">operator=</code> handles self-assignment and frees the old content.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">operator[]</code> in two versions</b> (<code class="inline">const</code> and non-<code class="inline">const</code>), with a bounds check and <code class="inline">std::exception</code> (p. 11). A negative index becomes a large <code class="inline">unsigned int</code>: out of bounds too.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">size()</code> is <code class="inline">const</code></b>, with no parameter (p. 11).</div></li>
+        <li><span class="chk">✓</span><div><b>Hygiene.</b> <code class="inline">c++ -Wall -Wextra -Werror -std=c++98</code>, canonical form, include guards, no <code class="inline">using namespace</code>, no STL, no leak. A small modification may be requested at the defense (p. 12).</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

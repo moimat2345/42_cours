@@ -1,0 +1,23 @@
+[data-demo="cpp07-iter-const"] .ic-title{color:var(--muted);font-size:.9rem;margin-bottom:12px}
+[data-demo="cpp07-iter-const"] .ic-presets{margin-top:0}
+[data-demo="cpp07-iter-const"] .ic-preset{min-height:40px;font-size:.74rem;white-space:normal;text-align:left}
+[data-demo="cpp07-iter-const"] .ic-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;margin-top:14px}
+[data-demo="cpp07-iter-const"] .ic-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+[data-demo="cpp07-iter-const"] .ic-field select{width:100%;min-width:0}
+[data-demo="cpp07-iter-const"] .ic-panels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+[data-demo="cpp07-iter-const"] .ic-panel{min-width:0}
+[data-demo="cpp07-iter-const"] .ic-panel:first-child{grid-column:1 / -1}
+[data-demo="cpp07-iter-const"] .ic-panel-title{margin-bottom:6px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+[data-demo="cpp07-iter-const"] .ic-code{margin-bottom:0;font-size:.78rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+[data-demo="cpp07-iter-const"] .ic-verdict{margin-top:16px;padding:14px 16px;border-radius:10px;border:1px solid var(--border-strong);font-family:var(--mono);font-size:.84rem;overflow-wrap:anywhere}
+[data-demo="cpp07-iter-const"] .ic-verdict.good{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);color:var(--accent)}
+[data-demo="cpp07-iter-const"] .ic-verdict.bad{background:rgba(255,93,115,.1);border-color:rgba(255,93,115,.38);color:var(--err)}
+[data-demo="cpp07-iter-const"] .ic-vline{font-weight:700}
+[data-demo="cpp07-iter-const"] .ic-vwhy{margin-top:6px;font-size:.8rem;color:var(--text);font-weight:300}
+[data-demo="cpp07-iter-const"] .ic-verdict .ic-panel-title{margin-top:12px}
+[data-demo="cpp07-iter-const"] .ic-verdict .ic-panel-title:empty{display:none}
+[data-demo="cpp07-iter-const"] .ic-msg{margin-bottom:0;font-size:.76rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text)}
+[data-demo="cpp07-iter-const"] .ic-meta{margin-top:12px;font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+@media (max-width:620px){
+  [data-demo="cpp07-iter-const"] .ic-panels,[data-demo="cpp07-iter-const"] .ic-controls{grid-template-columns:1fr}
+}

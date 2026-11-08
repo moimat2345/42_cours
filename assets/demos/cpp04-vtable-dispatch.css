@@ -1,0 +1,36 @@
+[data-demo="cpp04-vtable-dispatch"] .vd-title{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+[data-demo="cpp04-vtable-dispatch"] .vd-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 16px;align-items:end}
+[data-demo="cpp04-vtable-dispatch"] .vd-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+[data-demo="cpp04-vtable-dispatch"] .vd-field select{width:100%;min-width:0}
+[data-demo="cpp04-vtable-dispatch"] .vd-switch{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2);min-width:0}
+[data-demo="cpp04-vtable-dispatch"] .vd-switch input{width:20px;height:20px;flex:none;accent-color:var(--accent)}
+[data-demo="cpp04-vtable-dispatch"] .vd-check{color:var(--text);font-size:.8rem;overflow-wrap:anywhere}
+[data-demo="cpp04-vtable-dispatch"] .vd-hint{font-family:var(--mono);font-size:.74rem;color:var(--muted);margin:12px 0 0}
+[data-demo="cpp04-vtable-dispatch"] .vd-lbl{display:block;font-family:var(--mono);font-size:.74rem;letter-spacing:.02em;color:var(--muted);margin:18px 0 8px}
+[data-demo="cpp04-vtable-dispatch"] .vd-code{margin:0;padding:14px 16px;overflow-x:auto;font-size:.82rem;line-height:1.6;white-space:pre}
+/* the word "virtual" is visible in the code only when the switch is on (a text cue, not a colour alone) */
+[data-demo="cpp04-vtable-dispatch"] .vd-kw.on{color:var(--accent);font-weight:700}
+[data-demo="cpp04-vtable-dispatch"] .vd-call{color:var(--text);font-weight:700;background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:4px;padding:1px 4px}
+[data-demo="cpp04-vtable-dispatch"] .vd-steps{list-style:none;display:flex;flex-direction:column;gap:8px;margin:0}
+[data-demo="cpp04-vtable-dispatch"] .vd-steps li{display:flex;gap:12px;align-items:baseline;padding:10px 13px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);font-size:.88rem;color:#c3c8d4;font-weight:300}
+[data-demo="cpp04-vtable-dispatch"] .vd-when{flex:none;font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);min-width:7.5em;font-weight:700}
+[data-demo="cpp04-vtable-dispatch"] .vd-text{min-width:0;overflow-wrap:anywhere}
+[data-demo="cpp04-vtable-dispatch"] .vd-vtable{border:1px solid var(--border);border-radius:10px;background:#0c0f15;padding:12px 14px}
+[data-demo="cpp04-vtable-dispatch"] .vd-vtrow{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:8px 11px;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:8px}
+[data-demo="cpp04-vtable-dispatch"] .vd-vtrow code{font-family:var(--mono);font-size:.84rem;color:var(--text);font-variant-ligatures:none;overflow-wrap:anywhere}
+[data-demo="cpp04-vtable-dispatch"] .vd-vtrow.off{border-style:dashed;border-color:var(--border-strong)}
+[data-demo="cpp04-vtable-dispatch"] .vd-vtrow.off code{color:var(--muted)}
+[data-demo="cpp04-vtable-dispatch"] .vd-used{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+[data-demo="cpp04-vtable-dispatch"] .vd-out{margin-top:16px;border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#0c0f15}
+[data-demo="cpp04-vtable-dispatch"] .vd-out .vd-lbl{margin:0 0 6px}
+[data-demo="cpp04-vtable-dispatch"] .vd-sound{display:block;font-family:var(--mono);font-size:1.15rem;font-weight:700;color:var(--text);font-variant-ligatures:none;overflow-wrap:anywhere}
+/* the page accent of this course is amber: a good verdict stays green, a bad one red */
+[data-demo="cpp04-vtable-dispatch"] .verdict-box.good{background:rgba(62,230,176,.12);color:var(--stack);border:1px solid var(--stack-line)}
+[data-demo="cpp04-vtable-dispatch"] .verdict-box.bad{background:rgba(255,93,115,.12);color:var(--err);border:1px solid rgba(255,93,115,.38)}
+@media (max-width:560px){
+  [data-demo="cpp04-vtable-dispatch"] .vd-steps li{flex-direction:column;gap:4px}
+  [data-demo="cpp04-vtable-dispatch"] .vd-when{min-width:0}
+}
+[data-demo="cpp04-vtable-dispatch"] button,
+[data-demo="cpp04-vtable-dispatch"] .vd-steps li,
+[data-demo="cpp04-vtable-dispatch"] .vd-lbl{font-variant-ligatures:none}

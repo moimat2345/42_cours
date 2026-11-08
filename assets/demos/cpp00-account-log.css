@@ -1,0 +1,16 @@
+[data-demo="cpp00-account-log"] .al-title{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+[data-demo="cpp00-account-log"] .al-counters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0}
+[data-demo="cpp00-account-log"] .al-counter{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);min-width:0}
+[data-demo="cpp00-account-log"] .al-counter dt{font-family:var(--mono);font-size:.74rem;color:var(--muted);overflow-wrap:anywhere}
+[data-demo="cpp00-account-log"] .al-counter dt code{font-family:var(--mono);color:var(--muted)}
+[data-demo="cpp00-account-log"] .al-value{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--accent);line-height:1.2;margin:2px 0 0}
+[data-demo="cpp00-account-log"] .al-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px 16px;margin-top:16px}
+[data-demo="cpp00-account-log"] .al-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+[data-demo="cpp00-account-log"] .al-field input,[data-demo="cpp00-account-log"] .al-field select{width:100%;min-width:0}
+[data-demo="cpp00-account-log"] .al-field input[aria-invalid="true"]{border-color:var(--err)}
+[data-demo="cpp00-account-log"] .al-actions{margin-top:14px}
+[data-demo="cpp00-account-log"] .al-actions button{min-height:40px}
+[data-demo="cpp00-account-log"] .al-verdict{margin-top:14px}
+[data-demo="cpp00-account-log"] .al-verdict:not(.good):not(.bad){border:1px dashed var(--border-strong);color:var(--muted)}
+[data-demo="cpp00-account-log"] .al-cap{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin:16px 0 6px}
+[data-demo="cpp00-account-log"] .al-log{margin:0;padding:12px 14px;background:#0c0f15;border:1px solid var(--border);border-radius:10px;overflow:auto;max-height:260px;min-height:5.4em;white-space:pre;font-size:clamp(.58rem,2.5vw,.76rem);line-height:1.7;color:#dfe3ec}

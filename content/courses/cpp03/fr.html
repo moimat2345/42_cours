@@ -1,0 +1,439 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C++ · Module 03 · Héritage</span>
+  <h1 class="title">CPP<span class="g">03</span></h1>
+  <p class="lead">Faire <b>hériter</b> une classe d'une autre : construire et détruire dans le bon ordre, partager des attributs avec <code class="inline">protected</code>, puis démêler un <b>héritage en losange</b> avec <code class="inline">virtual</code>.</p>
+  <p class="subj">sujet : en.subject.pdf · version 8.1 · C++98 · c++ -Wall -Wextra -Werror -std=c++98</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>Le module en <span class="accent">bref</span></h2></div>
+    <p class="body">Tu construis une petite famille de robots. Tout part de <code class="inline">ClapTrap</code> : un nom et trois nombres (points de vie, points d'énergie, dégâts d'attaque), avec trois actions : attaquer, encaisser des dégâts, se réparer. Deux classes en <b>héritent</b>, <code class="inline">ScavTrap</code> et <code class="inline">FragTrap</code> : elles réutilisent tout ce que fait <code class="inline">ClapTrap</code> et ajoutent chacune une capacité spéciale. Un dernier exercice, facultatif, te demande un <code class="inline">DiamondTrap</code> qui hérite des deux à la fois.</p>
+    <p class="body">Le module tient en trois idées. D'abord, une classe dérivée <b>contient</b> sa base : la base est construite en premier et détruite en dernier. Ensuite, <code class="inline">protected</code> ouvre les attributs de la base aux classes dérivées sans les ouvrir au reste du programme. Enfin, quand deux chemins d'héritage mènent à la même base, il faut <code class="inline">virtual</code> pour n'en garder qu'un exemplaire.</p>
+    <div class="callout"><span class="bulb">💡</span><p><b>Tes messages sont ta preuve.</b> Le sujet veut un message dans chaque action, dans les constructeurs et dans le destructeur (p. 9) : c'est ce qui permet au correcteur de voir l'ordre de construction et de destruction. Écris dans ton <code class="inline">main</code> des tests qui les montrent.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>La carte du <span class="accent">module</span></h2></div>
+    <div class="callout" style="margin-top:0"><span class="bulb">📖</span><p>Les numéros de page entre parenthèses, comme <b>(p. 8)</b>, sont ceux imprimés en bas des pages du sujet (version 8.1). La première page du PDF est la couverture, sans numéro : le numéro imprimé est donc le numéro de page du PDF moins 1. Garde le sujet ouvert à côté : ce cours l'explique, il ne le remplace pas.</p></div>
+    <div class="map" style="margin-top:18px">
+      <div class="map-item"><span class="ex">ex00</span><div><h4>ClapTrap</h4><p>Le robot de base : un nom, des points de vie, de l'énergie, des dégâts, et <code class="inline">attack</code>, <code class="inline">takeDamage</code>, <code class="inline">beRepaired</code>. À rendre : <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">ClapTrap.{h, hpp}</code>, <code class="inline">ClapTrap.cpp</code> (p. 8).</p></div></div>
+      <div class="map-item"><span class="ex">ex01</span><div><h4>ScavTrap</h4><p>Dérive de <code class="inline">ClapTrap</code>, d'autres valeurs de départ, son propre <code class="inline">attack</code> et <code class="inline">guardGate()</code>. À rendre : les fichiers de l'ex00 + <code class="inline">ScavTrap.{h, hpp}</code>, <code class="inline">ScavTrap.cpp</code> (p. 10).</p></div></div>
+      <div class="map-item"><span class="ex">ex02</span><div><h4>FragTrap</h4><p>Dérive de <code class="inline">ClapTrap</code> aussi, d'autres valeurs, et <code class="inline">highFivesGuys()</code>. À rendre : les fichiers précédents + <code class="inline">FragTrap.{h, hpp}</code>, <code class="inline">FragTrap.cpp</code> (p. 11).</p></div></div>
+      <div class="map-item"><span class="ex">ex03</span><div><h4>DiamondTrap (facultatif)</h4><p>Hérite de <code class="inline">FragTrap</code> ET de <code class="inline">ScavTrap</code>, avec <code class="inline">whoAmI()</code>. Le sujet précise qu'on peut valider le module sans lui (p. 13). À rendre : les fichiers précédents + <code class="inline">DiamondTrap.{h, hpp}</code>, <code class="inline">DiamondTrap.cpp</code> (p. 12).</p></div></div>
+      <div class="map-item"><span class="ex">Compiler</span><div><h4>c++ et -std=c++98</h4><p>Compilation avec <code class="inline">c++ -Wall -Wextra -Werror</code> ; le code doit aussi compiler avec <code class="inline">-std=c++98</code> (p. 3). Pour le Makefile, les mêmes règles que pour les projets en C s'appliquent (p. 4).</p></div></div>
+      <div class="map-item"><span class="ex">Interdit</span><div><h4>Ce qui coûte des points</h4><p><code class="inline">using namespace</code> et <code class="inline">friend</code> : note -42 (p. 4). <code class="inline">*printf()</code>, <code class="inline">*alloc()</code> et <code class="inline">free()</code> : note 0 (p. 3). C++11 et Boost (p. 3). Conteneurs et <code class="inline">&lt;algorithm&gt;</code> avant les modules 08 et 09 : note -42 (p. 4).</p></div></div>
+      <div class="map-item"><span class="ex">Conception</span><div><h4>Forme canonique et headers</h4><p>Forme canonique orthodoxe, des modules 02 à 09 (p. 4). Un fichier de classe porte le nom de la classe (p. 3). Aucune implémentation de fonction dans un header : 0 à l'exercice. Headers utilisables seuls, avec des gardes d'inclusion : sinon 0 (p. 4). Pas de fuite mémoire (p. 4).</p></div></div>
+      <div class="map-item"><span class="ex">Sortie</span><div><h4>Newline et stdout</h4><p>Sauf précision contraire, chaque message se termine par un retour à la ligne et s'affiche sur la sortie standard (p. 3).</p></div></div>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Les valeurs de départ, classe par classe</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Classe</th><th>Points de vie</th><th>Énergie</th><th>Dégâts</th><th>Capacité spéciale</th><th>Sujet</th></tr></thead>
+        <tbody>
+          <tr><td>ClapTrap</td><td>10</td><td>10</td><td>0</td><td>aucune</td><td>p. 8</td></tr>
+          <tr><td>ScavTrap</td><td>100</td><td>50</td><td>20</td><td><code class="inline">guardGate()</code></td><td>p. 10</td></tr>
+          <tr><td>FragTrap</td><td>100</td><td>100</td><td>30</td><td><code class="inline">highFivesGuys(void)</code></td><td>p. 11</td></tr>
+          <tr><td>DiamondTrap</td><td>100 (FragTrap)</td><td>50 (ScavTrap)</td><td>30 (FragTrap)</td><td><code class="inline">whoAmI()</code>, et l'<code class="inline">attack()</code> de ScavTrap</td><td>p. 12</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">Le nom est toujours le paramètre du constructeur. Pour <code class="inline">DiamondTrap</code>, le sujet donne au <code class="inline">ClapTrap</code> intégré le nom du paramètre suivi de <code class="inline">_clap_name</code> (p. 12).</p>
+  </section>
+
+  <section id="inheritance">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>L'héritage <span class="accent">en pratique</span></h2></div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:0 0 12px">Une classe qui en contient une autre</h3>
+    <p class="body">Avec <code class="inline">class ScavTrap : public ClapTrap</code>, tu dis qu'un <code class="inline">ScavTrap</code> <b>est un</b> <code class="inline">ClapTrap</code> avec des choses en plus. Concrètement, un objet <code class="inline">ScavTrap</code> contient un <b>sous-objet</b> <code class="inline">ClapTrap</code> (la base), puis les membres propres à <code class="inline">ScavTrap</code>. C'est l'héritage <b>public</b>, le choix naturel ici (le sujet ne précise pas le mot-clé) : les membres publics de la base restent publics dans la dérivée.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ScavTrap.hpp (l'idée)</span></div>
+<pre><span class="k">class</span> <span class="ty">ScavTrap</span> : <span class="k">public</span> <span class="ty">ClapTrap</span>
+{
+    <span class="cm">// un ScavTrap contient un ClapTrap, plus ce qu'on écrit ici</span>
+};</pre>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">private, protected, public : qui voit quoi ?</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Membre déclaré dans ClapTrap</th><th>ClapTrap lui-même</th><th>Une classe dérivée</th><th>Le reste du programme</th></tr></thead>
+        <tbody>
+          <tr><td>private</td><td><span class="yes">✓ oui</span></td><td><span class="no">✗ non</span></td><td><span class="no">✗ non</span></td></tr>
+          <tr><td>protected</td><td><span class="yes">✓ oui</span></td><td><span class="yes">✓ oui</span></td><td><span class="no">✗ non</span></td></tr>
+          <tr><td>public</td><td><span class="yes">✓ oui</span></td><td><span class="yes">✓ oui</span></td><td><span class="yes">✓ oui</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">À l'ex00, le sujet donne les attributs de <code class="inline">ClapTrap</code> comme <b>privés</b> (p. 8). À l'ex01, <code class="inline">ScavTrap</code> doit utiliser ces attributs et le sujet demande de mettre <code class="inline">ClapTrap</code> à jour en conséquence (p. 10). Il faut donc ouvrir l'accès aux classes dérivées sans l'ouvrir à tout le monde : c'est exactement le rôle de <code class="inline">protected</code>. Si tu oublies, le compilateur te le rappelle : lire un membre <code class="inline">private</code> de la base depuis une dérivée donne <code class="inline">'_name' is a private member of 'ClapTrap'</code> (constaté avec clang sur macOS).</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Construction et destruction : l'ordre à connaître</h3>
+    <p class="body">Quand tu écris <code class="inline">ScavTrap robo("Robo");</code>, le programme commence par construire le sous-objet <code class="inline">ClapTrap</code>, puis exécute le constructeur de <code class="inline">ScavTrap</code>. À la sortie de la portée, c'est l'inverse : le destructeur de <code class="inline">ScavTrap</code> d'abord, celui de <code class="inline">ClapTrap</code> ensuite. Le sujet te demande de le montrer dans tes tests et pose la question du pourquoi (p. 10).</p>
+    <p class="body">La réponse tient en une phrase : le corps du constructeur de <code class="inline">ScavTrap</code> peut utiliser les attributs de <code class="inline">ClapTrap</code>, donc la base doit exister avant lui ; et à la destruction, on défait dans l'ordre inverse pour que le destructeur de la dérivée trouve encore sa base intacte. Essaie les quatre classes :</p>
+    <div class="demo" data-demo="cpp03-ctor-order">
+      <div class="demo-static"><p class="body">Démo : choisis une classe parmi <code class="inline">ClapTrap</code>, <code class="inline">ScavTrap</code>, <code class="inline">FragTrap</code> et <code class="inline">DiamondTrap</code>, instancie-la, puis sors de la portée. Pour un <code class="inline">ScavTrap</code>, les constructeurs s'exécutent dans l'ordre ClapTrap, ScavTrap et les destructeurs dans l'ordre inverse : ScavTrap, ClapTrap. Pour un <code class="inline">DiamondTrap</code> (avec <code class="inline">virtual</code>), la construction donne ClapTrap, ScavTrap, FragTrap, DiamondTrap, et la destruction suit l'ordre inverse : DiamondTrap, FragTrap, ScavTrap, ClapTrap.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Choisis une classe, instancie-la, puis sors de la portée","classLabel":"Classe à instancier","declLabel":"Déclaration","mainLabel":"Dans main()","build":"Instancier","leave":"Sortir de la portée","reset":"Recommencer","logLabel":"Sortie du programme","logEmpty":"(rien d'affiché pour l'instant)","layersLabel":"Les couches de l'objet","ctorLine":"{cls} constructed","dtorLine":"{cls} destroyed","tagCtor":"constructeur","tagDtor":"destructeur","stNone":"pas encore construit","stAlive":"construit","stGone":"détruit","shared":"partagé","sep":" → ","idle":"Rien n'est construit. Choisis une classe, puis clique sur « Instancier ».","built":"Construction : {order}. Chaque constructeur commence par celui de sa base : on construit de la base vers la classe la plus dérivée.","builtBase":"Construction : {order}. ClapTrap n'a pas de base : un seul constructeur.","builtDiamond":"Construction : {order}. ClapTrap est construit une seule fois, en premier, puis ScavTrap, FragTrap et enfin DiamondTrap (héritage virtual, voir l'exercice 03).","gone":"Destruction : {order}. C'est l'ordre inverse de la construction : la classe la plus dérivée disparaît d'abord, sa base en dernier."}</script>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Choisir le constructeur de la base</h3>
+    <p class="body">Dans la <b>liste d'initialisation</b> (après les deux-points), tu dis quel constructeur de la base appeler. Si tu n'écris rien, le compilateur appelle le constructeur <b>par défaut</b> de la base : ton robot ne reçoit donc pas le nom que tu as passé (constaté en compilant et en exécutant : il garde le nom que donne le constructeur par défaut). Avec <code class="inline">-Wextra -Werror</code>, le paramètre devenu inutilisé est même refusé (<code class="inline">unused parameter</code>), ce qui te prévient.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ScavTrap.cpp (l'idée)</span></div>
+<pre><span class="ty">ScavTrap</span>::<span class="fn">ScavTrap</span>(<span class="k">const</span> <span class="ty">std::string</span> &amp;name) : <span class="fn">ClapTrap</span>(name)
+{
+    <span class="cm">// ici, le sous-objet ClapTrap est déjà construit</span>
+}</pre>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Cacher n'est pas redéfinir</h3>
+    <p class="body"><code class="inline">ScavTrap</code> écrit son propre <code class="inline">attack</code>, avec un autre message (p. 10). Une fonction de même nom dans la dérivée <b>cache</b> celle de la base. Sans <code class="inline">virtual</code> (c'est le sujet du module 04), le choix se fait d'après le type écrit dans le code : appelée sur un <code class="inline">ScavTrap</code>, c'est la version de <code class="inline">ScavTrap</code> ; appelée à travers un <code class="inline">ClapTrap *</code> pointant sur ce même objet, c'est encore celle de <code class="inline">ClapTrap</code> (constaté en exécutant). Dans ce module, tu utilises tes objets avec leur vrai type, donc ça suffit.</p>
+  </section>
+
+  <section id="ex00">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>ex00 · <span class="accent">ClapTrap</span></h2></div>
+    <p class="body">Une classe <code class="inline">ClapTrap</code> avec quatre attributs <b>privés</b> (p. 8) : le nom (le paramètre du constructeur), les <b>points de vie</b> (10), les <b>points d'énergie</b> (10) et les <b>dégâts d'attaque</b> (0). Trois fonctions membres publiques, avec ces signatures : <code class="inline">void attack(const std::string&amp; target);</code>, <code class="inline">void takeDamage(unsigned int amount);</code> et <code class="inline">void beRepaired(unsigned int amount);</code>.</p>
+    <p class="body"><b>Fichiers à rendre</b> (dossier <code class="inline">ex00/</code>) : <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">ClapTrap.hpp</code> (ou <code class="inline">.h</code>) et <code class="inline">ClapTrap.cpp</code> (p. 8).</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Le header : déclarations seulement</h3>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex00/ClapTrap.hpp</span></div>
+<pre><span class="k">#ifndef</span> CLAPTRAP_HPP
+<span class="k">#define</span> CLAPTRAP_HPP
+
+<span class="k">#include</span> <span class="st">&lt;string&gt;</span>
+
+<span class="k">class</span> <span class="ty">ClapTrap</span>
+{
+    <span class="k">private</span>:
+        <span class="ty">std::string</span>   _name;
+        <span class="ty">unsigned int</span>  _hitPoints;      <span class="cm">// 10 au départ</span>
+        <span class="ty">unsigned int</span>  _energyPoints;   <span class="cm">// 10 au départ</span>
+        <span class="ty">unsigned int</span>  _attackDamage;   <span class="cm">// 0 au départ</span>
+
+    <span class="k">public</span>:
+        <span class="fn">ClapTrap</span>();
+        <span class="fn">ClapTrap</span>(<span class="k">const</span> <span class="ty">std::string</span> &amp;name);
+        <span class="fn">ClapTrap</span>(<span class="k">const</span> <span class="ty">ClapTrap</span> &amp;other);
+        <span class="ty">ClapTrap</span> &amp;<span class="k">operator</span>=(<span class="k">const</span> <span class="ty">ClapTrap</span> &amp;other);
+        ~<span class="fn">ClapTrap</span>();
+
+        <span class="ty">void</span> <span class="fn">attack</span>(<span class="k">const</span> <span class="ty">std::string</span> &amp;target);
+        <span class="ty">void</span> <span class="fn">takeDamage</span>(<span class="ty">unsigned int</span> amount);
+        <span class="ty">void</span> <span class="fn">beRepaired</span>(<span class="ty">unsigned int</span> amount);
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+    <p class="body">Les noms des attributs (<code class="inline">_name</code>, <code class="inline">_hitPoints</code>…) sont une suggestion : le sujet n'impose aucun nom de variable pour ClapTrap. La forme canonique (constructeur par défaut, de copie, <code class="inline">operator=</code>, destructeur) est exigée dès le module 02 (p. 4). Tout le corps des fonctions va dans le <code class="inline">.cpp</code>.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Les règles du jeu</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Action</th><th>Possible si</th><th>Effet</th><th>Énergie</th></tr></thead>
+        <tbody>
+          <tr><td>attack(target)</td><td>au moins 1 point de vie et 1 d'énergie</td><td>la cible perd autant de points de vie que tes dégâts d'attaque : tu l'annonces dans un message</td><td>−1</td></tr>
+          <tr><td>takeDamage(n)</td><td>le sujet ne le dit pas explicitement (voir p. 8) : à toi de choisir</td><td>tu perds <code class="inline">n</code> points de vie</td><td>0</td></tr>
+          <tr><td>beRepaired(n)</td><td>au moins 1 point de vie et 1 d'énergie</td><td>tu regagnes <code class="inline">n</code> points de vie</td><td>−1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">Attaquer et se réparer coûtent chacun 1 point d'énergie, et un <code class="inline">ClapTrap</code> ne peut rien faire s'il n'a plus de points de vie ou plus d'énergie (p. 8). Les <code class="inline">ClapTrap</code> n'interagissent pas directement : <code class="inline">attack</code> reçoit un simple nom (<code class="inline">std::string</code>), pas un autre robot, donc elle affiche un message sans toucher personne (p. 8). La règle générale (« ne peut rien faire », p. 8) ne dit pas explicitement si elle vise aussi <code class="inline">takeDamage</code> sur un robot déjà à zéro : décide, et sois prêt à justifier ton choix.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Les messages</h3>
+    <p class="body">Chaque fonction membre affiche un message qui décrit ce qui se passe, et les constructeurs et le destructeur aussi (p. 9). Pour <code class="inline">attack</code>, le sujet donne ce modèle (sans les chevrons) ; reprends-le tel quel pour être tranquille :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">message d'attack (p. 9)</span></div>
+<pre>ClapTrap &lt;name&gt; attacks &lt;target&gt;, causing &lt;damage&gt; points of damage!</pre>
+    </div>
+    <p class="body">Les autres messages sont libres. Voici ce que peut afficher un <code class="inline">main</code> minimal (exemple : tes messages seront différents) :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">sortie d'exemple</span></div>
+<pre>ClapTrap Bob constructed
+ClapTrap Bob attacks Alice, causing 0 points of damage!
+ClapTrap Bob takes 4 damage, hp=6
+ClapTrap Bob repairs 3, hp=9 ep=8
+ClapTrap Bob destroyed</pre>
+    </div>
+    <div class="callout"><span class="bulb">🧪</span><p><b>Ce que ton <code class="inline">main</code> doit prouver.</b> Il est à toi (p. 9). Teste une attaque, des dégâts, une réparation ; puis épuise l'énergie (10 actions), puis fais tomber les points de vie à zéro, et regarde que plus rien ne passe.</p></div>
+  </section>
+
+  <section id="ex01">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>ex01 · <span class="accent">ScavTrap</span></h2></div>
+    <p class="body"><code class="inline">ScavTrap</code> hérite de <code class="inline">ClapTrap</code>. Ses constructeurs, son destructeur et son <code class="inline">attack()</code> affichent d'autres messages que ceux de <code class="inline">ClapTrap</code> (p. 10). Il doit utiliser les attributs de <code class="inline">ClapTrap</code>, initialisés à : le nom du constructeur, <b>100</b> points de vie, <b>50</b> points d'énergie, <b>20</b> dégâts (p. 10). Sa capacité propre est <code class="inline">void guardGate();</code>, qui affiche un message disant que <code class="inline">ScavTrap</code> est en mode « Gate keeper ».</p>
+    <p class="body"><b>Fichiers à rendre</b> (dossier <code class="inline">ex01/</code>) : ceux de l'exercice précédent + <code class="inline">ScavTrap.hpp</code> (ou <code class="inline">.h</code>) et <code class="inline">ScavTrap.cpp</code> (p. 10).</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Ce qui change dans ClapTrap</h3>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex01/ClapTrap.hpp (la modification)</span></div>
+<pre><span class="k">class</span> <span class="ty">ClapTrap</span>
+{
+    <span class="k">protected</span>:   <span class="cm">// était private à l'ex00 : ScavTrap doit pouvoir y accéder</span>
+        <span class="ty">std::string</span>   _name;
+        <span class="ty">unsigned int</span>  _hitPoints;
+        <span class="ty">unsigned int</span>  _energyPoints;
+        <span class="ty">unsigned int</span>  _attackDamage;
+    <span class="cm">// ... le reste est inchangé ...</span>
+};</pre>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Le header de ScavTrap</h3>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex01/ScavTrap.hpp</span></div>
+<pre><span class="k">#ifndef</span> SCAVTRAP_HPP
+<span class="k">#define</span> SCAVTRAP_HPP
+
+<span class="k">#include</span> <span class="st">"ClapTrap.hpp"</span>
+
+<span class="k">class</span> <span class="ty">ScavTrap</span> : <span class="k">public</span> <span class="ty">ClapTrap</span>
+{
+    <span class="k">public</span>:
+        <span class="fn">ScavTrap</span>();
+        <span class="fn">ScavTrap</span>(<span class="k">const</span> <span class="ty">std::string</span> &amp;name);
+        <span class="fn">ScavTrap</span>(<span class="k">const</span> <span class="ty">ScavTrap</span> &amp;other);
+        <span class="ty">ScavTrap</span> &amp;<span class="k">operator</span>=(<span class="k">const</span> <span class="ty">ScavTrap</span> &amp;other);
+        ~<span class="fn">ScavTrap</span>();
+
+        <span class="ty">void</span> <span class="fn">attack</span>(<span class="k">const</span> <span class="ty">std::string</span> &amp;target);   <span class="cm">// cache celle de ClapTrap</span>
+        <span class="ty">void</span> <span class="fn">guardGate</span>();
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+
+    <div class="duo" style="margin-top:18px">
+      <div class="card">
+        <span class="ic">🧱</span>
+        <h3>Les valeurs de départ</h3>
+        <ul>
+          <li><span class="m">→</span><span><code class="inline">ClapTrap</code> pose 10 / 10 / 0.</span></li>
+          <li><span class="m">→</span><span>Le constructeur de <code class="inline">ScavTrap</code> appelle d'abord celui de <code class="inline">ClapTrap</code> avec le nom, puis remplace les trois valeurs par 100 / 50 / 20.</span></li>
+          <li><span class="m">→</span><span>Les deux constructeurs (par défaut et avec nom) doivent donner les mêmes valeurs.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="ic">🔁</span>
+        <h3>La forme canonique</h3>
+        <ul>
+          <li><span class="m">→</span><span>Constructeur de copie : nomme la base dans la liste d'initialisation, <code class="inline">ClapTrap(other)</code>.</span></li>
+          <li><span class="m">→</span><span><code class="inline">operator=</code> : appelle <code class="inline">ClapTrap::operator=(other)</code>, sinon la partie base n'est pas copiée.</span></li>
+          <li><span class="m">→</span><span>Un message dans chacun, pour que le correcteur voie qui s'exécute.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Le résultat attendu</h3>
+    <p class="body">Le sujet exige que tes tests <b>montrent</b> l'enchaînement des constructeurs et des destructeurs (p. 10). Un objet <code class="inline">ScavTrap</code> seul suffit à le voir. Exemple (tes messages seront différents) :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">sortie d'exemple</span></div>
+<pre>ClapTrap Robo constructed
+ScavTrap Robo constructed
+ScavTrap Robo attacks Bob, causing 20 points of damage!
+ScavTrap Robo is now in Gate keeper mode
+ScavTrap Robo destroyed
+ClapTrap Robo destroyed</pre>
+    </div>
+  </section>
+
+  <section id="ex02">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>ex02 · <span class="accent">FragTrap</span></h2></div>
+    <p class="body"><code class="inline">FragTrap</code> hérite lui aussi de <code class="inline">ClapTrap</code> et ressemble beaucoup à <code class="inline">ScavTrap</code>, mais ses messages de construction et de destruction doivent être différents, et l'enchaînement doit aussi être montré dans tes tests (p. 11). Valeurs : le nom du constructeur, <b>100</b> points de vie, <b>100</b> points d'énergie, <b>30</b> dégâts. Sa capacité est <code class="inline">void highFivesGuys(void);</code>, qui affiche sur la sortie standard une demande de « high five » positive (p. 11).</p>
+    <p class="body"><b>Fichiers à rendre</b> (dossier <code class="inline">ex02/</code>) : ceux des exercices précédents + <code class="inline">FragTrap.hpp</code> (ou <code class="inline">.h</code>) et <code class="inline">FragTrap.cpp</code> (p. 11).</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex02/FragTrap.hpp</span></div>
+<pre><span class="k">#ifndef</span> FRAGTRAP_HPP
+<span class="k">#define</span> FRAGTRAP_HPP
+
+<span class="k">#include</span> <span class="st">"ClapTrap.hpp"</span>
+
+<span class="k">class</span> <span class="ty">FragTrap</span> : <span class="k">public</span> <span class="ty">ClapTrap</span>
+{
+    <span class="k">public</span>:
+        <span class="fn">FragTrap</span>();
+        <span class="fn">FragTrap</span>(<span class="k">const</span> <span class="ty">std::string</span> &amp;name);
+        <span class="fn">FragTrap</span>(<span class="k">const</span> <span class="ty">FragTrap</span> &amp;other);
+        <span class="ty">FragTrap</span> &amp;<span class="k">operator</span>=(<span class="k">const</span> <span class="ty">FragTrap</span> &amp;other);
+        ~<span class="fn">FragTrap</span>();
+
+        <span class="ty">void</span> <span class="fn">highFivesGuys</span>(<span class="ty">void</span>);
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+
+    <div class="table-wrap" style="margin-top:18px">
+      <table>
+        <thead><tr><th></th><th>ScavTrap (ex01)</th><th>FragTrap (ex02)</th></tr></thead>
+        <tbody>
+          <tr><td>Points de vie / énergie / dégâts</td><td>100 / 50 / 20</td><td>100 / 100 / 30</td></tr>
+          <tr><td>Capacité</td><td><code class="inline">guardGate()</code></td><td><code class="inline">highFivesGuys(void)</code></td></tr>
+          <tr><td>Messages à changer</td><td>constructeurs, destructeur et <code class="inline">attack()</code> (p. 10)</td><td>construction et destruction (p. 11)</td></tr>
+          <tr><td><code class="inline">attack()</code> propre</td><td>oui</td><td>non demandé : celui de <code class="inline">ClapTrap</code> sert</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">Le piège de cet exercice est le copier-coller : relis les trois valeurs, et le nom de classe dans chaque message. Tant que <code class="inline">FragTrap</code> n'écrit pas son propre <code class="inline">attack</code>, il affiche celui de <code class="inline">ClapTrap</code>, et c'est normal.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">sortie d'exemple (un ScavTrap puis un FragTrap)</span></div>
+<pre>ClapTrap Robo constructed
+ScavTrap Robo constructed
+ClapTrap Frag constructed
+FragTrap Frag constructed
+ScavTrap Robo attacks Bob, causing 20 points of damage!
+ScavTrap Robo is now in Gate keeper mode
+FragTrap Frag requests a high five!
+FragTrap Frag destroyed
+ClapTrap Frag destroyed
+ScavTrap Robo destroyed
+ClapTrap Robo destroyed</pre>
+    </div>
+    <p class="body">Les objets locaux sont détruits dans l'ordre inverse de leur création : le <code class="inline">FragTrap</code>, créé en dernier, part le premier, avec son <code class="inline">ClapTrap</code>.</p>
+  </section>
+
+  <section id="ex03">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>ex03 · <span class="accent">DiamondTrap</span></h2></div>
+    <div class="callout" style="margin-top:0"><span class="bulb">🎯</span><p><b>Cet exercice est facultatif.</b> Le sujet indique qu'on peut valider le module sans le faire (p. 13). Il n'emploie pas le mot « bonus ». Si tu le tentes, ses fichiers s'ajoutent à ceux des exercices précédents : <code class="inline">DiamondTrap.hpp</code> (ou <code class="inline">.h</code>) et <code class="inline">DiamondTrap.cpp</code> (p. 12).</p></div>
+
+    <p class="body">Le sujet décrit un monstre : un <code class="inline">ClapTrap</code> mi-<code class="inline">FragTrap</code>, mi-<code class="inline">ScavTrap</code>. <code class="inline">DiamondTrap</code> hérite des deux (p. 12). Il a un attribut privé qui porte <b>exactement le même nom de variable</b> que celui de <code class="inline">ClapTrap</code> pour le nom du robot (si le tien s'appelle <code class="inline">_name</code> dans <code class="inline">ClapTrap</code>, appelle-le <code class="inline">_name</code> ici aussi). Le <code class="inline">ClapTrap</code> intégré porte le nom du paramètre suivi de <code class="inline">_clap_name</code>. Les points de vie viennent de <code class="inline">FragTrap</code>, l'énergie de <code class="inline">ScavTrap</code>, les dégâts de <code class="inline">FragTrap</code>, et <code class="inline">attack()</code> de <code class="inline">ScavTrap</code>. Sa capacité propre est <code class="inline">void whoAmI();</code>, qui affiche à la fois son nom et son nom de <code class="inline">ClapTrap</code> (p. 12 et 13).</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Le problème : deux ClapTrap</h3>
+    <p class="body"><code class="inline">ScavTrap</code> contient un <code class="inline">ClapTrap</code>, <code class="inline">FragTrap</code> aussi. Un <code class="inline">DiamondTrap</code> contient donc, par défaut, <b>deux</b> <code class="inline">ClapTrap</code>, chacun avec ses points de vie : c'est le schéma en losange, d'où le nom du problème. Le sujet exige l'inverse : le <code class="inline">ClapTrap</code> du <code class="inline">DiamondTrap</code> est créé une fois et une seule (p. 13). Le mot-clé <code class="inline">virtual</code> sur les deux héritages intermédiaires dit au compilateur de ne garder qu'un exemplaire partagé de la base. Bascule l'interrupteur :</p>
+    <div class="demo" data-demo="cpp03-diamond">
+      <div class="demo-static"><p class="body">Démo : un interrupteur « héritage <code class="inline">virtual</code> ». Sans <code class="inline">virtual</code>, un <code class="inline">DiamondTrap</code> contient deux sous-objets <code class="inline">ClapTrap</code> : la construction donne ClapTrap, ScavTrap, ClapTrap, FragTrap, DiamondTrap, et l'accès à <code class="inline">ClapTrap::_name</code> est ambigu (le compilateur refuse). Avec <code class="inline">virtual</code>, il n'y en a qu'un : la construction donne ClapTrap, ScavTrap, FragTrap, DiamondTrap, et l'ambiguïté disparaît.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Active ou coupe l'héritage virtual et regarde le losange","switchLabel":"Héritage virtual sur ScavTrap et FragTrap","declLabel":"Les trois déclarations","diagLabel":"Schéma de classes","diagNo":"Schéma : ScavTrap et FragTrap héritent chacun de leur propre ClapTrap, et DiamondTrap les contient tous les deux. Un DiamondTrap contient donc deux sous-objets ClapTrap.","diagYes":"Schéma : ScavTrap et FragTrap partagent un seul ClapTrap grâce à virtual. Un DiamondTrap ne contient qu'un seul sous-objet ClapTrap.","sub1":"sous-objet n° 1","sub2":"sous-objet n° 2","subShared":"un seul, partagé","orderLabel":"Ordre de construction d'un DiamondTrap","ctorLine":"{cls} constructed","dupTag":"le second ClapTrap","sharedTag":"construit une seule fois","accessLabel":"Ce que répond le compilateur","okWord":"accepté","koWord":"refusé","r1No":"ambigu : DiamondTrap contient deux ClapTrap, lequel lire ?","r1Yes":"un seul ClapTrap : pas d'ambiguïté","r2No":"conversion ambiguë de DiamondTrap vers ClapTrap","r2Yes":"conversion directe vers l'unique ClapTrap","r3No":"takeDamage existe dans deux sous-objets ClapTrap","r3Yes":"un seul takeDamage à appeler","r4No":"possible, mais c'est le ClapTrap de la branche ScavTrap","r4Yes":"possible : c'est le même ClapTrap que via FragTrap","sumNo":"Sans virtual : deux ClapTrap sont construits, chacun avec ses attributs, et le compilateur refuse les accès qui visent « le » ClapTrap.","sumYes":"Avec virtual : un seul ClapTrap, construit une seule fois. Les accès ne sont plus ambigus.","noteNo":"Sans virtual, DiamondTrap ne peut pas non plus nommer ClapTrap dans sa liste d'initialisation : il y en a deux, et aucun n'est une base directe.","noteYes":"Avec virtual, c'est DiamondTrap, la classe la plus dérivée, qui construit l'unique ClapTrap : il doit l'appeler lui-même dans sa liste d'initialisation."}</script>
+    </div>
+    <p class="body">Les messages du compilateur de la démo ont été constatés avec clang 17 sur macOS (par exemple <code class="inline">ambiguous conversion from derived class 'DiamondTrap' to base class 'ClapTrap'</code>). Le texte exact change d'un compilateur à l'autre, mais le refus est le même : à vérifier avec le <code class="inline">c++</code> de ton école.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Ce qui change dans le code</h3>
+    <p class="body">D'abord, <code class="inline">virtual</code> se pose sur <b>les deux</b> héritages de <code class="inline">ClapTrap</code>, dans les headers de <code class="inline">ScavTrap</code> et de <code class="inline">FragTrap</code>. Le comportement d'un <code class="inline">ScavTrap</code> seul ne change pas.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex03/ScavTrap.hpp et ex03/FragTrap.hpp (la modification)</span></div>
+<pre><span class="k">class</span> <span class="ty">ScavTrap</span> : <span class="k">virtual</span> <span class="k">public</span> <span class="ty">ClapTrap</span>   <span class="cm">// et de même pour FragTrap</span>
+{
+    <span class="cm">// ... inchangé ...</span>
+};</pre>
+    </div>
+    <p class="body">Ensuite, c'est la classe <b>la plus dérivée</b>, ici <code class="inline">DiamondTrap</code>, qui construit la base virtuelle. Les appels à <code class="inline">ClapTrap(name)</code> écrits dans les constructeurs de <code class="inline">ScavTrap</code> et de <code class="inline">FragTrap</code> sont ignorés quand l'objet construit est un <code class="inline">DiamondTrap</code>. C'est donc à lui de nommer <code class="inline">ClapTrap</code> dans sa liste d'initialisation, avec le nom suivi de <code class="inline">_clap_name</code>.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex03/DiamondTrap.cpp (la ligne qui compte)</span></div>
+<pre><span class="ty">DiamondTrap</span>::<span class="fn">DiamondTrap</span>(<span class="k">const</span> <span class="ty">std::string</span> &amp;name)
+    : <span class="fn">ClapTrap</span>(name + <span class="st">"_clap_name"</span>), <span class="fn">ScavTrap</span>(name), <span class="fn">FragTrap</span>(name), _name(name)</pre>
+    </div>
+    <p class="body">Le constructeur de copie obéit à la même règle : s'il ne nomme pas <code class="inline">ClapTrap(other)</code>, la copie est faite avec le constructeur par défaut de <code class="inline">ClapTrap</code>.</p>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Le header de DiamondTrap</h3>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ex03/DiamondTrap.hpp</span></div>
+<pre><span class="k">#ifndef</span> DIAMONDTRAP_HPP
+<span class="k">#define</span> DIAMONDTRAP_HPP
+
+<span class="k">#include</span> <span class="st">"ScavTrap.hpp"</span>
+<span class="k">#include</span> <span class="st">"FragTrap.hpp"</span>
+
+<span class="k">class</span> <span class="ty">DiamondTrap</span> : <span class="k">public</span> <span class="ty">ScavTrap</span>, <span class="k">public</span> <span class="ty">FragTrap</span>
+{
+    <span class="k">private</span>:
+        <span class="ty">std::string</span>  _name;   <span class="cm">// même nom de variable que dans ClapTrap (consigne du sujet)</span>
+
+    <span class="k">public</span>:
+        <span class="fn">DiamondTrap</span>();
+        <span class="fn">DiamondTrap</span>(<span class="k">const</span> <span class="ty">std::string</span> &amp;name);
+        <span class="fn">DiamondTrap</span>(<span class="k">const</span> <span class="ty">DiamondTrap</span> &amp;other);
+        <span class="ty">DiamondTrap</span> &amp;<span class="k">operator</span>=(<span class="k">const</span> <span class="ty">DiamondTrap</span> &amp;other);
+        ~<span class="fn">DiamondTrap</span>();
+
+        <span class="k">using</span> <span class="ty">ScavTrap</span>::<span class="fn">attack</span>;   <span class="cm">// l'attack de ScavTrap, comme le veut le sujet</span>
+        <span class="ty">void</span> <span class="fn">whoAmI</span>();
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:600;font-size:1.15rem;margin:28px 0 12px">Deux noms, une seule variable à choisir</h3>
+    <p class="body">Dans <code class="inline">DiamondTrap</code>, le nom <code class="inline">_name</code> désigne l'attribut du <code class="inline">DiamondTrap</code> : il cache celui de <code class="inline">ClapTrap</code>. Pour lire le nom du <code class="inline">ClapTrap</code>, écris <code class="inline">ClapTrap::_name</code>, ce qui suppose que l'attribut soit <code class="inline">protected</code> et qu'il n'y ait qu'un seul <code class="inline">ClapTrap</code> (la démo ci-dessus). Le sujet te renvoie aux options <code class="inline">-Wshadow</code> et <code class="inline">-Wno-shadow</code> (p. 13). Avec <code class="inline">-Wall -Wextra -Werror</code>, ce nom répété ne provoque aucun avertissement (constaté avec clang 17 sur macOS, même avec <code class="inline">-Wshadow</code>). Chez clang, c'est l'option distincte <code class="inline">-Wshadow-field</code> qui signale <code class="inline">shadows member inherited from type 'ClapTrap'</code>. Comportement du <code class="inline">g++</code> de ton école : à vérifier.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">sortie d'exemple</span></div>
+<pre>ClapTrap Dia_clap_name constructed
+ScavTrap Dia_clap_name constructed
+FragTrap Dia_clap_name constructed
+DiamondTrap Dia constructed
+I am Dia, my ClapTrap name is Dia_clap_name
+ScavTrap Dia_clap_name attacks Bob, causing 30 points of damage!
+DiamondTrap Dia destroyed
+FragTrap Dia_clap_name destroyed
+ScavTrap Dia_clap_name destroyed
+ClapTrap Dia_clap_name destroyed</pre>
+    </div>
+    <p class="body">Remarque les 30 points de dégâts : ils viennent de <code class="inline">FragTrap</code>, alors que le message d'<code class="inline">attack</code> vient de <code class="inline">ScavTrap</code>, exactement comme la liste du sujet (p. 12).</p>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Étape par <span class="accent">étape</span></h2></div>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Écris <code class="inline">ClapTrap</code> seul.</b> Header, source, <code class="inline">Makefile</code> (<code class="inline">c++ -Wall -Wextra -Werror -std=c++98</code>), et un <code class="inline">main</code> qui crée un robot. Les constructeurs et le destructeur affichent déjà leur message.</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>Ajoute les trois actions.</b> Vérifie l'énergie et les points de vie avant <code class="inline">attack</code> et <code class="inline">beRepaired</code>, retire 1 d'énergie à chacune, et protège <code class="inline">takeDamage</code> contre les points de vie qui passent sous zéro.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>Teste les limites.</b> Dix actions puis une onzième ; des dégâts supérieurs aux points de vie ; une action sur un robot à zéro. Chaque cas doit afficher un message clair.</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>Copie ton dossier en <code class="inline">ex01/</code> et passe les attributs en <code class="inline">protected</code>.</b> Ton <code class="inline">ClapTrap</code> de l'ex00 reste intact dans son dossier.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>Écris <code class="inline">ScavTrap</code>.</b> Héritage <code class="inline">public</code>, constructeurs qui nomment <code class="inline">ClapTrap</code> dans la liste d'initialisation puis posent 100 / 50 / 20, son <code class="inline">attack</code> avec son message, <code class="inline">guardGate</code>. Regarde l'ordre dans ta sortie.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>Fais de même avec <code class="inline">FragTrap</code> (ex02)</b> : 100 / 100 / 30, <code class="inline">highFivesGuys</code>, et des messages qui disent bien <code class="inline">FragTrap</code>.</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>Mets les trois classes dans un même <code class="inline">main</code>.</b> Tu vois les objets locaux se détruire dans l'ordre inverse de leur création, chacun avec sa base.</span></div>
+      <div class="step on"><span class="n">8</span><span class="txt"><b>(Facultatif) ex03.</b> Pose <code class="inline">virtual</code> sur les deux héritages de <code class="inline">ClapTrap</code>, écris <code class="inline">DiamondTrap</code> avec <code class="inline">ClapTrap(name + "_clap_name")</code> dans sa liste d'initialisation, règle les valeurs de départ, puis <code class="inline">whoAmI</code>.</span></div>
+      <div class="step on"><span class="n">9</span><span class="txt"><b>Relis le sujet et compile à froid.</b> Mêmes drapeaux, aucun warning, aucune implémentation dans un header, des gardes d'inclusion partout, pas de fuite.</span></div>
+    </div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">09</span><h2>Pièges <span class="accent">classiques</span></h2></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Oublier <code class="inline">virtual</code>, ou ne le mettre que d'un côté.</b> Sans lui, <code class="inline">DiamondTrap</code> contient deux <code class="inline">ClapTrap</code> et tout accès à un membre de <code class="inline">ClapTrap</code> est ambigu. Il faut <code class="inline">virtual</code> sur <b>les deux</b> héritages, <code class="inline">ScavTrap</code> et <code class="inline">FragTrap</code> : avec un seul des deux, il reste deux sous-objets, et le compilateur refuse toujours l'accès (constaté avec clang sur macOS : <code class="inline">found in multiple base-class subobjects of type 'ClapTrap'</code>).</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Ne pas nommer <code class="inline">ClapTrap</code> dans le constructeur de <code class="inline">DiamondTrap</code>.</b> Avec la base virtuelle, c'est lui qui construit <code class="inline">ClapTrap</code>. S'il ne l'appelle pas, c'est le constructeur par défaut qui s'exécute : le nom du <code class="inline">ClapTrap</code> n'est pas <code class="inline">xxx_clap_name</code>, et rien ne le signale à la compilation (constaté en exécutant). Même piège dans le constructeur de copie.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>L'ordre des bases dans la liste d'héritage.</b> C'est lui qui fixe l'ordre de construction, pas l'ordre de ta liste d'initialisation. Avec <code class="inline">public ScavTrap, public FragTrap</code>, on construit <code class="inline">ClapTrap</code>, <code class="inline">ScavTrap</code>, <code class="inline">FragTrap</code>, puis <code class="inline">DiamondTrap</code> ; dans l'autre ordre, <code class="inline">FragTrap</code> passe avant <code class="inline">ScavTrap</code>. La destruction suit l'ordre inverse. Écris ta liste d'initialisation dans le même ordre que la liste d'héritage : sinon <code class="inline">-Wall</code> avertit, et avec <code class="inline">-Werror</code> la compilation échoue (constaté avec clang : <code class="inline">-Wreorder-ctor</code>).</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Les valeurs de départ qui se marchent dessus.</b> <code class="inline">ScavTrap</code> et <code class="inline">FragTrap</code> écrivent chacun leurs valeurs dans le même <code class="inline">ClapTrap</code> : le dernier construit gagne. Avec <code class="inline">ScavTrap</code> puis <code class="inline">FragTrap</code>, tu obtiens 100 / 100 / 30 : l'énergie est celle de <code class="inline">FragTrap</code>, alors que le sujet veut celle de <code class="inline">ScavTrap</code> (50). Dans l'autre ordre, c'est 100 / 50 / 20 : les dégâts sont ceux de <code class="inline">ScavTrap</code>, alors que le sujet veut 30. Dans les deux cas, <code class="inline">DiamondTrap</code> doit corriger lui-même ce qui ne convient pas (constaté en exécutant).</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">attack</code> et le <code class="inline">using</code>.</b> Le sujet veut l'<code class="inline">attack()</code> de <code class="inline">ScavTrap</code> (p. 12). Si <code class="inline">FragTrap</code> a aussi écrit le sien, <code class="inline">d.attack(...)</code> devient ambigu (clang : <code class="inline">found in multiple base classes of different types</code>). <code class="inline">using ScavTrap::attack;</code> dans <code class="inline">DiamondTrap</code> tranche et dit clairement ce que tu veux. Si seul <code class="inline">ScavTrap</code> a un <code class="inline">attack</code>, l'appel compile déjà avec <code class="inline">virtual</code> ; sans <code class="inline">virtual</code>, il est ambigu dans tous les cas (constaté avec clang).</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Le destructeur qui n'est pas <code class="inline">virtual</code>.</b> Avec des objets locaux, comme dans ce module, tout va bien. Mais <code class="inline">ClapTrap *p = new ScavTrap("S"); delete p;</code> n'exécute que <code class="inline">~ClapTrap</code> : le comportement est formellement indéfini, et avec clang sur macOS le <code class="inline">~ScavTrap</code> n'est pas appelé, sans aucun avertissement avec <code class="inline">-Wall -Wextra -Werror</code>. Mettre <code class="inline">virtual</code> sur le destructeur de <code class="inline">ClapTrap</code> règle le problème (vérifié) ; le sujet de ce module ne l'impose pas, mais c'est une bonne habitude avant le module 04.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Les messages que le sujet attend.</b> Un message dans chaque action, dans les constructeurs et dans le destructeur (p. 9) ; <code class="inline">ScavTrap</code> change ses messages de constructeurs, de destructeur et d'<code class="inline">attack()</code> (p. 10), <code class="inline">FragTrap</code> ceux de construction et de destruction (p. 11) ; l'enchaînement doit se voir dans tes tests (p. 10 et 11). Si ton <code class="inline">ScavTrap</code> affiche <code class="inline">ClapTrap ... attacks</code>, le correcteur croira que l'<code class="inline">attack</code> de la dérivée n'est pas appelé. Chaque message finit par un retour à la ligne et va sur la sortie standard (p. 3).</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Énergie à 0 ou points de vie à 0.</b> Le sujet dit qu'un <code class="inline">ClapTrap</code> ne peut rien faire dans ces deux cas (p. 8). Teste les deux séparément : dix attaques puis une onzième (plus d'énergie), puis des dégâts supérieurs aux points de vie (plus de vie), puis une réparation. Dans chaque cas, affiche pourquoi l'action est refusée. N'oublie pas que se réparer coûte aussi 1 point d'énergie.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">int</code> et <code class="inline">unsigned int</code>.</b> Les paramètres <code class="inline">amount</code> sont des <code class="inline">unsigned int</code> (p. 8). Soustraire 10 à 6 points de vie <code class="inline">unsigned int</code> donne 4294967292 : ton robot devient immortel. Avec des <code class="inline">int</code>, tu obtiens −4, et <code class="inline">if (hp &lt; amount)</code> compare un signé et un non signé : avec <code class="inline">-Wextra -Werror</code>, c'est une erreur de compilation (<code class="inline">-Wsign-compare</code>). Compare avant de soustraire, ou borne à zéro. Constaté avec clang sur macOS.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>La partie base oubliée dans la copie.</b> Si l'<code class="inline">operator=</code> de la dérivée n'appelle pas <code class="inline">ClapTrap::operator=</code>, le nom, les points de vie, l'énergie et les dégâts ne sont pas copiés : après <code class="inline">b = a;</code>, <code class="inline">b</code> garde son ancien nom (constaté en exécutant). Même idée pour le constructeur de copie, qui doit nommer <code class="inline">ClapTrap(other)</code>.</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">10</span><h2>Comment je <span class="accent">l'ai fait</span></h2></div>
+    <div class="how"><p class="body">J'ai écrit <code class="inline">ClapTrap</code> avec un nom et trois compteurs entiers, privés à l'ex00, puis passés en <code class="inline">protected</code> à l'ex01 pour que les classes dérivées y accèdent. Chaque constructeur appelle celui de sa base, pose ses propres valeurs et affiche un message préfixé par le nom de la classe, ce qui rend l'ordre de construction et de destruction lisible dans la sortie. <code class="inline">ScavTrap</code> écrit son propre <code class="inline">attack</code> avec son message ; <code class="inline">FragTrap</code> garde celui de <code class="inline">ClapTrap</code>. Avant d'attaquer ou de se réparer, chaque fonction teste les points de vie puis l'énergie et affiche un refus sinon, et <code class="inline">takeDamage</code> ne descend jamais sous zéro. Le constructeur de copie et l'affectation passent par ceux de la base. Mon <code class="inline">main</code> crée un robot de chaque classe et appelle toutes les actions. Mon dépôt s'arrête à l'ex02 : je n'ai pas fait l'ex03, facultatif.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 À retenir (défense d'éval)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>Ordre de construction.</b> La base d'abord, puis la dérivée ; destruction dans l'ordre inverse. Pourquoi : le corps du constructeur de la dérivée utilise la base, et le destructeur de la dérivée doit la trouver intacte.</div></li>
+        <li><span class="chk">✓</span><div><b><code class="inline">protected</code> ou <code class="inline">private</code> ?</b> <code class="inline">private</code> reste dans la classe, <code class="inline">protected</code> s'ouvre aux classes dérivées, <code class="inline">public</code> à tout le monde. L'ex01 demande d'ouvrir les attributs de <code class="inline">ClapTrap</code> à <code class="inline">ScavTrap</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Valeurs de départ.</b> ClapTrap 10 / 10 / 0 ; ScavTrap 100 / 50 / 20 ; FragTrap 100 / 100 / 30 ; DiamondTrap : vie et dégâts de FragTrap, énergie de ScavTrap (100 / 50 / 30).</div></li>
+        <li><span class="chk">✓</span><div><b>Coûts.</b> <code class="inline">attack</code> et <code class="inline">beRepaired</code> coûtent 1 énergie ; à zéro point de vie ou zéro énergie, le robot ne fait rien ; <code class="inline">takeDamage</code> ne coûte pas d'énergie.</div></li>
+        <li><span class="chk">✓</span><div><b>Choisir le constructeur de la base.</b> Dans la liste d'initialisation ; sinon c'est le constructeur par défaut qui est appelé.</div></li>
+        <li><span class="chk">✓</span><div><b>Cacher n'est pas redéfinir.</b> L'<code class="inline">attack</code> de <code class="inline">ScavTrap</code> cache celui de <code class="inline">ClapTrap</code> ; sans <code class="inline">virtual</code>, un <code class="inline">ClapTrap *</code> appelle encore celui de <code class="inline">ClapTrap</code>. La suite, au module 04.</div></li>
+        <li><span class="chk">✓</span><div><b>Forme canonique.</b> Le constructeur de copie nomme la base, <code class="inline">operator=</code> appelle celui de la base, chaque constructeur et chaque destructeur affiche un message.</div></li>
+        <li><span class="chk">✓</span><div><b>Le losange.</b> Sans <code class="inline">virtual</code>, deux <code class="inline">ClapTrap</code> et des accès ambigus ; avec <code class="inline">virtual</code> sur les deux héritages, un seul, construit par <code class="inline">DiamondTrap</code> lui-même.</div></li>
+        <li><span class="chk">✓</span><div><b>L'ex03 est facultatif.</b> Le sujet précise qu'on peut valider le module sans lui (p. 13). <code class="inline">-Wshadow</code> et <code class="inline">-Wno-shadow</code> sont cités dans le sujet.</div></li>
+        <li><span class="chk">✓</span><div><b>Rendu.</b> <code class="inline">c++ -Wall -Wextra -Werror -std=c++98</code>, forme canonique, aucune implémentation dans un header, gardes d'inclusion, pas de <code class="inline">using namespace</code> ni de <code class="inline">friend</code>, pas de STL, pas de fuite, un fichier par classe.</div></li>
+        <li><span class="chk">✓</span><div><b>Une petite modification peut t'être demandée.</b> Le sujet prévoit qu'à la défense on te demande parfois un petit changement de comportement ou quelques lignes à écrire (p. 14), si les consignes d'évaluation le mentionnent. Entraîne-toi à changer une valeur de départ ou un message sans casser l'ordre de construction.</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

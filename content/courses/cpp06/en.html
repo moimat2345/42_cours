@@ -1,0 +1,375 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C++ · Module 06 · Casts</span>
+  <h1 class="title">C++ <span class="g">casts</span></h1>
+  <p class="lead">Converting one type into another is fine, as long as you say <b>which cast and why</b>. This course explains the module's three exercises and, above all, <b>the choice of cast</b> you will have to defend.</p>
+  <p class="subj">subject: en.subject-8.pdf · version 8.1 · C++98 · -Wall -Wextra -Werror</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>The module in <span class="accent">short</span></h2></div>
+    <p class="body">Module 06 revolves around one idea: <b>converting a value from one type to another</b> with the right tool. Three exercises:</p>
+    <p class="body"><b>ex00</b>: write <code class="inline">ScalarConverter</code>, a class that cannot be instantiated, whose only static method <code class="inline">convert</code> receives a literal as a string (<code class="inline">0</code>, <code class="inline">42.0f</code>, <code class="inline">nan</code>, <code class="inline">'c'</code>...) and prints it as a <code class="inline">char</code>, an <code class="inline">int</code>, a <code class="inline">float</code> and a <code class="inline">double</code>.</p>
+    <p class="body"><b>ex01</b>: <code class="inline">Serializer</code>, which turns the address of a <code class="inline">Data</code> object into a <code class="inline">uintptr_t</code> integer, then gets the pointer back.</p>
+    <p class="body"><b>ex02</b>: given a pointer or a reference to <code class="inline">Base</code>, print the real type of the object (<code class="inline">A</code>, <code class="inline">B</code> or <code class="inline">C</code>), without the <code class="inline">typeinfo</code> header.</p>
+    <p class="body">The module adds a rule of its own (p. 6): <b>for each exercise, the type conversion must go through a specific type of cast</b>, and that choice is reviewed during the defense. The subject does not say which cast goes with which exercise: it is up to you to choose one and to be able to justify it.</p>
+    <div class="callout"><span class="bulb">📖</span><p>The page numbers in parentheses, like <b>(p. 6)</b>, are the ones printed at the bottom of the subject's pages (version 8.1): the printed page is the PDF page minus one, because the cover is not numbered. Keep the PDF open next to this page: this course explains the subject, it does not replace it.</p></div>
+    <div class="callout"><span class="bulb">💡</span><p><b>What you will defend is not "it works".</b> It is "I picked <code class="inline">static_cast</code> here because...". A C-style cast almost always compiles, but it does not answer that question: the next section helps you answer it.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>The module <span class="accent">map</span></h2></div>
+    <p class="body">First the general rules of the C++ modules that this subject repeats, with the page where to read them:</p>
+    <div class="map">
+      <div class="map-item"><span class="ex">Compile</span><div><h4>The flags (p. 3)</h4><p><code class="inline">c++ -Wall -Wextra -Werror</code>. Your code must still compile if you add <code class="inline">-std=c++98</code>.</p></div></div>
+      <div class="map-item"><span class="ex">Naming</span><div><h4>Folders and files (p. 3)</h4><p>Folders <code class="inline">ex00</code>, <code class="inline">ex01</code>... Class names in UpperCamelCase, files named after the class (<code class="inline">ClassName.hpp</code> or <code class="inline">.h</code>, <code class="inline">.cpp</code>, <code class="inline">.tpp</code>).</p></div></div>
+      <div class="map-item"><span class="ex">Output</span><div><h4>One message, one line (p. 3)</h4><p>Unless stated otherwise, every output message ends with a newline and goes to the standard output.</p></div></div>
+      <div class="map-item"><span class="ex">Forbidden</span><div><h4>What costs you dearly (p. 3-4)</h4><p><code class="inline">*printf()</code>, <code class="inline">*alloc()</code> and <code class="inline">free()</code>: grade 0. C++11 and Boost are forbidden. <code class="inline">using namespace</code> and <code class="inline">friend</code>: -42. Containers and <code class="inline">&lt;algorithm&gt;</code> before modules 08 and 09: -42.</p></div></div>
+      <div class="map-item"><span class="ex">Design</span><div><h4>Classes and headers (p. 4)</h4><p>No memory leaks. Orthodox Canonical Form (OCF) from module 02 to 09, unless stated otherwise. No function implementation in a header (except templates): 0. Each header usable on its own, with include guards: otherwise 0.</p></div></div>
+      <div class="map-item"><span class="ex">Module</span><div><h4>The cast rule (p. 6)</h4><p>For each exercise, the type conversion goes through a specific type of cast. The choice is discussed during the defense.</p></div></div>
+      <div class="map-item"><span class="ex">Tests</span><div><h4>A test program (p. 11, 12, 13)</h4><p>Each exercise asks you to write a program that shows your class or your functions work.</p></div></div>
+      <div class="map-item"><span class="ex">Defense</span><div><h4>A small modification (p. 14)</h4><p>During the evaluation you may be asked to change a behavior or write a few lines, in your usual environment.</p></div></div>
+    </div>
+
+    <p class="body" style="margin-top:22px">Then the three exercises, read in the subject:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Exercise</th><th>Files to submit</th><th>Authorized / forbidden</th><th>Required by the subject</th></tr></thead>
+        <tbody>
+          <tr><td>ex00 · Conversion of scalar types (p. 9-11)</td><td>Folder <code class="inline">ex00/</code>: <code class="inline">Makefile</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code></td><td>Authorized: any function that converts a string to an <code class="inline">int</code>, a <code class="inline">float</code> or a <code class="inline">double</code>. It helps, without doing the whole job.</td><td>A <code class="inline">ScalarConverter</code> class that contains only <b>one</b> static method <code class="inline">convert</code>, and that cannot be instantiated. Output as <code class="inline">char</code>, <code class="inline">int</code>, <code class="inline">float</code>, <code class="inline">double</code>. Pseudo-literals <code class="inline">-inff</code> <code class="inline">+inff</code> <code class="inline">nanf</code> and <code class="inline">-inf</code> <code class="inline">+inf</code> <code class="inline">nan</code>.</td></tr>
+          <tr><td>ex01 · Serialization (p. 12)</td><td>Folder <code class="inline">ex01/</code>: <code class="inline">Makefile</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code></td><td>Forbidden: nothing.</td><td>A <code class="inline">Serializer</code> class that the user must not be able to initialize in any way, with <code class="inline">uintptr_t serialize(Data* ptr);</code> and <code class="inline">Data* deserialize(uintptr_t raw);</code> as static methods. A <b>non-empty</b> <code class="inline">Data</code> structure (it has data members), to submit as well. The test compares the returned pointer with the original.</td></tr>
+          <tr><td>ex02 · Identify real type (p. 13)</td><td>Folder <code class="inline">ex02/</code>: <code class="inline">Makefile</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code></td><td>Forbidden: <code class="inline">std::typeinfo</code>. Including the <code class="inline">typeinfo</code> header is forbidden. Using a pointer inside <code class="inline">identify(Base&amp;)</code> is forbidden.</td><td><code class="inline">Base</code> has only a <b>public virtual destructor</b>. <code class="inline">A</code>, <code class="inline">B</code>, <code class="inline">C</code> are empty and publicly inherit from <code class="inline">Base</code>. <code class="inline">Base * generate(void);</code> <code class="inline">void identify(Base* p);</code> <code class="inline">void identify(Base&amp; p);</code> These four classes do not have to follow the OCF.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout"><span class="bulb">🗂️</span><p><b>File names.</b> The subject only requires <code class="inline">Makefile</code>, <code class="inline">*.cpp</code> and <code class="inline">*.{h, hpp}</code>. The naming rule (p. 3) lets you deduce <code class="inline">ScalarConverter.hpp</code> and <code class="inline">.cpp</code>, <code class="inline">Serializer.hpp</code> and <code class="inline">.cpp</code>, <code class="inline">Data.hpp</code>, <code class="inline">Base.hpp</code>, <code class="inline">A.hpp</code>, <code class="inline">B.hpp</code>, <code class="inline">C.hpp</code>: a deduction, to check in your subject and with your evaluation. The subject does not say where to put <code class="inline">generate</code> and <code class="inline">identify</code> either: a file of your own.</p></div>
+    <div class="callout"><span class="bulb">🔒</span><p><b>"Not instantiable" and the canonical form.</b> The subject wants the OCF from module 02 to 09 unless stated otherwise (p. 4), and it also wants <code class="inline">ScalarConverter</code> and <code class="inline">Serializer</code> to be non-instantiable (p. 9 and 12). The classic way to satisfy both: declare all <b>four</b> canonical members <code class="inline">private</code>. This is advice, not a rule of the subject: check what your evaluation expects.</p></div>
+  </section>
+
+  <section id="casts">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>The four <span class="accent">casts</span></h2></div>
+    <p class="body">A <b>cast</b> is a conversion written explicitly. In C there is only one, <code class="inline">(type)value</code>, and it does everything. In C++ there are four, each with a precise intent: the compiler checks what it can, and whoever reads your code immediately sees what you meant. A <code class="inline">grep _cast</code> finds them all.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Cast</th><th>What it guarantees, what it checks</th><th>Typical use</th></tr></thead>
+        <tbody>
+          <tr><td>static_cast&lt;T&gt;(x)</td><td>A conversion between compatible types, checked <b>at compile time</b>: numbers (<code class="inline">int</code>, <code class="inline">float</code>, <code class="inline">double</code>, <code class="inline">char</code>), pointer to <code class="inline">void *</code>, going up or down a class hierarchy. It refuses pointer to integer, and two pointers to classes with no inheritance link. <b>Nothing is checked at run time</b>: going down to the wrong type gives a bogus pointer.</td><td><code class="inline">static_cast&lt;int&gt;(3.9)</code> gives 3</td></tr>
+          <tr><td>reinterpret_cast&lt;T&gt;(x)</td><td>Reads the same bits as another type: pointer to integer and back, pointer to unrelated pointer. <b>No value conversion</b> (<code class="inline">reinterpret_cast&lt;int&gt;(4.2f)</code> does not compile), no run-time check. It refuses to remove a <code class="inline">const</code>, or to store a pointer in an integer that is too small.</td><td><code class="inline">reinterpret_cast&lt;uintptr_t&gt;(ptr)</code></td></tr>
+          <tr><td>dynamic_cast&lt;T&gt;(x)</td><td>Checks <b>at run time</b>, using the real type of the object, that a pointer or a reference to a base class really designates a <code class="inline">T</code>. Requires a <b>polymorphic</b> class (at least one virtual function). On failure: a pointer gives <code class="inline">NULL</code>, a reference <b>throws</b> <code class="inline">std::bad_cast</code>.</td><td><code class="inline">dynamic_cast&lt;B *&gt;(basePtr)</code></td></tr>
+          <tr><td>const_cast&lt;T&gt;(x)</td><td>Adds or removes <code class="inline">const</code> (or <code class="inline">volatile</code>), nothing else: <code class="inline">const_cast&lt;long *&gt;</code> of a <code class="inline">const int *</code> is refused. Writing to an object that was defined <code class="inline">const</code> is still undefined behavior, according to the standard.</td><td>No exercise of the module needs it</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:22px">Why not stick with the C-style cast? Because it tries everything: <code class="inline">static_cast</code>, then <code class="inline">reinterpret_cast</code>, and it can even remove a <code class="inline">const</code>, silently and with no name to search for. Observed with clang and <code class="inline">-Wall -Wextra -Werror</code>: <code class="inline">(Data *)raw</code> (an integer read as a pointer) and <code class="inline">(char *)constPtr</code> compile without a single warning, and <code class="inline">(A *)p</code> on an object that is really a <code class="inline">B</code> returns a non-null pointer, with no check at all.</p>
+
+    <p class="body">Here is the classic choice for this module. The subject does not require it: it is the answer you must be able to argue.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Need</th><th>Usual cast</th><th>Where in the module</th></tr></thead>
+        <tbody>
+          <tr><td>Go from one numeric type to another (<code class="inline">double</code> to <code class="inline">float</code>, <code class="inline">int</code> to <code class="inline">char</code>...)</td><td><code class="inline">static_cast</code></td><td>ex00</td></tr>
+          <tr><td>Read a pointer as an integer, and the reverse</td><td><code class="inline">reinterpret_cast</code></td><td>ex01</td></tr>
+          <tr><td>Find out whether a <code class="inline">Base *</code> or a <code class="inline">Base &amp;</code> really designates an <code class="inline">A</code>, a <code class="inline">B</code> or a <code class="inline">C</code></td><td><code class="inline">dynamic_cast</code></td><td>ex02</td></tr>
+          <tr><td>Remove a <code class="inline">const</code></td><td><code class="inline">const_cast</code></td><td>no exercise</td></tr>
+          <tr><td>Turn a string into a number</td><td>Not a cast: you parse text (<code class="inline">strtod</code>...)</td><td>ex00</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:22px">What the compiler refuses shows you the difference better than a long speech. Messages from Apple clang 17 with <code class="inline">-Wall -Wextra -Werror</code>; the exact wording changes from one compiler to another.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>You write</th><th>The compiler answers</th></tr></thead>
+        <tbody>
+          <tr><td>static_cast&lt;uintptr_t&gt;(ptr)</td><td>static_cast from 'Data *' to 'uintptr_t' (aka 'unsigned long') is not allowed</td></tr>
+          <tr><td>static_cast&lt;Data *&gt;(raw)</td><td>cannot cast from type 'uintptr_t' (aka 'unsigned long') to pointer type 'Data *'</td></tr>
+          <tr><td>static_cast&lt;B *&gt;(pa), with unrelated A and B</td><td>static_cast from 'A *' to 'B *', which are not related by inheritance, is not allowed</td></tr>
+          <tr><td>reinterpret_cast&lt;unsigned int&gt;(ptr)</td><td>cast from pointer to smaller type 'unsigned int' loses information</td></tr>
+          <tr><td>dynamic_cast&lt;A *&gt;(b), with a Base that has no virtual function</td><td>'Base' is not polymorphic</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="editor" style="margin-top:18px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">the four casts in one line each</span></div>
+<pre><span class="fn">static_cast</span>&lt;<span class="ty">int</span>&gt;(<span class="nm">3.9</span>)             <span class="cm">// 3: the fractional part is cut off (-3.9 gives -3)</span>
+<span class="fn">static_cast</span>&lt;<span class="ty">char</span>&gt;(<span class="nm">65</span>)             <span class="cm">// 'A'</span>
+<span class="fn">static_cast</span>&lt;<span class="ty">char</span>&gt;(<span class="nm">321</span>)            <span class="cm">// 'A' too, on this machine: the cast reports no overflow</span>
+<span class="fn">reinterpret_cast</span>&lt;<span class="ty">uintptr_t</span>&gt;(ptr)  <span class="cm">// the address, read as an integer</span>
+<span class="fn">dynamic_cast</span>&lt;<span class="ty">B</span> *&gt;(basePtr)       <span class="cm">// NULL if *basePtr is not a B</span></pre>
+    </div>
+  </section>
+
+  <section id="ex00">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>ex00 · <span class="accent">ScalarConverter</span></h2></div>
+    <p class="body">Your class receives a <b>string</b> that represents a C++ literal in its most common form (p. 9), works out which type it is, then prints its value as the four scalar types. It stores nothing: a single static method, no object.</p>
+    <p class="body"><b>Files to submit (p. 9)</b>: <code class="inline">Makefile</code>, <code class="inline">ScalarConverter.hpp</code>, <code class="inline">ScalarConverter.cpp</code> and your test program <code class="inline">main.cpp</code> (see the note on names in the previous section). The subject does not fix the type of the parameter of <code class="inline">convert</code>: a <code class="inline">const std::string &amp;</code> is a simple choice.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ScalarConverter.hpp</span></div>
+<pre><span class="k">#ifndef</span> SCALARCONVERTER_HPP
+<span class="k"># define</span> SCALARCONVERTER_HPP
+
+<span class="k"># include</span> <span class="st">&lt;string&gt;</span>
+
+<span class="k">class</span> <span class="ty">ScalarConverter</span>
+{
+	<span class="k">public</span>:
+		<span class="k">static</span> <span class="ty">void</span>	<span class="fn">convert</span>(<span class="k">const</span> std::string &amp;literal);
+
+	<span class="k">private</span>:
+		<span class="fn">ScalarConverter</span>();                                    <span class="cm">// the four canonical members are private:</span>
+		<span class="fn">ScalarConverter</span>(<span class="k">const</span> ScalarConverter &amp;other);        <span class="cm">// nobody can create, copy</span>
+		ScalarConverter &amp;<span class="fn">operator=</span>(<span class="k">const</span> ScalarConverter &amp;other); <span class="cm">// or destroy a ScalarConverter</span>
+		<span class="fn">~ScalarConverter</span>();
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+
+    <p class="body">The work happens in three steps. The subject describes them like this (p. 11): <b>detect</b> the type of the literal, <b>convert</b> it from the string to its real type, then explicitly convert it to the three other types and <b>display</b> the results.</p>
+
+    <p class="body"><b>1. Detect the type.</b> The subject gives examples; how to recognize each form is up to you (this table is advice). Do the pseudo-literals first.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>Examples from the subject</th><th>How to recognize it</th></tr></thead>
+        <tbody>
+          <tr><td>pseudo-literals</td><td><code class="inline">-inff</code> <code class="inline">+inff</code> <code class="inline">nanf</code> (p. 9); <code class="inline">-inf</code> <code class="inline">+inf</code> <code class="inline">nan</code> (p. 10)</td><td>Exact comparison with these six strings, before anything else.</td></tr>
+          <tr><td>char</td><td><code class="inline">'c'</code>, <code class="inline">'a'</code> (p. 9)</td><td>Three characters: an apostrophe, a displayable character, an apostrophe.</td></tr>
+          <tr><td>int</td><td><code class="inline">0</code>, <code class="inline">-42</code>, <code class="inline">42</code> (p. 9)</td><td>An optional sign, then digits only.</td></tr>
+          <tr><td>float</td><td><code class="inline">0.0f</code>, <code class="inline">-4.2f</code>, <code class="inline">4.2f</code> (p. 9)</td><td>An optional sign, digits, a single dot, digits, then <code class="inline">f</code>.</td></tr>
+          <tr><td>double</td><td><code class="inline">0.0</code>, <code class="inline">-4.2</code>, <code class="inline">4.2</code> (p. 10)</td><td>Like the float, without the <code class="inline">f</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">Except for chars, only the decimal notation is used (p. 9): no exponent (<code class="inline">1e3</code>), no hexadecimal (<code class="inline">0x10</code>). And non-displayable characters will not be given as input (p. 9). Everything else is invalid input: it is up to you to decide what to print, but never to crash.</p>
+
+    <p class="body"><b>2. Convert.</b> To go from the string to a number, the subject authorizes "any function" that converts a string to an <code class="inline">int</code>, a <code class="inline">float</code> or a <code class="inline">double</code> (p. 9), such as <code class="inline">strtod</code>. That is not a cast: it is text parsing, and it is the part with traps (see the pitfalls). Then going from one numeric type to another is where the cast comes in: <code class="inline">static_cast</code>. But a cast does not say "impossible": <b>it is up to you to test the range before casting</b>. The subject asks for a message when a conversion makes no sense or overflows, and tells you to include the headers for numeric limits and special values (p. 11).</p>
+
+    <p class="body"><b>3. Display.</b> Four lines, in this order. The words <code class="inline">Non displayable</code> and <code class="inline">impossible</code> come from the subject's examples (p. 11); the rest of the table is this course's choice.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Line</th><th>When</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td>char</td><td>truncated value from 32 to 126</td><td>the character between apostrophes: <code class="inline">'*'</code></td></tr>
+          <tr><td>char</td><td>truncated value from 0 to 31, or 127</td><td><code class="inline">Non displayable</code></td></tr>
+          <tr><td>char</td><td>nan, infinity, or outside 0 to 127</td><td><code class="inline">impossible</code></td></tr>
+          <tr><td>int</td><td>truncated value within the range of an <code class="inline">int</code></td><td>the number: <code class="inline">42</code></td></tr>
+          <tr><td>int</td><td>nan, infinity, or out of range</td><td><code class="inline">impossible</code></td></tr>
+          <tr><td>float</td><td>finite value</td><td>at least one decimal, then <code class="inline">f</code>: <code class="inline">0.0f</code>, <code class="inline">42.0f</code></td></tr>
+          <tr><td>float</td><td>nan or infinity</td><td><code class="inline">nanf</code> (the subject's example), <code class="inline">+inff</code>, <code class="inline">-inff</code></td></tr>
+          <tr><td>double</td><td>finite value</td><td>at least one decimal: <code class="inline">0.0</code>, <code class="inline">42.0</code></td></tr>
+          <tr><td>double</td><td>nan or infinity</td><td><code class="inline">nan</code> (the subject's example), <code class="inline">+inf</code>, <code class="inline">-inf</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn"><span class="bulb">🔢</span><p><b>The decimals are yours to impose.</b> Observed with clang in C++98: <code class="inline">std::cout &lt;&lt; 42.0f</code> prints <code class="inline">42</code> (not <code class="inline">42.0</code>), <code class="inline">0.0f</code> prints <code class="inline">0</code>, and <code class="inline">2147483648.0f</code> prints <code class="inline">2.14748e+09</code>. With <code class="inline">std::fixed</code> and <code class="inline">std::setprecision(1)</code> (<code class="inline">&lt;iomanip&gt;</code>) you do get <code class="inline">42.0</code>, <code class="inline">0.0</code> and <code class="inline">2147483648.0</code>, but <code class="inline">3.14159</code> becomes <code class="inline">3.1</code> and <code class="inline">4.25f</code> becomes <code class="inline">4.2</code>: digits are lost. The subject only fixes its examples; the demo below keeps <b>the fewest decimals that give back the same value, at least one</b>. And <code class="inline">std::cout</code> writes <code class="inline">nan</code>, <code class="inline">inf</code> and <code class="inline">-inf</code>: the <code class="inline">f</code> of <code class="inline">nanf</code> and the <code class="inline">+</code> of <code class="inline">+inf</code> are up to you.</p></div>
+
+    <p class="body" style="margin-top:22px">Try some literals: the demo applies these rules and explains every <code class="inline">impossible</code>. The examples are the control cases; also try <code class="inline">42f</code> (invalid), <code class="inline">-0.0</code>, <code class="inline">16777217</code> and <code class="inline">4.2f</code> (look at the note under the output).</p>
+    <div class="demo" data-demo="cpp06-scalar-converter">
+      <div class="demo-static"><p class="body">Demo: an input field and example buttons. For <code class="inline">0</code>, the demo prints <code class="inline">char: Non displayable</code>, <code class="inline">int: 0</code>, <code class="inline">float: 0.0f</code>, <code class="inline">double: 0.0</code>. For <code class="inline">nan</code>: <code class="inline">char: impossible</code>, <code class="inline">int: impossible</code>, <code class="inline">float: nanf</code>, <code class="inline">double: nan</code>. For <code class="inline">42.0f</code>: <code class="inline">char: '*'</code>, <code class="inline">int: 42</code>, <code class="inline">float: 42.0f</code>, <code class="inline">double: 42.0</code>. An empty or invalid input gives a clear message.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Type a literal: the demo detects its type, then prints the subject's four lines","inputLabel":"Literal passed to ScalarConverter::convert (argv[1])","examplesLabel":"Examples","formatNote":"Format chosen by the demo for float and double: the fewest decimals that give back the same value, at least one. The subject only fixes its examples (p. 11): Non displayable and impossible come from those examples.","emptyMsg":"The field is empty: type a literal (0, 42.0f, nan, 'c'...).","errorMsg":"This input made the demo fail: try another literal.","typeLine":"Detected type: {type}","type_char":"char","type_int":"int","type_intBig":"integer too big for an int","type_float":"float","type_double":"double","type_pseudo":"pseudo-literal","type_invalid":"invalid","typeOverflow":"{type}, but its value is beyond the limits of the type: no conversion makes sense","invalidMsg":"\"{lit}\" is not a literal of the subject.","hintSpace":"There is a space at the start or at the end: it is part of the string (strtod would skip the leading one).","hintNoDot":"A float is written with a dot: 42.0f. In C++, 42f does not even compile.","hintNotDecimal":"Only the decimal notation is used (p. 9): no exponent (1e3) and no hexadecimal (0x10), even though strtod accepts them.","hintPseudo":"The subject's pseudo-literals are exactly -inff, +inff, nanf, -inf, +inf and nan (p. 9-10): not inf, +nan, NaN...","hintQuote":"A char is written 'c': a single displayable character between two apostrophes.","hintGeneric":"It is not a char ('c'), an int (42), a float (4.2f), a double (4.2) or a pseudo-literal. Leftover characters after the number (42abc) also make it invalid: with strtod, endptr is what reveals them.","whyCharNan":"char: nan and infinity have no character equivalent, so impossible.","whyCharRange":"char: the truncated value is not within 0 to 127, so impossible.","whyCharHidden":"char: codes 0 to 31 and 127 are not displayable, so Non displayable.","whyIntNan":"int: nan and infinity have no integer equivalent, so impossible.","whyIntRange":"int: the truncated value does not fit in an int (from -2147483648 to 2147483647), so impossible.","whyFloatRange":"float: the value is larger than the largest finite float, so impossible.","noteBigInt":"This integer does not fit in an int: the int line is impossible, but float and double show the nearest value.","noteBare":"A single character without apostrophes is treated as a char: the shell strips the apostrophes of ./convert 'c', which then receives just c (the subject gives 'c' as an example of a literal, p. 9).","noteNegZero":"-0.0 exists: negative zero keeps its sign when printed.","noteWiden":"{lit} is really {digits} when you read the float back as a double (15 digits): a float is only an approximate value. The double line shows only the digits the float is sure of.","noteLoss":"{lit} cannot be represented as a float: the float line shows the nearest float ({f})."}</script>
+    </div>
+
+    <p class="body" style="margin-top:22px"><b>The expected result.</b> The subject's three examples (p. 11), as they are:</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">examples from the subject (p. 11)</span></div>
+<pre><span class="cm">$ ./convert 0</span>
+char: Non displayable
+int: 0
+float: 0.0f
+double: 0.0
+<span class="cm">$ ./convert nan</span>
+char: impossible
+int: impossible
+float: nanf
+double: nan
+<span class="cm">$ ./convert 42.0f</span>
+char: '*'
+int: 42
+float: 42.0f
+double: 42.0</pre>
+    </div>
+    <p class="body" style="margin-top:14px">More cases, observed with a reference program compiled in C++98 (clang, macOS) that follows the rules above. Only the subject's examples are required: your format may differ slightly, as long as you can explain it.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Input</th><th>char</th><th>int</th><th>float</th><th>double</th></tr></thead>
+        <tbody>
+          <tr><td><code class="inline">'c'</code></td><td><code class="inline">'c'</code></td><td><code class="inline">99</code></td><td><code class="inline">99.0f</code></td><td><code class="inline">99.0</code></td></tr>
+          <tr><td><code class="inline">-inff</code></td><td><code class="inline">impossible</code></td><td><code class="inline">impossible</code></td><td><code class="inline">-inff</code></td><td><code class="inline">-inf</code></td></tr>
+          <tr><td><code class="inline">+inf</code></td><td><code class="inline">impossible</code></td><td><code class="inline">impossible</code></td><td><code class="inline">+inff</code></td><td><code class="inline">+inf</code></td></tr>
+          <tr><td><code class="inline">2147483648</code></td><td><code class="inline">impossible</code></td><td><code class="inline">impossible</code></td><td><code class="inline">2147483648.0f</code></td><td><code class="inline">2147483648.0</code></td></tr>
+          <tr><td><code class="inline">-42</code></td><td><code class="inline">impossible</code></td><td><code class="inline">-42</code></td><td><code class="inline">-42.0f</code></td><td><code class="inline">-42.0</code></td></tr>
+          <tr><td><code class="inline">4.2f</code></td><td><code class="inline">Non displayable</code></td><td><code class="inline">4</code></td><td><code class="inline">4.2f</code></td><td><code class="inline">4.2</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><span class="bulb">🧪</span><p><b>Passing <code class="inline">'c'</code> through the shell.</b> The shell strips the apostrophes: <code class="inline">./convert 'c'</code> receives just <code class="inline">c</code> (observed). For your program to really receive <code class="inline">'c'</code>, write <code class="inline">./convert "'c'"</code>. Decide how you handle a lone character without apostrophes, and be ready to explain it.</p></div>
+  </section>
+
+  <section id="ex01">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>ex01 · <span class="accent">Serializer</span></h2></div>
+    <p class="body">A pointer is an <b>address</b>, so it is a number. <code class="inline">uintptr_t</code> is an unsigned integer type big enough to hold one. Your class has two static methods: <code class="inline">serialize</code> reads the address as an integer, <code class="inline">deserialize</code> reads that integer back as an address. <b>Nothing is copied</b>: the <code class="inline">Data</code> object stays where it is.</p>
+    <p class="body"><b>Files to submit (p. 12)</b>: <code class="inline">Makefile</code>, <code class="inline">Serializer.hpp</code>, <code class="inline">Serializer.cpp</code>, <code class="inline">Data.hpp</code> (and <code class="inline">Data.cpp</code> if you need it) and <code class="inline">main.cpp</code>. The subject reminds you not to forget the <code class="inline">Data</code> files.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Serializer.hpp</span></div>
+<pre><span class="k">#ifndef</span> SERIALIZER_HPP
+<span class="k"># define</span> SERIALIZER_HPP
+
+<span class="k"># include</span> <span class="st">&lt;stdint.h&gt;</span>
+<span class="k"># include</span> <span class="st">"Data.hpp"</span>
+
+<span class="k">class</span> <span class="ty">Serializer</span>
+{
+	<span class="k">public</span>:
+		<span class="k">static</span> <span class="ty">uintptr_t</span>	<span class="fn">serialize</span>(Data *ptr);
+		<span class="k">static</span> Data			*<span class="fn">deserialize</span>(<span class="ty">uintptr_t</span> raw);
+
+	<span class="k">private</span>:
+		<span class="fn">Serializer</span>();
+		<span class="fn">Serializer</span>(<span class="k">const</span> Serializer &amp;other);
+		Serializer &amp;<span class="fn">operator=</span>(<span class="k">const</span> Serializer &amp;other);
+		<span class="fn">~Serializer</span>();
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Data.hpp</span></div>
+<pre><span class="k">#ifndef</span> DATA_HPP
+<span class="k"># define</span> DATA_HPP
+
+<span class="k"># include</span> <span class="st">&lt;string&gt;</span>
+
+<span class="k">struct</span> <span class="ty">Data</span>
+{
+	std::string	name;
+	<span class="ty">int</span>			value;
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+    <p class="body"><b>The cast.</b> The classic choice is <code class="inline">reinterpret_cast</code> in both directions: you do not <i>convert</i> a value, you read an address again. <code class="inline">static_cast</code> is refused for that, as seen in the previous section. For <code class="inline">uintptr_t</code>, include <code class="inline">&lt;stdint.h&gt;</code>: it compiles with <code class="inline">-std=c++98</code>. <code class="inline">&lt;cstdint&gt;</code> is C++11; clang on macOS accepts it in C++98 mode too (observed), but check with your school's compiler.</p>
+    <p class="body"><b>The test (p. 12).</b> Create a <code class="inline">Data</code> with data members, pass its address to <code class="inline">serialize</code>, give the result to <code class="inline">deserialize</code>, then check that the pointer you get is <b>equal</b> to the original, using <code class="inline">==</code> on the two <code class="inline">Data *</code>. Also print the integer in decimal and in hexadecimal: it speaks for itself during the defense.</p>
+    <div class="callout"><span class="bulb">🎲</span><p><b>A real address is never the same twice.</b> Observed on macOS: two runs of the same program print two different stack addresses (<code class="inline">0x16d216558</code> then <code class="inline">0x16b2e2558</code>). So do not try to compare your output to a fixed value. On this machine, <code class="inline">sizeof(uintptr_t)</code> and <code class="inline">sizeof(void *)</code> are 8, <code class="inline">sizeof(unsigned int)</code> is 4: storing an address in an <code class="inline">unsigned int</code> is refused (see the previous table).</p></div>
+    <p class="body">The demo uses a <b>simulated</b> address, to always show the same digits. Press <code class="inline">serialize(ptr)</code>, then <code class="inline">deserialize(raw)</code>: the pointer is the same. Add 1 to the integer: the pointer changes, and the verdict turns false.</p>
+    <div class="demo" data-demo="cpp06-serializer">
+      <div class="demo-static"><p class="body">Demo: a fake <code class="inline">Data</code> object at the simulated address <code class="inline">0x7ffee3b2a1c0</code>. <code class="inline">serialize(ptr)</code> returns the integer <code class="inline">140732718555584</code> (<code class="inline">0x7ffee3b2a1c0</code> in hexadecimal); <code class="inline">deserialize(raw)</code> gives back the same address, so <code class="inline">ptr == deserialize(serialize(ptr))</code> is true. With the integer plus 1, that is <code class="inline">140732718555585</code>, you get <code class="inline">0x7ffee3b2a1c1</code>: a different pointer, which must never be dereferenced.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"A pointer becomes an integer, then becomes a pointer again","simNote":"The address below is simulated, so that the demo always shows the same digits: a real address changes at every run of the program.","objHead":"Data *ptr = {addr};   // the Data object is at this address","nameLabel":"name field of Data","valueLabel":"value field of Data","dataView":"Data { name = \"{name}\", value = {value} }","serialize":"serialize(ptr)","deserialize":"deserialize(raw)","reset":"Start over","rowPtr":"ptr (Data *)","rowDec":"raw in decimal (uintptr_t)","rowHex":"raw in hexadecimal","rowBack":"deserialize(raw)","none":"—","editLabel":"Edit the integer raw (decimal, or hexadecimal with 0x)","errEmpty":"The field is empty: type an integer in decimal or hexadecimal (0x...).","errFormat":"That is not an integer: type digits, or 0x followed by hexadecimal digits.","errRange":"This integer is too big for a 64-bit uintptr_t (maximum 18446744073709551615).","idle":"Press serialize(ptr): the address of the object is about to be read as an integer.","needFirst":"Nothing to deserialize yet: call serialize(ptr) first, or type an integer.","msgSerialized":"serialize(ptr) returns {dec}, that is {hex}. Nothing is copied: it is the address of the object, written as a number. Editing name or value does not change this integer.","msgSame":"✓ equal: deserialize(raw) returns {hex}, and ptr == deserialize(serialize(ptr)) is true. It is the same object, not a copy.","msgDiff":"✗ different: ptr is {ptr} but deserialize(raw) returns {back}. This pointer no longer designates the Data object.","derefOk":"Read through the pointer we got back: name = \"{name}\", value = {value}.","derefNever":"NEVER dereference this pointer: the address does not designate a Data object, the behavior is undefined.","wrapNote":"uintptr_t is unsigned: outside its limits it wraps around to the other end (0 - 1 gives 18446744073709551615 on 64 bits).","nullNote":"The integer 0 gives the null pointer (NULL)."}</script>
+    </div>
+  </section>
+
+  <section id="ex02">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>ex02 · <span class="accent">Identify real type</span></h2></div>
+    <p class="body">You have a pointer (or a reference) to <code class="inline">Base</code>, but the object may be an <code class="inline">A</code>, a <code class="inline">B</code> or a <code class="inline">C</code>. How do you tell which, <b>without</b> <code class="inline">typeid</code>? By asking <code class="inline">dynamic_cast</code>: it compares the real type of the object with the one you propose, and answers yes or no at run time.</p>
+    <p class="body"><b>Files to submit (p. 13)</b>: <code class="inline">Makefile</code>, <code class="inline">Base.hpp</code> and <code class="inline">Base.cpp</code>, <code class="inline">A.hpp</code>, <code class="inline">B.hpp</code>, <code class="inline">C.hpp</code>, a file for <code class="inline">generate</code> and <code class="inline">identify</code> (you name it), and <code class="inline">main.cpp</code>. Why a <code class="inline">Base.cpp</code>? Because a function body in a header, even a bare <code class="inline">{}</code> after the destructor, is a function implementation in a header: the subject gives 0 (p. 4). Do not take that risk.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Base.hpp</span></div>
+<pre><span class="k">#ifndef</span> BASE_HPP
+<span class="k"># define</span> BASE_HPP
+
+<span class="k">class</span> <span class="ty">Base</span>
+{
+	<span class="k">public</span>:
+		<span class="k">virtual</span> <span class="fn">~Base</span>();   <span class="cm">// the only member: public and virtual (p. 13)</span>
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">A.hpp</span></div>
+<pre><span class="k">#ifndef</span> A_HPP
+<span class="k"># define</span> A_HPP
+
+<span class="k"># include</span> <span class="st">"Base.hpp"</span>
+
+<span class="k">class</span> <span class="ty">A</span> : <span class="k">public</span> Base {};   <span class="cm">// empty: B and C are identical</span>
+
+<span class="k">#endif</span></pre>
+    </div>
+    <p class="body"><b>Why the virtual destructor?</b> Because <code class="inline">dynamic_cast</code> only accepts polymorphic types: a class with at least one virtual function. Without <code class="inline">virtual</code>, the compiler answers "'Base' is not polymorphic" (observed). And destroying an <code class="inline">A</code> through a <code class="inline">Base *</code> without a virtual destructor is undefined behavior.</p>
+    <p class="body"><b><code class="inline">generate</code>.</b> It randomly creates an <code class="inline">A</code>, a <code class="inline">B</code> or a <code class="inline">C</code> with <code class="inline">new</code> and returns it as a <code class="inline">Base *</code>; the subject leaves the random choice up to you (p. 13). Who does the <code class="inline">delete</code>? Whoever called <code class="inline">generate</code>. Seed the generator <b>only once</b>, in <code class="inline">main</code> (see the pitfalls).</p>
+    <p class="body"><b><code class="inline">identify(Base *p)</code>.</b> Try a <code class="inline">dynamic_cast</code> to each type: a pointer of the wrong type gives <code class="inline">NULL</code>, and the first non-null result gives you the answer.</p>
+    <p class="body"><b><code class="inline">identify(Base &amp;p)</code>.</b> Same idea, but the subject forbids pointers inside this function (p. 13). A reference cannot be "nothing": a failing <code class="inline">dynamic_cast</code> to a reference does not return <code class="inline">NULL</code>, it <b>throws an exception</b> (<code class="inline">std::bad_cast</code>, whose <code class="inline">what()</code> returns <code class="inline">std::bad_cast</code> here). So you need a <code class="inline">try</code> / <code class="inline">catch</code>. The trap: <code class="inline">std::bad_cast</code> is declared in <code class="inline">&lt;typeinfo&gt;</code>, the header the subject forbids you to include (p. 13). Catch <code class="inline">std::exception</code> instead, which comes from <code class="inline">&lt;exception&gt;</code>: observed, it compiles and works without ever including <code class="inline">&lt;typeinfo&gt;</code>.</p>
+    <p class="body">What the demo does: a chain of attempts, A first, then B, then C, stopped at the first success. For an object of type <code class="inline">A</code>, one attempt is enough; for a <code class="inline">C</code>, two failures come before the success.</p>
+    <div class="demo" data-demo="cpp06-identify">
+      <div class="demo-static"><p class="body">Demo: an object whose real type is hidden. For an object of type <code class="inline">B</code>: pointer version, <code class="inline">dynamic_cast&lt;A *&gt;</code> returns <code class="inline">NULL</code>, <code class="inline">dynamic_cast&lt;B *&gt;</code> returns a valid pointer and the function prints <code class="inline">B</code>; reference version, <code class="inline">dynamic_cast&lt;A &amp;&gt;</code> throws <code class="inline">std::bad_cast</code>, <code class="inline">dynamic_cast&lt;B &amp;&gt;</code> succeeds and the function prints <code class="inline">B</code>. For <code class="inline">A</code>, the first attempt succeeds; for <code class="inline">C</code>, the first two fail.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"What is the real type of the object? Follow the chain of dynamic_casts","typeLabel":"Real type of the object (hidden from the code)","random":"random","create":"Create the object","step":"Next attempt","run":"Run all","created":"Object created: p is a Base *, its real type is hidden. Start the attempts.","createdRandom":"Object created with a randomly drawn, hidden type. Start the attempts.","idle":"Press \"Next attempt\": each column tries a dynamic_cast to A, then B, then C.","objHidden":"Base *p = generate();   // real type of *p: hidden","objRevealed":"Base *p = generate();   // real type of *p: {type}","ptrTitle":"Pointer version","refTitle":"Reference version","ptrOk":"✓ non-NULL pointer","ptrNull":"✗ returns NULL","refOk":"✓ succeeds","refThrow":"✗ throws std::bad_cast","ptrOkShort":"returns a non-NULL pointer","ptrNullShort":"returns NULL","refOkShort":"succeeds","refThrowShort":"throws std::bad_cast (caught by catch)","waiting":"not tried yet","skipped":"not tried: the chain stopped before","prints":"prints: {type}","stepMsg":"Attempt {n}: {ptrCast} {ptrRes}; {refCast} {refRes}.","foundMsg":"The first attempt that succeeds identifies the object: {type}."}</script>
+    </div>
+    <div class="callout"><span class="bulb">❓</span><p><b>And a bare <code class="inline">Base</code>?</b> <code class="inline">generate</code> never produces one, and the subject only asks for <code class="inline">A</code>, <code class="inline">B</code> or <code class="inline">C</code> (p. 13). But nothing stops you from calling <code class="inline">identify</code> on a <code class="inline">new Base</code>: observed, all three attempts fail. Plan what your functions do in that case (a message, or nothing), so you are never surprised during the defense.</p></div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Step by <span class="accent">step</span></h2></div>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Read the whole module.</b> The subject asks for it itself (p. 4). Then, before coding, write down for each exercise <b>the cast you chose and one sentence to justify it</b>: you will need it in the defense (p. 6).</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>ex00: the shell.</b> <code class="inline">ScalarConverter.hpp</code> with its four private members, an empty <code class="inline">.cpp</code>, a <code class="inline">main</code>, a <code class="inline">Makefile</code> with the subject's flags. Check that <code class="inline">ScalarConverter s;</code> does not compile.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>ex00: the detection.</b> Write the function that guesses the type, and test it on the subject's three examples, the six pseudo-literals, then invalid inputs (<code class="inline">42f</code>, <code class="inline">'a</code>, an empty string).</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>ex00: the conversions.</b> Test the range <b>before</b> each <code class="inline">static_cast</code>, then add the display with its decimals. Keep a list of inputs with the expected output (for example those of the table in the ex00 section) and replay it after every change.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>ex01.</b> <code class="inline">Data</code> with data members, <code class="inline">Serializer</code> with its two static methods, then the test: pointer equality, integer printed in decimal and hexadecimal, program run twice to see the address change.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>ex02.</b> <code class="inline">Base</code>, <code class="inline">A</code>, <code class="inline">B</code>, <code class="inline">C</code>, then <code class="inline">generate</code> with a single <code class="inline">srand</code> in <code class="inline">main</code>, <code class="inline">identify(Base *)</code>, and finally <code class="inline">identify(Base &amp;)</code>. Test on many randomly drawn objects, and check that none is leaked (<code class="inline">delete</code> on every turn).</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>Reread the prohibitions.</b> No <code class="inline">*printf</code>, <code class="inline">malloc</code> or <code class="inline">free</code>, no C++11, no <code class="inline">using namespace</code> or <code class="inline">friend</code>, nothing implemented in a header, include guards everywhere, no <code class="inline">typeinfo</code> in ex02 (p. 3, 4 and 13). Compile with <code class="inline">-Wall -Wextra -Werror -std=c++98</code>.</span></div>
+    </div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Classic <span class="accent">pitfalls</span></h2></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">nanf</code> or <code class="inline">nan</code>?</b> The six pseudo-literals are exact strings (p. 9-10), to recognize before anything else. When printing, <code class="inline">std::cout</code> writes <code class="inline">nan</code>, <code class="inline">inf</code> and <code class="inline">-inf</code> (observed): the <code class="inline">f</code> of the float line and the <code class="inline">+</code> are up to you. To build these values, <code class="inline">&lt;limits&gt;</code> provides <code class="inline">quiet_NaN()</code> and <code class="inline">infinity()</code> in <code class="inline">std::numeric_limits&lt;double&gt;</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">-0.0</code>.</b> Negative zero exists. With <code class="inline">std::fixed</code> and <code class="inline">std::setprecision(1)</code>, <code class="inline">-0.0</code> prints as <code class="inline">-0.0</code> (observed); without <code class="inline">fixed</code>, as <code class="inline">-0</code>. The subject does not test it: decide the result of your four lines (here: <code class="inline">Non displayable</code>, <code class="inline">0</code>, <code class="inline">-0.0f</code>, <code class="inline">-0.0</code>) and stay consistent.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">42f</code> is not <code class="inline">42.0f</code>.</b> A float is written with a dot. In C++, <code class="inline">float f = 42f;</code> does not even compile (clang: "invalid digit 'f' in decimal constant"). Your detector must reject <code class="inline">42f</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>A badly closed apostrophe.</b> <code class="inline">'a</code>, <code class="inline">'ab'</code> and <code class="inline">''</code> are not chars: reject them. And the shell eats apostrophes (see the ex00 section): decide what your program does with a lone character like <code class="inline">c</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">strtod</code> accepts much more than the subject.</b> Observed: <code class="inline">strtod("42abc")</code> returns 42 and only <code class="inline">endptr</code> points at <code class="inline">abc</code>; a leading space is accepted; <code class="inline">"0x10"</code> gives 16, <code class="inline">"1e3"</code> gives 1000; <code class="inline">"inf"</code>, <code class="inline">"infinity"</code> and <code class="inline">"NaN"</code> go through too. So validate the <b>shape</b> of the string first, and check <code class="inline">endptr</code>. <code class="inline">atoi("abc")</code> returns 0, just like <code class="inline">atoi("0")</code>: there is no way to tell the error. Finally <code class="inline">std::stod</code>, <code class="inline">std::stof</code> and <code class="inline">std::stoi</code> are C++11, which is forbidden (p. 3): clang on macOS still compiles them with <code class="inline">-std=c++98</code> (observed), so do not trust your local compiler; check with your school's.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>An <code class="inline">int</code> out of range.</b> Converting a <code class="inline">double</code> whose truncated value does not fit in an <code class="inline">int</code> is undefined behavior according to the standard. The result is not guaranteed: <code class="inline">static_cast&lt;int&gt;(3e10)</code> may give 2147483647 or some other value, depending on the machine, the compiler and optimization. <b>Test the range before casting</b>, with the limits from <code class="inline">&lt;climits&gt;</code> or <code class="inline">&lt;limits&gt;</code>. Same logic for <code class="inline">char</code>: <code class="inline">static_cast&lt;char&gt;(321)</code> gives <code class="inline">'A'</code> (observed), without warning you.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Non-displayable characters.</b> Codes 0 to 31 and 127 give <code class="inline">Non displayable</code>. <code class="inline">std::isprint</code> (<code class="inline">&lt;cctype&gt;</code>) accepts codes 32 to 126, that is 95 characters (observed, "C" locale), but expects a value between 0 and 255: do not pass it a negative <code class="inline">char</code>. For 128 to 255, <code class="inline">char</code> is signed here (<code class="inline">CHAR_MIN</code> is -128) and <code class="inline">static_cast&lt;char&gt;(200)</code> is -56: the subject does not settle it, this course prints <code class="inline">impossible</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>"Not instantiable" = the four private members.</b> A private default constructor is enough to stop <code class="inline">ScalarConverter s;</code>, but the OCF also asks for the copy constructor, the assignment operator and the destructor: declare all four private. Observed: the compiler answers "calling a private constructor of class 'ScalarConverter'" then "variable of type 'ScalarConverter' has private destructor". Same for <code class="inline">Serializer</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>The wrong cast in the defense.</b> <code class="inline">reinterpret_cast</code> to go from a <code class="inline">float</code> to an <code class="inline">int</code>: refused, it does not convert values. <code class="inline">static_cast</code> for a pointer to an integer: refused. A C-style cast everywhere: it compiles, but you did not choose. Prepare one sentence per exercise, as in step 1.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Compare the pointers, not the contents.</b> The ex01 test asks for the returned pointer to equal the original (p. 12): <code class="inline">==</code> on two <code class="inline">Data *</code>, not a comparison of the fields. If you store the address in a type that is too small (<code class="inline">unsigned int</code>), the compiler refuses; <code class="inline">uintptr_t</code> comes from <code class="inline">&lt;stdint.h&gt;</code>. And never hard-code an address in your test: it changes at every run.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">identify(Base &amp;)</code> with no pointer and no <code class="inline">typeinfo</code>.</b> Do not take the address of the reference: the subject forbids it (p. 13). A failing <code class="inline">dynamic_cast</code> on a reference throws an exception: you need a <code class="inline">try</code> / <code class="inline">catch</code>. Do not write <code class="inline">typeid</code>: clang answers "you need to include &lt;typeinfo&gt; before using the 'typeid' operator" (observed), and the subject forbids it. To catch the exception without <code class="inline">&lt;typeinfo&gt;</code>, use <code class="inline">std::exception</code> (<code class="inline">&lt;exception&gt;</code>). With libc++ (clang, macOS), even <code class="inline">catch (const std::bad_cast &amp;)</code> compiles with only <code class="inline">&lt;exception&gt;</code> (observed): do not count on it elsewhere.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>The forgotten <code class="inline">virtual</code> on <code class="inline">~Base</code>.</b> Without a virtual function, <code class="inline">dynamic_cast</code> no longer compiles ("'Base' is not polymorphic"), and deleting a derived object through a <code class="inline">Base *</code> becomes undefined behavior. Do not write the destructor body in the header either (p. 4).</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">srand</code> inside <code class="inline">generate</code>.</b> If you seed the generator on every call with <code class="inline">time(NULL)</code>, every object created during the same second has the same type: observed, twelve calls in a row all gave the same type (<code class="inline">C</code>). Call <code class="inline">srand</code> only once, in <code class="inline">main</code>.</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">09</span><h2>How I <span class="accent">did it</span></h2></div>
+    <div class="how"><p class="body">I kept the three exercises simple. For <code class="inline">ScalarConverter</code>, the four canonical members are private. One function detects the literal's type by hand, pseudo-literals first, then char, int, float and double. The value then goes through a single <code class="inline">double</code>, and each output line checks its range before using <code class="inline">static_cast</code>. I print one decimal when the number is whole, and the default precision otherwise. <code class="inline">Serializer</code> has only two static methods using <code class="inline">reinterpret_cast</code>, tried on a <code class="inline">Data</code> object from the stack and then from the heap. For exercise 02, the pointer version chains the <code class="inline">dynamic_cast</code>s and checks whether they return <code class="inline">NULL</code>, while the reference version tries them inside <code class="inline">try</code> blocks that catch <code class="inline">std::exception</code>, never including <code class="inline">&lt;typeinfo&gt;</code>. I also tested with a bare <code class="inline">Base</code>.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 To remember (defense)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>One specific cast per exercise (p. 6).</b> Be able to say which and why: <code class="inline">static_cast</code> for numeric conversions, <code class="inline">reinterpret_cast</code> for pointer and integer, <code class="inline">dynamic_cast</code> for the real type.</div></li>
+        <li><span class="chk">✓</span><div><b>Why not the C-style cast?</b> It mixes everything, removes <code class="inline">const</code> without a word and cannot be searched for. C++ casts state the intent, and the compiler refuses nonsense.</div></li>
+        <li><span class="chk">✓</span><div><b>What each cast checks.</b> <code class="inline">static_cast</code>: related types, at compile time. <code class="inline">reinterpret_cast</code>: almost nothing. <code class="inline">dynamic_cast</code>: the real type, at run time, on polymorphic types. <code class="inline">const_cast</code>: only <code class="inline">const</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>ex00.</b> Detect, convert, display. A cast does not warn you about overflow: test the range first. <code class="inline">impossible</code> (nan, infinity, out of range) and <code class="inline">Non displayable</code> (0 to 31 and 127) are two different messages.</div></li>
+        <li><span class="chk">✓</span><div><b>The pseudo-literals.</b> <code class="inline">-inff +inff nanf -inf +inf nan</code>, six exact strings. At least one decimal: <code class="inline">0.0f</code>, <code class="inline">42.0</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Not instantiable.</b> The four canonical members <code class="inline">private</code>; <code class="inline">ScalarConverter s;</code> must not compile.</div></li>
+        <li><span class="chk">✓</span><div><b>ex01.</b> <code class="inline">reinterpret_cast</code> in both directions with <code class="inline">uintptr_t</code> (<code class="inline">&lt;stdint.h&gt;</code>); the test compares two pointers with <code class="inline">==</code>. Nothing is copied.</div></li>
+        <li><span class="chk">✓</span><div><b>ex02.</b> Public virtual destructor in <code class="inline">Base</code>, defined in a <code class="inline">.cpp</code>. Pointer: <code class="inline">dynamic_cast</code> returns <code class="inline">NULL</code>. Reference: it throws <code class="inline">std::bad_cast</code>, caught through <code class="inline">std::exception</code>. No <code class="inline">typeinfo</code>, no pointer inside <code class="inline">identify(Base &amp;)</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>General rules.</b> C++98, <code class="inline">-Wall -Wextra -Werror</code>, no <code class="inline">*printf</code> or <code class="inline">*alloc</code>, no <code class="inline">using namespace</code> or <code class="inline">friend</code>, include guards, nothing implemented in a header, no leaks.</div></li>
+        <li><span class="chk">✓</span><div><b>Prepare for the small modification (p. 14).</b> It can concern any line of your code: know how to redo a test or change an output quickly.</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>

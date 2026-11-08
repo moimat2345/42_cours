@@ -1,0 +1,375 @@
+<header class="hero">
+  <span class="kicker"><span class="dot"></span>C++ · Module 06 · Casts</span>
+  <h1 class="title">Les <span class="g">casts</span> du C++</h1>
+  <p class="lead">Convertir un type en un autre, oui, mais en disant <b>lequel et pourquoi</b>. Ce cours explique les trois exercices du module et, surtout, <b>le choix du cast</b> que tu devras défendre.</p>
+  <p class="subj">sujet : en.subject-8.pdf · version 8.1 · C++98 · -Wall -Wextra -Werror</p>
+</header>
+
+<div class="wrap">
+
+  <section id="overview">
+    <div class="sec-head reveal"><span class="sec-num">01</span><h2>Le module en <span class="accent">bref</span></h2></div>
+    <p class="body">Le module 06 tourne autour d'une idée : <b>convertir une valeur d'un type vers un autre</b> en choisissant le bon outil. Trois exercices :</p>
+    <p class="body"><b>ex00</b> : écrire <code class="inline">ScalarConverter</code>, une classe qu'on ne peut pas instancier, dont l'unique méthode statique <code class="inline">convert</code> reçoit un littéral sous forme de chaîne (<code class="inline">0</code>, <code class="inline">42.0f</code>, <code class="inline">nan</code>, <code class="inline">'c'</code>…) et l'affiche en <code class="inline">char</code>, <code class="inline">int</code>, <code class="inline">float</code> et <code class="inline">double</code>.</p>
+    <p class="body"><b>ex01</b> : <code class="inline">Serializer</code>, qui transforme l'adresse d'un objet <code class="inline">Data</code> en entier <code class="inline">uintptr_t</code>, puis retrouve le pointeur.</p>
+    <p class="body"><b>ex02</b> : à partir d'un pointeur ou d'une référence sur <code class="inline">Base</code>, afficher le vrai type de l'objet (<code class="inline">A</code>, <code class="inline">B</code> ou <code class="inline">C</code>), sans l'en-tête <code class="inline">typeinfo</code>.</p>
+    <p class="body">Le module ajoute une règle qui lui est propre (p. 6) : <b>pour chaque exercice, la conversion de type doit passer par un type de cast précis</b>, et ce choix est examiné en défense. Le sujet ne dit pas quel cast va avec quel exercice : c'est à toi de le choisir et de savoir le justifier.</p>
+    <div class="callout"><span class="bulb">📖</span><p>Les numéros de page entre parenthèses, comme <b>(p. 6)</b>, sont ceux imprimés en bas des pages du sujet (version 8.1) : la page imprimée est la page du PDF moins un, parce que la couverture n'est pas numérotée. Garde le PDF ouvert à côté : ce cours explique le sujet, il ne le remplace pas.</p></div>
+    <div class="callout"><span class="bulb">💡</span><p><b>Ce que tu défendras, ce n'est pas « ça marche ».</b> C'est « j'ai pris <code class="inline">static_cast</code> ici parce que… ». Un cast C compile presque toujours, mais il ne répond pas à cette question : la section suivante t'aide à y répondre.</p></div>
+  </section>
+
+  <section id="map">
+    <div class="sec-head reveal"><span class="sec-num">02</span><h2>La carte du <span class="accent">module</span></h2></div>
+    <p class="body">D'abord les règles générales des modules C++ que ce sujet rappelle, avec la page où les lire :</p>
+    <div class="map">
+      <div class="map-item"><span class="ex">Compiler</span><div><h4>Les flags (p. 3)</h4><p><code class="inline">c++ -Wall -Wextra -Werror</code>. Le code doit aussi compiler si tu ajoutes <code class="inline">-std=c++98</code>.</p></div></div>
+      <div class="map-item"><span class="ex">Nommer</span><div><h4>Dossiers et fichiers (p. 3)</h4><p>Dossiers <code class="inline">ex00</code>, <code class="inline">ex01</code>… Classes en UpperCamelCase, fichiers nommés d'après la classe (<code class="inline">ClassName.hpp</code> ou <code class="inline">.h</code>, <code class="inline">.cpp</code>, <code class="inline">.tpp</code>).</p></div></div>
+      <div class="map-item"><span class="ex">Sortie</span><div><h4>Un message, une ligne (p. 3)</h4><p>Sauf mention contraire, chaque message se termine par un saut de ligne et va sur la sortie standard.</p></div></div>
+      <div class="map-item"><span class="ex">Interdit</span><div><h4>Ce qui coûte cher (p. 3-4)</h4><p><code class="inline">*printf()</code>, <code class="inline">*alloc()</code> et <code class="inline">free()</code> : note 0. C++11 et Boost interdits. <code class="inline">using namespace</code> et <code class="inline">friend</code> : -42. Conteneurs et <code class="inline">&lt;algorithm&gt;</code> avant les modules 08 et 09 : -42.</p></div></div>
+      <div class="map-item"><span class="ex">Conception</span><div><h4>Classes et headers (p. 4)</h4><p>Pas de fuite mémoire. Forme canonique orthodoxe (OCF) du module 02 au 09, sauf mention contraire. Aucune implémentation de fonction dans un header (hors templates) : 0. Chaque header s'utilise seul, avec ses gardes d'inclusion : sinon 0.</p></div></div>
+      <div class="map-item"><span class="ex">Module</span><div><h4>La règle du cast (p. 6)</h4><p>Pour chaque exercice, la conversion de type passe par un type de cast précis. Le choix est discuté en défense.</p></div></div>
+      <div class="map-item"><span class="ex">Tests</span><div><h4>Un programme de test (p. 11, 12, 13)</h4><p>Chaque exercice demande d'écrire un programme qui montre que ta classe ou tes fonctions marchent.</p></div></div>
+      <div class="map-item"><span class="ex">Défense</span><div><h4>Une petite modification (p. 14)</h4><p>Pendant l'évaluation, on peut te demander de changer un comportement ou d'écrire quelques lignes, dans ton environnement habituel.</p></div></div>
+    </div>
+
+    <p class="body" style="margin-top:22px">Puis les trois exercices, lus dans le sujet :</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Exercice</th><th>Fichiers à rendre</th><th>Autorisé / interdit</th><th>Imposé par le sujet</th></tr></thead>
+        <tbody>
+          <tr><td>ex00 · Conversion of scalar types (p. 9-11)</td><td>Dossier <code class="inline">ex00/</code> : <code class="inline">Makefile</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code></td><td>Autorisé : toute fonction qui convertit une chaîne en <code class="inline">int</code>, <code class="inline">float</code> ou <code class="inline">double</code>. Cela aide, sans faire tout le travail.</td><td>Une classe <code class="inline">ScalarConverter</code> qui ne contient qu'<b>une</b> méthode statique <code class="inline">convert</code>, et qu'on ne peut pas instancier. Sortie en <code class="inline">char</code>, <code class="inline">int</code>, <code class="inline">float</code>, <code class="inline">double</code>. Pseudo-littéraux <code class="inline">-inff</code> <code class="inline">+inff</code> <code class="inline">nanf</code> et <code class="inline">-inf</code> <code class="inline">+inf</code> <code class="inline">nan</code>.</td></tr>
+          <tr><td>ex01 · Serialization (p. 12)</td><td>Dossier <code class="inline">ex01/</code> : <code class="inline">Makefile</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code></td><td>Interdit : rien.</td><td>Une classe <code class="inline">Serializer</code> que l'utilisateur ne doit pouvoir initialiser d'aucune façon, avec <code class="inline">uintptr_t serialize(Data* ptr);</code> et <code class="inline">Data* deserialize(uintptr_t raw);</code> en méthodes statiques. Une structure <code class="inline">Data</code> <b>non vide</b> (elle a des attributs), à rendre aussi. Le test compare le pointeur retrouvé à l'original.</td></tr>
+          <tr><td>ex02 · Identify real type (p. 13)</td><td>Dossier <code class="inline">ex02/</code> : <code class="inline">Makefile</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code></td><td>Interdit : <code class="inline">std::typeinfo</code>. Inclure l'en-tête <code class="inline">typeinfo</code> est interdit. Dans <code class="inline">identify(Base&amp;)</code>, utiliser un pointeur est interdit.</td><td><code class="inline">Base</code> n'a qu'un <b>destructeur virtuel public</b>. <code class="inline">A</code>, <code class="inline">B</code>, <code class="inline">C</code> sont vides et héritent publiquement de <code class="inline">Base</code>. <code class="inline">Base * generate(void);</code> <code class="inline">void identify(Base* p);</code> <code class="inline">void identify(Base&amp; p);</code> Ces quatre classes n'ont pas à respecter l'OCF.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout"><span class="bulb">🗂️</span><p><b>Les noms de fichiers.</b> Le sujet n'impose que <code class="inline">Makefile</code>, <code class="inline">*.cpp</code> et <code class="inline">*.{h, hpp}</code>. La règle de nommage (p. 3) en fait déduire <code class="inline">ScalarConverter.hpp</code> et <code class="inline">.cpp</code>, <code class="inline">Serializer.hpp</code> et <code class="inline">.cpp</code>, <code class="inline">Data.hpp</code>, <code class="inline">Base.hpp</code>, <code class="inline">A.hpp</code>, <code class="inline">B.hpp</code>, <code class="inline">C.hpp</code> : une déduction, à vérifier dans ton sujet et avec ton évaluation. Le sujet ne dit pas non plus où ranger <code class="inline">generate</code> et <code class="inline">identify</code> : un fichier à toi.</p></div>
+    <div class="callout"><span class="bulb">🔒</span><p><b>« Non instanciable » et forme canonique.</b> Le sujet veut l'OCF du module 02 au 09 sauf mention contraire (p. 4), et il veut aussi que <code class="inline">ScalarConverter</code> et <code class="inline">Serializer</code> ne soient pas instanciables (p. 9 et 12). Le moyen classique de tout respecter : déclarer les <b>quatre</b> membres canoniques en <code class="inline">private</code>. C'est un conseil, pas une règle du sujet : vérifie ce que ton évaluation attend.</p></div>
+  </section>
+
+  <section id="casts">
+    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Les quatre <span class="accent">casts</span></h2></div>
+    <p class="body">Un <b>cast</b> est une conversion écrite explicitement. En C, il n'y en a qu'un, <code class="inline">(type)valeur</code>, et il fait tout. En C++, il y en a quatre, chacun avec une intention précise : le compilateur vérifie ce qu'il peut, et celui qui relit ton code voit tout de suite ce que tu voulais. Un <code class="inline">grep _cast</code> les retrouve tous.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Cast</th><th>Ce qu'il garantit, ce qu'il vérifie</th><th>Cas typique</th></tr></thead>
+        <tbody>
+          <tr><td>static_cast&lt;T&gt;(x)</td><td>Une conversion entre types compatibles, vérifiée <b>à la compilation</b> : nombres (<code class="inline">int</code>, <code class="inline">float</code>, <code class="inline">double</code>, <code class="inline">char</code>), pointeur vers <code class="inline">void *</code>, remonter ou descendre une hiérarchie de classes. Il refuse pointeur vers entier, et deux pointeurs de classes sans lien d'héritage. <b>Rien n'est vérifié à l'exécution</b> : descendre vers le mauvais type donne un pointeur faux.</td><td><code class="inline">static_cast&lt;int&gt;(3.9)</code> donne 3</td></tr>
+          <tr><td>reinterpret_cast&lt;T&gt;(x)</td><td>Relit les mêmes bits comme un autre type : pointeur vers entier et l'inverse, pointeur vers pointeur sans lien. <b>Aucune conversion de valeur</b> (<code class="inline">reinterpret_cast&lt;int&gt;(4.2f)</code> ne compile pas), aucune vérification à l'exécution. Il refuse de retirer un <code class="inline">const</code>, ou de ranger un pointeur dans un entier trop petit.</td><td><code class="inline">reinterpret_cast&lt;uintptr_t&gt;(ptr)</code></td></tr>
+          <tr><td>dynamic_cast&lt;T&gt;(x)</td><td>Vérifie <b>à l'exécution</b>, grâce au type réel de l'objet, qu'un pointeur ou une référence sur une classe de base désigne bien un <code class="inline">T</code>. Exige une classe <b>polymorphe</b> (au moins une fonction virtuelle). Échec : un pointeur donne <code class="inline">NULL</code>, une référence <b>lève</b> <code class="inline">std::bad_cast</code>.</td><td><code class="inline">dynamic_cast&lt;B *&gt;(basePtr)</code></td></tr>
+          <tr><td>const_cast&lt;T&gt;(x)</td><td>Ajoute ou retire <code class="inline">const</code> (ou <code class="inline">volatile</code>), rien d'autre : <code class="inline">const_cast&lt;long *&gt;</code> d'un <code class="inline">const int *</code> est refusé. Écrire dans un objet défini <code class="inline">const</code> reste un comportement indéfini, selon la norme.</td><td>Aucun exercice du module n'en a besoin</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:22px">Pourquoi ne pas rester au cast C ? Parce qu'il essaie tout : <code class="inline">static_cast</code>, puis <code class="inline">reinterpret_cast</code>, et il peut même retirer un <code class="inline">const</code>, sans rien dire et sans nom à chercher. Constaté avec clang et <code class="inline">-Wall -Wextra -Werror</code> : <code class="inline">(Data *)raw</code> (un entier lu comme pointeur) et <code class="inline">(char *)ptrConst</code> compilent sans un avertissement, et <code class="inline">(A *)p</code> sur un objet qui est en réalité un <code class="inline">B</code> renvoie un pointeur non nul, sans aucun contrôle.</p>
+
+    <p class="body">Voici le choix classique pour ce module. Le sujet ne l'impose pas : c'est la réponse que tu dois pouvoir argumenter.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Besoin</th><th>Cast habituel</th><th>Où dans le module</th></tr></thead>
+        <tbody>
+          <tr><td>Passer d'un type numérique à un autre (<code class="inline">double</code> vers <code class="inline">float</code>, <code class="inline">int</code> vers <code class="inline">char</code>…)</td><td><code class="inline">static_cast</code></td><td>ex00</td></tr>
+          <tr><td>Lire un pointeur comme un entier, et l'inverse</td><td><code class="inline">reinterpret_cast</code></td><td>ex01</td></tr>
+          <tr><td>Savoir si un <code class="inline">Base *</code> ou un <code class="inline">Base &amp;</code> désigne vraiment un <code class="inline">A</code>, un <code class="inline">B</code> ou un <code class="inline">C</code></td><td><code class="inline">dynamic_cast</code></td><td>ex02</td></tr>
+          <tr><td>Retirer un <code class="inline">const</code></td><td><code class="inline">const_cast</code></td><td>aucun exercice</td></tr>
+          <tr><td>Transformer une chaîne en nombre</td><td>Ce n'est pas un cast : on analyse du texte (<code class="inline">strtod</code>…)</td><td>ex00</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:22px">Ce que le compilateur refuse te montre la différence mieux qu'un long discours. Messages d'Apple clang 17 avec <code class="inline">-Wall -Wextra -Werror</code> ; le texte exact change d'un compilateur à l'autre.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tu écris</th><th>Le compilateur répond</th></tr></thead>
+        <tbody>
+          <tr><td>static_cast&lt;uintptr_t&gt;(ptr)</td><td>static_cast from 'Data *' to 'uintptr_t' (aka 'unsigned long') is not allowed</td></tr>
+          <tr><td>static_cast&lt;Data *&gt;(raw)</td><td>cannot cast from type 'uintptr_t' (aka 'unsigned long') to pointer type 'Data *'</td></tr>
+          <tr><td>static_cast&lt;B *&gt;(pa), avec A et B sans lien</td><td>static_cast from 'A *' to 'B *', which are not related by inheritance, is not allowed</td></tr>
+          <tr><td>reinterpret_cast&lt;unsigned int&gt;(ptr)</td><td>cast from pointer to smaller type 'unsigned int' loses information</td></tr>
+          <tr><td>dynamic_cast&lt;A *&gt;(b), avec un Base sans fonction virtuelle</td><td>'Base' is not polymorphic</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="editor" style="margin-top:18px">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">les quatre casts en une ligne</span></div>
+<pre><span class="fn">static_cast</span>&lt;<span class="ty">int</span>&gt;(<span class="nm">3.9</span>)             <span class="cm">// 3 : la partie décimale est coupée (-3.9 donne -3)</span>
+<span class="fn">static_cast</span>&lt;<span class="ty">char</span>&gt;(<span class="nm">65</span>)             <span class="cm">// 'A'</span>
+<span class="fn">static_cast</span>&lt;<span class="ty">char</span>&gt;(<span class="nm">321</span>)            <span class="cm">// 'A' aussi, sur cette machine : le cast ne signale aucun débordement</span>
+<span class="fn">reinterpret_cast</span>&lt;<span class="ty">uintptr_t</span>&gt;(ptr)  <span class="cm">// l'adresse, lue comme un entier</span>
+<span class="fn">dynamic_cast</span>&lt;<span class="ty">B</span> *&gt;(basePtr)       <span class="cm">// NULL si *basePtr n'est pas un B</span></pre>
+    </div>
+  </section>
+
+  <section id="ex00">
+    <div class="sec-head reveal"><span class="sec-num">04</span><h2>ex00 · <span class="accent">ScalarConverter</span></h2></div>
+    <p class="body">Ta classe reçoit une <b>chaîne</b> qui représente un littéral C++ dans sa forme la plus courante (p. 9), devine de quel type il s'agit, puis affiche sa valeur sous les quatre types scalaires. Elle ne stocke rien : une seule méthode statique, pas d'objet.</p>
+    <p class="body"><b>Fichiers à rendre (p. 9)</b> : <code class="inline">Makefile</code>, <code class="inline">ScalarConverter.hpp</code>, <code class="inline">ScalarConverter.cpp</code> et ton programme de test <code class="inline">main.cpp</code> (voir la note sur les noms, section précédente). Le sujet ne fixe pas le type du paramètre de <code class="inline">convert</code> : une <code class="inline">const std::string &amp;</code> est un choix simple.</p>
+
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">ScalarConverter.hpp</span></div>
+<pre><span class="k">#ifndef</span> SCALARCONVERTER_HPP
+<span class="k"># define</span> SCALARCONVERTER_HPP
+
+<span class="k"># include</span> <span class="st">&lt;string&gt;</span>
+
+<span class="k">class</span> <span class="ty">ScalarConverter</span>
+{
+	<span class="k">public</span>:
+		<span class="k">static</span> <span class="ty">void</span>	<span class="fn">convert</span>(<span class="k">const</span> std::string &amp;literal);
+
+	<span class="k">private</span>:
+		<span class="fn">ScalarConverter</span>();                                    <span class="cm">// les quatre membres canoniques sont privés :</span>
+		<span class="fn">ScalarConverter</span>(<span class="k">const</span> ScalarConverter &amp;other);        <span class="cm">// personne ne peut créer, copier</span>
+		ScalarConverter &amp;<span class="fn">operator=</span>(<span class="k">const</span> ScalarConverter &amp;other); <span class="cm">// ni détruire un ScalarConverter</span>
+		<span class="fn">~ScalarConverter</span>();
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+
+    <p class="body">Le travail se fait en trois temps. Le sujet les décrit ainsi (p. 11) : <b>détecter</b> le type du littéral, le <b>convertir</b> depuis la chaîne vers son vrai type, puis le convertir explicitement vers les trois autres et <b>afficher</b>.</p>
+
+    <p class="body"><b>1. Détecter le type.</b> Le sujet donne des exemples ; la façon de reconnaître chaque forme est à toi (ce tableau est un conseil). Fais les pseudo-littéraux en premier.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>Exemples du sujet</th><th>Comment le reconnaître</th></tr></thead>
+        <tbody>
+          <tr><td>pseudo-littéraux</td><td><code class="inline">-inff</code> <code class="inline">+inff</code> <code class="inline">nanf</code> (p. 9) ; <code class="inline">-inf</code> <code class="inline">+inf</code> <code class="inline">nan</code> (p. 10)</td><td>Comparaison exacte avec ces six chaînes, avant tout le reste.</td></tr>
+          <tr><td>char</td><td><code class="inline">'c'</code>, <code class="inline">'a'</code> (p. 9)</td><td>Trois caractères : une apostrophe, un caractère affichable, une apostrophe.</td></tr>
+          <tr><td>int</td><td><code class="inline">0</code>, <code class="inline">-42</code>, <code class="inline">42</code> (p. 9)</td><td>Un signe facultatif, puis uniquement des chiffres.</td></tr>
+          <tr><td>float</td><td><code class="inline">0.0f</code>, <code class="inline">-4.2f</code>, <code class="inline">4.2f</code> (p. 9)</td><td>Un signe facultatif, des chiffres, un seul point, des chiffres, puis <code class="inline">f</code>.</td></tr>
+          <tr><td>double</td><td><code class="inline">0.0</code>, <code class="inline">-4.2</code>, <code class="inline">4.2</code> (p. 10)</td><td>Comme le float, sans le <code class="inline">f</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top:14px">Sauf pour les char, seule la notation décimale est utilisée (p. 9) : ni exposant (<code class="inline">1e3</code>), ni hexadécimal (<code class="inline">0x10</code>). Et les caractères non affichables ne seront pas donnés en entrée (p. 9). Tout le reste est une entrée invalide : à toi de décider ce que tu affiches, mais jamais de planter.</p>
+
+    <p class="body"><b>2. Convertir.</b> Pour passer de la chaîne à un nombre, le sujet autorise « toute fonction » qui convertit une chaîne en <code class="inline">int</code>, <code class="inline">float</code> ou <code class="inline">double</code> (p. 9), comme <code class="inline">strtod</code>. Ce n'est pas un cast : c'est de l'analyse de texte, et c'est elle qui est piégeuse (voir les pièges). Ensuite, passer d'un type numérique à un autre est là où le cast intervient : <code class="inline">static_cast</code>. Mais un cast ne dit pas « impossible » : <b>c'est à toi de tester la plage avant de caster</b>. Le sujet demande un message quand la conversion n'a pas de sens ou déborde, et de penser aux en-têtes pour les limites numériques et les valeurs spéciales (p. 11).</p>
+
+    <p class="body"><b>3. Afficher.</b> Quatre lignes, dans cet ordre. Les mots <code class="inline">Non displayable</code> et <code class="inline">impossible</code> viennent des exemples du sujet (p. 11) ; le reste du tableau est le choix de ce cours.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ligne</th><th>Quand</th><th>Affichage</th></tr></thead>
+        <tbody>
+          <tr><td>char</td><td>valeur tronquée de 32 à 126</td><td>le caractère entre apostrophes : <code class="inline">'*'</code></td></tr>
+          <tr><td>char</td><td>valeur tronquée de 0 à 31, ou 127</td><td><code class="inline">Non displayable</code></td></tr>
+          <tr><td>char</td><td>nan, infini, ou hors de 0 à 127</td><td><code class="inline">impossible</code></td></tr>
+          <tr><td>int</td><td>valeur tronquée dans la plage d'un <code class="inline">int</code></td><td>le nombre : <code class="inline">42</code></td></tr>
+          <tr><td>int</td><td>nan, infini, ou hors plage</td><td><code class="inline">impossible</code></td></tr>
+          <tr><td>float</td><td>valeur finie</td><td>au moins une décimale, puis <code class="inline">f</code> : <code class="inline">0.0f</code>, <code class="inline">42.0f</code></td></tr>
+          <tr><td>float</td><td>nan ou infini</td><td><code class="inline">nanf</code> (exemple du sujet), <code class="inline">+inff</code>, <code class="inline">-inff</code></td></tr>
+          <tr><td>double</td><td>valeur finie</td><td>au moins une décimale : <code class="inline">0.0</code>, <code class="inline">42.0</code></td></tr>
+          <tr><td>double</td><td>nan ou infini</td><td><code class="inline">nan</code> (exemple du sujet), <code class="inline">+inf</code>, <code class="inline">-inf</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn"><span class="bulb">🔢</span><p><b>Les décimales, c'est toi qui les imposes.</b> Constaté avec clang en C++98 : <code class="inline">std::cout &lt;&lt; 42.0f</code> affiche <code class="inline">42</code> (pas <code class="inline">42.0</code>), <code class="inline">0.0f</code> affiche <code class="inline">0</code>, et <code class="inline">2147483648.0f</code> affiche <code class="inline">2.14748e+09</code>. Avec <code class="inline">std::fixed</code> et <code class="inline">std::setprecision(1)</code> (<code class="inline">&lt;iomanip&gt;</code>), on obtient bien <code class="inline">42.0</code>, <code class="inline">0.0</code> et <code class="inline">2147483648.0</code>, mais <code class="inline">3.14159</code> devient <code class="inline">3.1</code> et <code class="inline">4.25f</code> devient <code class="inline">4.2</code> : on perd des chiffres. Le sujet ne fixe que ses exemples ; la démo ci-dessous garde <b>le moins de décimales qui redonnent la même valeur, au moins une</b>. Et <code class="inline">std::cout</code> écrit <code class="inline">nan</code>, <code class="inline">inf</code> et <code class="inline">-inf</code> : le <code class="inline">f</code> de <code class="inline">nanf</code> et le <code class="inline">+</code> de <code class="inline">+inf</code> sont à toi.</p></div>
+
+    <p class="body" style="margin-top:22px">Essaie des littéraux : la démo applique ces règles et explique chaque <code class="inline">impossible</code>. Les exemples sont les cas de contrôle ; essaie aussi <code class="inline">42f</code> (invalide), <code class="inline">-0.0</code>, <code class="inline">16777217</code> et <code class="inline">4.2f</code> (regarde la note sous la sortie).</p>
+    <div class="demo" data-demo="cpp06-scalar-converter">
+      <div class="demo-static"><p class="body">Démo : un champ de saisie et des boutons d'exemples. Pour <code class="inline">0</code>, la démo affiche <code class="inline">char: Non displayable</code>, <code class="inline">int: 0</code>, <code class="inline">float: 0.0f</code>, <code class="inline">double: 0.0</code>. Pour <code class="inline">nan</code> : <code class="inline">char: impossible</code>, <code class="inline">int: impossible</code>, <code class="inline">float: nanf</code>, <code class="inline">double: nan</code>. Pour <code class="inline">42.0f</code> : <code class="inline">char: '*'</code>, <code class="inline">int: 42</code>, <code class="inline">float: 42.0f</code>, <code class="inline">double: 42.0</code>. Une entrée vide ou invalide donne un message clair.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Tape un littéral : la démo détecte son type, puis affiche les quatre lignes du sujet","inputLabel":"Littéral passé à ScalarConverter::convert (argv[1])","examplesLabel":"Exemples","formatNote":"Format choisi par la démo pour float et double : le moins de décimales qui redonnent la même valeur, au moins une. Le sujet ne fixe que ses exemples (p. 11) : Non displayable et impossible viennent de ces exemples.","emptyMsg":"Le champ est vide : tape un littéral (0, 42.0f, nan, 'c'…).","errorMsg":"Cette entrée a fait échouer la démo : essaie un autre littéral.","typeLine":"Type détecté : {type}","type_char":"char","type_int":"int","type_intBig":"entier qui dépasse un int","type_float":"float","type_double":"double","type_pseudo":"pseudo-littéral","type_invalid":"invalide","typeOverflow":"{type}, mais sa valeur dépasse les bornes du type : aucune conversion n'a de sens","invalidMsg":"« {lit} » n'est pas un littéral du sujet.","hintSpace":"Il y a une espace au début ou à la fin : elle fait partie de la chaîne (strtod, lui, ignorerait celle du début).","hintNoDot":"Un float s'écrit avec un point : 42.0f. En C++, 42f ne compile même pas.","hintNotDecimal":"Seule la notation décimale est utilisée (p. 9) : pas d'exposant (1e3) ni d'hexadécimal (0x10), même si strtod les accepte.","hintPseudo":"Les pseudo-littéraux du sujet sont exactement -inff, +inff, nanf, -inf, +inf et nan (p. 9-10) : pas inf, +nan, NaN…","hintQuote":"Un char s'écrit 'c' : un seul caractère affichable entre deux apostrophes.","hintGeneric":"Ce n'est ni un char ('c'), ni un int (42), ni un float (4.2f), ni un double (4.2), ni un pseudo-littéral. Un reste après le nombre (42abc) l'invalide aussi : avec strtod, c'est endptr qui le révèle.","whyCharNan":"char : nan et l'infini n'ont pas d'équivalent caractère, donc impossible.","whyCharRange":"char : la valeur tronquée n'est pas dans 0 à 127, donc impossible.","whyCharHidden":"char : les codes 0 à 31 et 127 ne s'affichent pas, donc Non displayable.","whyIntNan":"int : nan et l'infini n'ont pas d'équivalent entier, donc impossible.","whyIntRange":"int : la valeur tronquée ne tient pas dans un int (de -2147483648 à 2147483647), donc impossible.","whyFloatRange":"float : la valeur dépasse le plus grand float fini, donc impossible.","noteBigInt":"Cet entier ne tient pas dans un int : la ligne int est impossible, mais float et double affichent la valeur la plus proche.","noteBare":"Un seul caractère sans apostrophes est traité comme un char : le shell retire les apostrophes de ./convert 'c', qui reçoit alors juste c (le sujet donne 'c' comme exemple de littéral, p. 9).","noteNegZero":"-0.0 existe : le zéro négatif garde son signe à l'affichage.","noteWiden":"{lit} vaut en réalité {digits} quand on relit le float en double (15 chiffres) : un float n'est qu'une valeur approchée. La ligne double n'affiche que les chiffres dont le float est sûr.","noteLoss":"{lit} n'est pas représentable en float : la ligne float affiche le float le plus proche ({f})."}</script>
+    </div>
+
+    <p class="body" style="margin-top:22px"><b>Le résultat attendu.</b> Les trois exemples du sujet (p. 11), tels quels :</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">exemples du sujet (p. 11)</span></div>
+<pre><span class="cm">$ ./convert 0</span>
+char: Non displayable
+int: 0
+float: 0.0f
+double: 0.0
+<span class="cm">$ ./convert nan</span>
+char: impossible
+int: impossible
+float: nanf
+double: nan
+<span class="cm">$ ./convert 42.0f</span>
+char: '*'
+int: 42
+float: 42.0f
+double: 42.0</pre>
+    </div>
+    <p class="body" style="margin-top:14px">Des cas de plus, constatés avec un programme de référence compilé en C++98 (clang, macOS) qui suit les règles ci-dessus. Seuls les exemples du sujet sont imposés : ton format peut différer légèrement, pourvu que tu saches l'expliquer.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Entrée</th><th>char</th><th>int</th><th>float</th><th>double</th></tr></thead>
+        <tbody>
+          <tr><td><code class="inline">'c'</code></td><td><code class="inline">'c'</code></td><td><code class="inline">99</code></td><td><code class="inline">99.0f</code></td><td><code class="inline">99.0</code></td></tr>
+          <tr><td><code class="inline">-inff</code></td><td><code class="inline">impossible</code></td><td><code class="inline">impossible</code></td><td><code class="inline">-inff</code></td><td><code class="inline">-inf</code></td></tr>
+          <tr><td><code class="inline">+inf</code></td><td><code class="inline">impossible</code></td><td><code class="inline">impossible</code></td><td><code class="inline">+inff</code></td><td><code class="inline">+inf</code></td></tr>
+          <tr><td><code class="inline">2147483648</code></td><td><code class="inline">impossible</code></td><td><code class="inline">impossible</code></td><td><code class="inline">2147483648.0f</code></td><td><code class="inline">2147483648.0</code></td></tr>
+          <tr><td><code class="inline">-42</code></td><td><code class="inline">impossible</code></td><td><code class="inline">-42</code></td><td><code class="inline">-42.0f</code></td><td><code class="inline">-42.0</code></td></tr>
+          <tr><td><code class="inline">4.2f</code></td><td><code class="inline">Non displayable</code></td><td><code class="inline">4</code></td><td><code class="inline">4.2f</code></td><td><code class="inline">4.2</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><span class="bulb">🧪</span><p><b>Passer <code class="inline">'c'</code> dans le shell.</b> Le shell retire les apostrophes : <code class="inline">./convert 'c'</code> reçoit juste <code class="inline">c</code> (constaté). Pour que ton programme reçoive vraiment <code class="inline">'c'</code>, écris <code class="inline">./convert "'c'"</code>. Décide comment tu traites un caractère seul sans apostrophes, et sois prêt à l'expliquer.</p></div>
+  </section>
+
+  <section id="ex01">
+    <div class="sec-head reveal"><span class="sec-num">05</span><h2>ex01 · <span class="accent">Serializer</span></h2></div>
+    <p class="body">Un pointeur, c'est une <b>adresse</b>, donc un nombre. <code class="inline">uintptr_t</code> est un type d'entier non signé assez grand pour en contenir un. Ta classe a deux méthodes statiques : <code class="inline">serialize</code> lit l'adresse comme un entier, <code class="inline">deserialize</code> relit cet entier comme une adresse. <b>Rien n'est copié</b> : l'objet <code class="inline">Data</code> reste où il est.</p>
+    <p class="body"><b>Fichiers à rendre (p. 12)</b> : <code class="inline">Makefile</code>, <code class="inline">Serializer.hpp</code>, <code class="inline">Serializer.cpp</code>, <code class="inline">Data.hpp</code> (et <code class="inline">Data.cpp</code> si tu en as besoin) et <code class="inline">main.cpp</code>. Le sujet rappelle de ne pas oublier les fichiers de <code class="inline">Data</code>.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Serializer.hpp</span></div>
+<pre><span class="k">#ifndef</span> SERIALIZER_HPP
+<span class="k"># define</span> SERIALIZER_HPP
+
+<span class="k"># include</span> <span class="st">&lt;stdint.h&gt;</span>
+<span class="k"># include</span> <span class="st">"Data.hpp"</span>
+
+<span class="k">class</span> <span class="ty">Serializer</span>
+{
+	<span class="k">public</span>:
+		<span class="k">static</span> <span class="ty">uintptr_t</span>	<span class="fn">serialize</span>(Data *ptr);
+		<span class="k">static</span> Data			*<span class="fn">deserialize</span>(<span class="ty">uintptr_t</span> raw);
+
+	<span class="k">private</span>:
+		<span class="fn">Serializer</span>();
+		<span class="fn">Serializer</span>(<span class="k">const</span> Serializer &amp;other);
+		Serializer &amp;<span class="fn">operator=</span>(<span class="k">const</span> Serializer &amp;other);
+		<span class="fn">~Serializer</span>();
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Data.hpp</span></div>
+<pre><span class="k">#ifndef</span> DATA_HPP
+<span class="k"># define</span> DATA_HPP
+
+<span class="k"># include</span> <span class="st">&lt;string&gt;</span>
+
+<span class="k">struct</span> <span class="ty">Data</span>
+{
+	std::string	name;
+	<span class="ty">int</span>			value;
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+    <p class="body"><b>Le cast.</b> Le choix classique est <code class="inline">reinterpret_cast</code> dans les deux sens : tu ne <i>convertis</i> pas une valeur, tu relis une adresse. <code class="inline">static_cast</code> est refusé pour ça, comme on l'a vu dans la section précédente. Pour <code class="inline">uintptr_t</code>, inclus <code class="inline">&lt;stdint.h&gt;</code> : il compile avec <code class="inline">-std=c++98</code>. <code class="inline">&lt;cstdint&gt;</code> est du C++11 ; clang sous macOS l'accepte aussi en mode C++98 (constaté), mais à vérifier avec le compilateur de ton école.</p>
+    <p class="body"><b>Le test (p. 12).</b> Crée un <code class="inline">Data</code> avec des attributs, passe son adresse à <code class="inline">serialize</code>, donne le résultat à <code class="inline">deserialize</code>, puis vérifie que le pointeur obtenu est <b>égal</b> à l'original, avec <code class="inline">==</code> sur les deux <code class="inline">Data *</code>. Affiche aussi l'entier en décimal et en hexadécimal : c'est parlant en défense.</p>
+    <div class="callout"><span class="bulb">🎲</span><p><b>Une vraie adresse n'est jamais la même.</b> Constaté sur macOS : deux exécutions du même programme affichent deux adresses de pile différentes (<code class="inline">0x16d216558</code> puis <code class="inline">0x16b2e2558</code>). Ne cherche donc pas à comparer ton affichage à une valeur fixe. Sur cette machine, <code class="inline">sizeof(uintptr_t)</code> et <code class="inline">sizeof(void *)</code> valent 8, <code class="inline">sizeof(unsigned int)</code> vaut 4 : ranger une adresse dans un <code class="inline">unsigned int</code> est refusé (voir le tableau précédent).</p></div>
+    <p class="body">La démo utilise une adresse <b>simulée</b>, pour avoir toujours les mêmes chiffres. Appuie sur <code class="inline">serialize(ptr)</code>, puis <code class="inline">deserialize(raw)</code> : le pointeur est le même. Ajoute 1 à l'entier : le pointeur change, et le verdict devient faux.</p>
+    <div class="demo" data-demo="cpp06-serializer">
+      <div class="demo-static"><p class="body">Démo : un objet <code class="inline">Data</code> fictif à l'adresse simulée <code class="inline">0x7ffee3b2a1c0</code>. <code class="inline">serialize(ptr)</code> renvoie l'entier <code class="inline">140732718555584</code> (en hexadécimal <code class="inline">0x7ffee3b2a1c0</code>) ; <code class="inline">deserialize(raw)</code> rend la même adresse, donc <code class="inline">ptr == deserialize(serialize(ptr))</code> est vrai. Avec l'entier plus 1, soit <code class="inline">140732718555585</code>, on obtient <code class="inline">0x7ffee3b2a1c1</code> : un autre pointeur, que l'on ne doit jamais déréférencer.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Un pointeur devient un entier, puis redevient un pointeur","simNote":"L'adresse ci-dessous est simulée, pour que la démo donne toujours les mêmes chiffres : une vraie adresse change à chaque exécution du programme.","objHead":"Data *ptr = {addr};   // l'objet Data est à cette adresse","nameLabel":"Champ name de Data","valueLabel":"Champ value de Data","dataView":"Data { name = \"{name}\", value = {value} }","serialize":"serialize(ptr)","deserialize":"deserialize(raw)","reset":"Recommencer","rowPtr":"ptr (Data *)","rowDec":"raw en décimal (uintptr_t)","rowHex":"raw en hexadécimal","rowBack":"deserialize(raw)","none":"—","editLabel":"Modifier l'entier raw (décimal, ou hexadécimal avec 0x)","errEmpty":"Le champ est vide : écris un entier en décimal ou en hexadécimal (0x…).","errFormat":"Ce n'est pas un entier : écris des chiffres, ou 0x suivi de chiffres hexadécimaux.","errRange":"Cet entier est trop grand pour un uintptr_t de 64 bits (maximum 18446744073709551615).","idle":"Appuie sur serialize(ptr) : l'adresse de l'objet va être lue comme un entier.","needFirst":"Rien à désérialiser pour l'instant : appelle d'abord serialize(ptr), ou écris un entier.","msgSerialized":"serialize(ptr) renvoie {dec}, soit {hex}. Rien n'est copié : c'est l'adresse de l'objet, écrite comme un nombre. Modifier name ou value ne change pas cet entier.","msgSame":"✓ égal : deserialize(raw) renvoie {hex}, et ptr == deserialize(serialize(ptr)) est vrai. C'est le même objet, pas une copie.","msgDiff":"✗ différent : ptr vaut {ptr} mais deserialize(raw) renvoie {back}. Ce pointeur ne désigne plus l'objet Data.","derefOk":"Lu à travers le pointeur retrouvé : name = \"{name}\", value = {value}.","derefNever":"Ne déréférence JAMAIS ce pointeur : l'adresse ne désigne pas un objet Data, le comportement est indéfini.","wrapNote":"uintptr_t est non signé : hors de ses bornes, il repart de l'autre côté (0 - 1 donne 18446744073709551615 sur 64 bits).","nullNote":"L'entier 0 donne le pointeur nul (NULL)."}</script>
+    </div>
+  </section>
+
+  <section id="ex02">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>ex02 · <span class="accent">Identify real type</span></h2></div>
+    <p class="body">Tu as un pointeur (ou une référence) sur <code class="inline">Base</code>, mais l'objet peut être un <code class="inline">A</code>, un <code class="inline">B</code> ou un <code class="inline">C</code>. Comment savoir lequel, <b>sans</b> <code class="inline">typeid</code> ? En demandant à <code class="inline">dynamic_cast</code> : il compare le vrai type de l'objet à celui que tu proposes, et te dit oui ou non à l'exécution.</p>
+    <p class="body"><b>Fichiers à rendre (p. 13)</b> : <code class="inline">Makefile</code>, <code class="inline">Base.hpp</code> et <code class="inline">Base.cpp</code>, <code class="inline">A.hpp</code>, <code class="inline">B.hpp</code>, <code class="inline">C.hpp</code>, un fichier pour <code class="inline">generate</code> et <code class="inline">identify</code> (à toi de le nommer), et <code class="inline">main.cpp</code>. Pourquoi un <code class="inline">Base.cpp</code> ? Parce qu'un corps de fonction dans un header, même un simple <code class="inline">{}</code> après le destructeur, est une implémentation de fonction dans un header : le sujet met 0 (p. 4). Ne prends pas ce risque.</p>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Base.hpp</span></div>
+<pre><span class="k">#ifndef</span> BASE_HPP
+<span class="k"># define</span> BASE_HPP
+
+<span class="k">class</span> <span class="ty">Base</span>
+{
+	<span class="k">public</span>:
+		<span class="k">virtual</span> <span class="fn">~Base</span>();   <span class="cm">// le seul membre : public et virtuel (p. 13)</span>
+};
+
+<span class="k">#endif</span></pre>
+    </div>
+    <div class="editor">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">A.hpp</span></div>
+<pre><span class="k">#ifndef</span> A_HPP
+<span class="k"># define</span> A_HPP
+
+<span class="k"># include</span> <span class="st">"Base.hpp"</span>
+
+<span class="k">class</span> <span class="ty">A</span> : <span class="k">public</span> Base {};   <span class="cm">// vide : B et C sont identiques</span>
+
+<span class="k">#endif</span></pre>
+    </div>
+    <p class="body"><b>Pourquoi le destructeur virtuel ?</b> Parce que <code class="inline">dynamic_cast</code> n'accepte que du polymorphe : une classe avec au moins une fonction virtuelle. Sans <code class="inline">virtual</code>, le compilateur répond « 'Base' is not polymorphic » (constaté). Et détruire un <code class="inline">A</code> à travers un <code class="inline">Base *</code> sans destructeur virtuel est un comportement indéfini.</p>
+    <p class="body"><b><code class="inline">generate</code>.</b> Elle crée au hasard un <code class="inline">A</code>, un <code class="inline">B</code> ou un <code class="inline">C</code> avec <code class="inline">new</code> et le rend comme <code class="inline">Base *</code> ; le sujet te laisse libre du tirage au sort (p. 13). Qui fait le <code class="inline">delete</code> ? Celui qui a appelé <code class="inline">generate</code>. Initialise le générateur <b>une seule fois</b>, dans <code class="inline">main</code> (voir les pièges).</p>
+    <p class="body"><b><code class="inline">identify(Base *p)</code>.</b> Essaie un <code class="inline">dynamic_cast</code> vers chaque type : un pointeur qui n'est pas du bon type donne <code class="inline">NULL</code>, le premier résultat non nul te donne la réponse.</p>
+    <p class="body"><b><code class="inline">identify(Base &amp;p)</code>.</b> Même idée, mais le sujet interdit les pointeurs dans cette fonction (p. 13). Une référence ne peut pas valoir « rien » : un <code class="inline">dynamic_cast</code> vers une référence qui échoue ne renvoie pas <code class="inline">NULL</code>, il <b>lève une exception</b> (<code class="inline">std::bad_cast</code>, dont <code class="inline">what()</code> donne <code class="inline">std::bad_cast</code> ici). Tu as donc besoin d'un <code class="inline">try</code> / <code class="inline">catch</code>. Le piège : <code class="inline">std::bad_cast</code> est déclarée dans <code class="inline">&lt;typeinfo&gt;</code>, l'en-tête que le sujet t'interdit d'inclure (p. 13). Attrape plutôt <code class="inline">std::exception</code>, qui vient de <code class="inline">&lt;exception&gt;</code> : constaté, ça compile et ça marche sans jamais inclure <code class="inline">&lt;typeinfo&gt;</code>.</p>
+    <p class="body">Ce que fait la démo : une chaîne d'essais, A d'abord, puis B, puis C, arrêtée au premier succès. Pour un objet de type <code class="inline">A</code>, un seul essai suffit ; pour un <code class="inline">C</code>, deux échecs précèdent le succès.</p>
+    <div class="demo" data-demo="cpp06-identify">
+      <div class="demo-static"><p class="body">Démo : un objet dont le type réel est caché. Pour un objet de type <code class="inline">B</code> : version pointeur, <code class="inline">dynamic_cast&lt;A *&gt;</code> renvoie <code class="inline">NULL</code>, <code class="inline">dynamic_cast&lt;B *&gt;</code> renvoie un pointeur valide et la fonction affiche <code class="inline">B</code> ; version référence, <code class="inline">dynamic_cast&lt;A &amp;&gt;</code> lève <code class="inline">std::bad_cast</code>, <code class="inline">dynamic_cast&lt;B &amp;&gt;</code> réussit et la fonction affiche <code class="inline">B</code>. Pour <code class="inline">A</code>, le premier essai réussit ; pour <code class="inline">C</code>, les deux premiers échouent.</p></div>
+      <div class="demo-mount"></div>
+      <script type="application/json" class="demo-i18n">{"title":"Quel est le vrai type de l'objet ? Suis la chaîne de dynamic_cast","typeLabel":"Type réel de l'objet (caché au code)","random":"au hasard","create":"Créer l'objet","step":"Essai suivant","run":"Tout exécuter","created":"Objet créé : p est un Base *, son type réel est caché. Lance les essais.","createdRandom":"Objet créé avec un type tiré au hasard et caché. Lance les essais.","idle":"Appuie sur « Essai suivant » : chaque colonne tente un dynamic_cast vers A, puis B, puis C.","objHidden":"Base *p = generate();   // type réel de *p : caché","objRevealed":"Base *p = generate();   // type réel de *p : {type}","ptrTitle":"Version pointeur","refTitle":"Version référence","ptrOk":"✓ pointeur non NULL","ptrNull":"✗ renvoie NULL","refOk":"✓ réussit","refThrow":"✗ lève std::bad_cast","ptrOkShort":"renvoie un pointeur non NULL","ptrNullShort":"renvoie NULL","refOkShort":"réussit","refThrowShort":"lève std::bad_cast (rattrapée par catch)","waiting":"pas encore essayé","skipped":"non essayé : la chaîne s'est arrêtée avant","prints":"affiche : {type}","stepMsg":"Essai {n} : {ptrCast} {ptrRes} ; {refCast} {refRes}.","foundMsg":"Le premier essai qui réussit identifie l'objet : {type}."}</script>
+    </div>
+    <div class="callout"><span class="bulb">❓</span><p><b>Et un <code class="inline">Base</code> tout nu ?</b> <code class="inline">generate</code> ne le produit jamais, et le sujet ne demande que <code class="inline">A</code>, <code class="inline">B</code> ou <code class="inline">C</code> (p. 13). Mais rien ne t'empêche d'appeler <code class="inline">identify</code> sur un <code class="inline">new Base</code> : constaté, les trois essais échouent. Prévois ce que tes fonctions font dans ce cas (un message, ou rien), pour ne jamais être surpris en défense.</p></div>
+  </section>
+
+  <section id="steps">
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Étape par <span class="accent">étape</span></h2></div>
+    <div class="steps">
+      <div class="step on"><span class="n">1</span><span class="txt"><b>Lis le module en entier.</b> Le sujet le demande lui-même (p. 4). Puis, avant de coder, note pour chaque exercice <b>le cast choisi et une phrase pour le justifier</b> : tu en auras besoin en défense (p. 6).</span></div>
+      <div class="step on"><span class="n">2</span><span class="txt"><b>ex00 : la coquille.</b> <code class="inline">ScalarConverter.hpp</code> avec ses quatre membres privés, un <code class="inline">.cpp</code> vide, un <code class="inline">main</code>, un <code class="inline">Makefile</code> avec les flags du sujet. Vérifie que <code class="inline">ScalarConverter s;</code> ne compile pas.</span></div>
+      <div class="step on"><span class="n">3</span><span class="txt"><b>ex00 : la détection.</b> Écris la fonction qui devine le type, et teste-la sur les trois exemples du sujet, les six pseudo-littéraux, puis des entrées invalides (<code class="inline">42f</code>, <code class="inline">'a</code>, une chaîne vide).</span></div>
+      <div class="step on"><span class="n">4</span><span class="txt"><b>ex00 : les conversions.</b> Teste la plage <b>avant</b> chaque <code class="inline">static_cast</code>, puis ajoute l'affichage avec ses décimales. Garde une liste d'entrées avec la sortie attendue (par exemple celles du tableau de la section ex00) et rejoue-la après chaque changement.</span></div>
+      <div class="step on"><span class="n">5</span><span class="txt"><b>ex01.</b> <code class="inline">Data</code> avec des attributs, <code class="inline">Serializer</code> avec ses deux méthodes statiques, puis le test : égalité des pointeurs, entier affiché en décimal et en hexadécimal, programme lancé deux fois pour voir l'adresse changer.</span></div>
+      <div class="step on"><span class="n">6</span><span class="txt"><b>ex02.</b> <code class="inline">Base</code>, <code class="inline">A</code>, <code class="inline">B</code>, <code class="inline">C</code>, puis <code class="inline">generate</code> avec un seul <code class="inline">srand</code> dans <code class="inline">main</code>, <code class="inline">identify(Base *)</code>, et enfin <code class="inline">identify(Base &amp;)</code>. Teste sur beaucoup d'objets tirés au hasard, et vérifie qu'aucun n'est perdu (<code class="inline">delete</code> à chaque tour).</span></div>
+      <div class="step on"><span class="n">7</span><span class="txt"><b>Relis les interdits.</b> Pas de <code class="inline">*printf</code>, de <code class="inline">malloc</code> ni de <code class="inline">free</code>, pas de C++11, pas de <code class="inline">using namespace</code> ni de <code class="inline">friend</code>, rien d'implémenté dans un header, des gardes d'inclusion partout, pas de <code class="inline">typeinfo</code> en ex02 (p. 3, 4 et 13). Compile avec <code class="inline">-Wall -Wextra -Werror -std=c++98</code>.</span></div>
+    </div>
+  </section>
+
+  <section id="pitfalls">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Pièges <span class="accent">classiques</span></h2></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">nanf</code> ou <code class="inline">nan</code> ?</b> Les six pseudo-littéraux sont des chaînes exactes (p. 9-10), à reconnaître avant tout le reste. À l'affichage, <code class="inline">std::cout</code> écrit <code class="inline">nan</code>, <code class="inline">inf</code> et <code class="inline">-inf</code> (constaté) : le <code class="inline">f</code> de la ligne float et le <code class="inline">+</code> sont à toi. Pour fabriquer ces valeurs, <code class="inline">&lt;limits&gt;</code> fournit <code class="inline">quiet_NaN()</code> et <code class="inline">infinity()</code> dans <code class="inline">std::numeric_limits&lt;double&gt;</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">-0.0</code>.</b> Le zéro négatif existe. Avec <code class="inline">std::fixed</code> et <code class="inline">std::setprecision(1)</code>, <code class="inline">-0.0</code> s'affiche <code class="inline">-0.0</code> (constaté) ; sans <code class="inline">fixed</code>, <code class="inline">-0</code>. Le sujet ne le teste pas : décide du résultat de tes quatre lignes (ici : <code class="inline">Non displayable</code>, <code class="inline">0</code>, <code class="inline">-0.0f</code>, <code class="inline">-0.0</code>) et reste cohérent.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">42f</code> n'est pas <code class="inline">42.0f</code>.</b> Un float s'écrit avec un point. En C++, <code class="inline">float f = 42f;</code> ne compile même pas (clang : « invalid digit 'f' in decimal constant »). Ton détecteur doit refuser <code class="inline">42f</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Une apostrophe mal fermée.</b> <code class="inline">'a</code>, <code class="inline">'ab'</code> et <code class="inline">''</code> ne sont pas des char : refuse-les. Et le shell mange les apostrophes (voir la section ex00) : décide ce que ton programme fait d'un caractère seul comme <code class="inline">c</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">strtod</code> accepte beaucoup plus que le sujet.</b> Constaté : <code class="inline">strtod("42abc")</code> renvoie 42 et seul <code class="inline">endptr</code> pointe vers <code class="inline">abc</code> ; une espace de tête est acceptée ; <code class="inline">"0x10"</code> donne 16, <code class="inline">"1e3"</code> donne 1000 ; <code class="inline">"inf"</code>, <code class="inline">"infinity"</code> et <code class="inline">"NaN"</code> passent aussi. Valide donc la <b>forme</b> de la chaîne avant, et vérifie <code class="inline">endptr</code>. <code class="inline">atoi("abc")</code> renvoie 0, comme <code class="inline">atoi("0")</code> : impossible de distinguer l'erreur. Enfin <code class="inline">std::stod</code>, <code class="inline">std::stof</code> et <code class="inline">std::stoi</code> sont du C++11, interdit (p. 3) : le clang de macOS les compile pourtant avec <code class="inline">-std=c++98</code> (constaté), donc ne te fie pas à ton compilateur local ; à vérifier avec celui de ton école.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Un <code class="inline">int</code> hors plage.</b> Convertir un <code class="inline">double</code> dont la valeur tronquée ne tient pas dans un <code class="inline">int</code> est un comportement indéfini selon la norme. Le résultat n'est pas garanti : <code class="inline">static_cast&lt;int&gt;(3e10)</code> peut donner 2147483647, une autre valeur, ou changer selon la machine, le compilateur et l'optimisation. <b>Teste la plage avant de caster</b>, avec les bornes de <code class="inline">&lt;climits&gt;</code> ou de <code class="inline">&lt;limits&gt;</code>. Même logique pour <code class="inline">char</code> : <code class="inline">static_cast&lt;char&gt;(321)</code> donne <code class="inline">'A'</code> (constaté), sans prévenir.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Les caractères non affichables.</b> Les codes 0 à 31 et 127 donnent <code class="inline">Non displayable</code>. <code class="inline">std::isprint</code> (<code class="inline">&lt;cctype&gt;</code>) accepte les codes de 32 à 126, soit 95 caractères (constaté, locale « C »), mais attend une valeur entre 0 et 255 : ne lui passe pas un <code class="inline">char</code> négatif. Pour 128 à 255, <code class="inline">char</code> est signé ici (<code class="inline">CHAR_MIN</code> vaut -128) et <code class="inline">static_cast&lt;char&gt;(200)</code> vaut -56 : le sujet ne tranche pas, ce cours affiche <code class="inline">impossible</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>« Non instanciable » = les quatre membres privés.</b> Un constructeur par défaut privé suffit à empêcher <code class="inline">ScalarConverter s;</code>, mais l'OCF demande aussi le constructeur de copie, l'opérateur d'affectation et le destructeur : déclare-les tous les quatre privés. Constaté : le compilateur répond « calling a private constructor of class 'ScalarConverter' » puis « variable of type 'ScalarConverter' has private destructor ». Même chose pour <code class="inline">Serializer</code>.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Le mauvais cast en défense.</b> <code class="inline">reinterpret_cast</code> pour passer d'un <code class="inline">float</code> à un <code class="inline">int</code> : refusé, il ne convertit pas les valeurs. <code class="inline">static_cast</code> pour un pointeur vers un entier : refusé. Un cast C partout : ça compile, mais tu n'as pas choisi. Prépare une phrase par exercice, comme à l'étape 1.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Comparer les pointeurs, pas les contenus.</b> Le test d'ex01 demande que le pointeur retrouvé soit égal à l'original (p. 12) : <code class="inline">==</code> sur deux <code class="inline">Data *</code>, pas une comparaison des champs. Si tu stockes l'adresse dans un type trop petit (<code class="inline">unsigned int</code>), le compilateur refuse ; <code class="inline">uintptr_t</code> vient de <code class="inline">&lt;stdint.h&gt;</code>. Et n'écris jamais une adresse en dur dans ton test : elle change à chaque exécution.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">identify(Base &amp;)</code> sans pointeur ni <code class="inline">typeinfo</code>.</b> Ne prends pas l'adresse de la référence : le sujet l'interdit (p. 13). Un <code class="inline">dynamic_cast</code> sur une référence qui échoue lève une exception : il te faut un <code class="inline">try</code> / <code class="inline">catch</code>. N'écris pas <code class="inline">typeid</code> : clang répond « you need to include &lt;typeinfo&gt; before using the 'typeid' operator » (constaté), et le sujet l'interdit. Pour attraper l'exception sans <code class="inline">&lt;typeinfo&gt;</code>, utilise <code class="inline">std::exception</code> (<code class="inline">&lt;exception&gt;</code>). Avec libc++ (clang, macOS), même <code class="inline">catch (const std::bad_cast &amp;)</code> compile avec seulement <code class="inline">&lt;exception&gt;</code> (constaté) : ne compte pas dessus ailleurs.</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b>Le <code class="inline">virtual</code> oublié sur <code class="inline">~Base</code>.</b> Sans fonction virtuelle, <code class="inline">dynamic_cast</code> ne compile plus (« 'Base' is not polymorphic »), et supprimer un objet dérivé via un <code class="inline">Base *</code> devient un comportement indéfini. N'écris pas non plus le corps du destructeur dans le header (p. 4).</p></div>
+
+    <div class="callout warn"><span class="bulb">⚠️</span><p><b><code class="inline">srand</code> dans <code class="inline">generate</code>.</b> Si tu initialises le générateur à chaque appel avec <code class="inline">time(NULL)</code>, tous les objets créés pendant la même seconde sont du même type : constaté, douze appels de suite ont tous donné le même type (<code class="inline">C</code>). Appelle <code class="inline">srand</code> une seule fois, dans <code class="inline">main</code>.</p></div>
+  </section>
+
+  <section id="how">
+    <div class="sec-head reveal"><span class="sec-num">09</span><h2>Comment je <span class="accent">l'ai fait</span></h2></div>
+    <div class="how"><p class="body">J'ai gardé les trois exercices simples. Pour <code class="inline">ScalarConverter</code>, les quatre membres canoniques sont privés. Une fonction détecte le type du littéral à la main, pseudo-littéraux d'abord, puis char, int, float et double. La valeur passe ensuite une seule fois par un <code class="inline">double</code>, et chaque ligne de sortie teste sa plage avant d'utiliser <code class="inline">static_cast</code>. Je mets une seule décimale quand le nombre est entier, sinon la précision par défaut. <code class="inline">Serializer</code> n'a que deux méthodes statiques en <code class="inline">reinterpret_cast</code>, essayées sur un <code class="inline">Data</code> de la pile puis du tas. Pour l'exercice 02, la version pointeur enchaîne les <code class="inline">dynamic_cast</code> et regarde s'ils renvoient <code class="inline">NULL</code>, tandis que la version référence les essaie dans des blocs <code class="inline">try</code> qui attrapent <code class="inline">std::exception</code>, sans jamais inclure <code class="inline">&lt;typeinfo&gt;</code>. J'ai aussi testé avec un <code class="inline">Base</code> nu.</p></div>
+  </section>
+
+  <section id="recap">
+    <div class="cheat">
+      <h2>📌 À retenir (défense d'éval)</h2>
+      <ul>
+        <li><span class="chk">✓</span><div><b>Un cast précis par exercice (p. 6).</b> Sache dire lequel et pourquoi : <code class="inline">static_cast</code> pour les conversions numériques, <code class="inline">reinterpret_cast</code> pour pointeur et entier, <code class="inline">dynamic_cast</code> pour le vrai type.</div></li>
+        <li><span class="chk">✓</span><div><b>Pourquoi pas le cast C ?</b> Il mélange tout, retire <code class="inline">const</code> sans rien dire et ne se cherche pas. Les casts C++ disent l'intention, et le compilateur refuse le non-sens.</div></li>
+        <li><span class="chk">✓</span><div><b>Ce que vérifie chaque cast.</b> <code class="inline">static_cast</code> : types liés, à la compilation. <code class="inline">reinterpret_cast</code> : presque rien. <code class="inline">dynamic_cast</code> : le type réel, à l'exécution, sur du polymorphe. <code class="inline">const_cast</code> : seulement <code class="inline">const</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>ex00.</b> Détecter, convertir, afficher. Un cast ne prévient pas du débordement : teste la plage avant. <code class="inline">impossible</code> (nan, infini, hors plage) et <code class="inline">Non displayable</code> (0 à 31 et 127) sont deux messages différents.</div></li>
+        <li><span class="chk">✓</span><div><b>Les pseudo-littéraux.</b> <code class="inline">-inff +inff nanf -inf +inf nan</code>, six chaînes exactes. Au moins une décimale : <code class="inline">0.0f</code>, <code class="inline">42.0</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Non instanciable.</b> Les quatre membres canoniques en <code class="inline">private</code> ; <code class="inline">ScalarConverter s;</code> ne doit pas compiler.</div></li>
+        <li><span class="chk">✓</span><div><b>ex01.</b> <code class="inline">reinterpret_cast</code> dans les deux sens avec <code class="inline">uintptr_t</code> (<code class="inline">&lt;stdint.h&gt;</code>) ; le test compare deux pointeurs avec <code class="inline">==</code>. Rien n'est copié.</div></li>
+        <li><span class="chk">✓</span><div><b>ex02.</b> Destructeur virtuel public dans <code class="inline">Base</code>, défini dans un <code class="inline">.cpp</code>. Pointeur : <code class="inline">dynamic_cast</code> renvoie <code class="inline">NULL</code>. Référence : il lève <code class="inline">std::bad_cast</code>, qu'on attrape via <code class="inline">std::exception</code>. Ni <code class="inline">typeinfo</code>, ni pointeur dans <code class="inline">identify(Base &amp;)</code>.</div></li>
+        <li><span class="chk">✓</span><div><b>Règles générales.</b> C++98, <code class="inline">-Wall -Wextra -Werror</code>, pas de <code class="inline">*printf</code> ni de <code class="inline">*alloc</code>, pas de <code class="inline">using namespace</code> ni de <code class="inline">friend</code>, des gardes d'inclusion, rien d'implémenté dans un header, aucune fuite.</div></li>
+        <li><span class="chk">✓</span><div><b>Prépare la petite modification (p. 14).</b> Elle peut porter sur n'importe quelle ligne de ton code : sache refaire un test ou changer un affichage vite.</div></li>
+      </ul>
+    </div>
+  </section>
+
+</div>
