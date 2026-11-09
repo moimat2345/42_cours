@@ -141,6 +141,21 @@
     .seg{flex-direction:column}.seg button{border-radius:11px;border-bottom:1px solid var(--border)}
     pre{font-size:.74rem}
   }
+
+  /* ex04 simulator */
+  .sed{border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;background:var(--surface);margin-top:14px}
+  .sed-top{padding:18px 20px;border-bottom:1px solid var(--border)}
+  .sed-top p{color:var(--muted);font-size:.88rem;font-weight:300}
+  .sed-form{display:grid;gap:8px;padding:16px 20px;border-bottom:1px solid var(--border)}
+  .sed-form label{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+  .sed-form textarea,.sed-form input{font-family:var(--mono);font-size:.84rem;background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:9px 12px;width:100%;min-width:0}
+  .sed-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .sed-row>div{display:grid;gap:8px;min-width:0}
+  .sed-out{padding:16px 20px}
+  .sed-out pre{margin:8px 0 12px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:.84rem;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;min-height:2.4em}
+  .sed-info{font-family:var(--mono);font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+  .sed-info.good{color:var(--stack)} .sed-info.bad{color:var(--err)}
+  @media (max-width:520px){.sed-row{grid-template-columns:1fr}}
 </style>
 <header class="hero">
   <span class="kicker"><span class="dot"></span>C++ — Module 01</span>
@@ -352,25 +367,33 @@
     </div>
   </section>
 
-  <!-- 08 FILE STREAMS -->
-  <section>
-    <div class="sec-head reveal"><span class="sec-num">08</span><h2>C++ <span class="accent">file streams</span></h2></div>
-    <p class="body reveal">ex04 forbids C functions (<code class="inline">fopen</code>, <code class="inline">read</code>…) and <code class="inline">std::string::replace</code>. You use the <b>streams</b>: <code class="inline">std::ifstream</code> (read), <code class="inline">std::ofstream</code> (write), <code class="inline">std::stringstream</code> (load everything into memory), and you replace by hand with <code class="inline">find</code> + <code class="inline">substr</code>.</p>
+  <!-- 08 EX04 -->
+  <section id="ex04">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>ex04: <span class="accent">Sed is for losers</span></h2></div>
+    <p class="body reveal"><b>What the subject asks (p. 13).</b> A program that takes three parameters, in this order: a filename, then two strings <code class="inline">s1</code> and <code class="inline">s2</code>. It opens the file and copies its content into a new file <code class="inline">&lt;filename&gt;.replace</code>, replacing every occurrence of <code class="inline">s1</code> with <code class="inline">s2</code>. Files to submit: <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>.</p>
+    <p class="body reveal"><b>Forbidden.</b> <code class="inline">std::string::replace</code>, and the C file manipulation functions (<code class="inline">fopen</code>, <code class="inline">read</code>…): the subject calls that cheating. All the other member functions of <code class="inline">std::string</code> are allowed. You must handle unexpected inputs and errors, and turn in your own tests.</p>
+    <p class="body reveal">So you use <b>streams</b>: <code class="inline">std::ifstream</code> (read), <code class="inline">std::ofstream</code> (write), <code class="inline">std::stringstream</code> (load everything into memory), and you replace by hand with <code class="inline">find</code> + <code class="inline">substr</code>.</p>
     <div class="editor reveal">
       <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">FileReplacer.cpp — the idea</span></div>
-<pre><code><span class="ty">std::ifstream</span>  inFile(_filename.<span class="fn">c_str</span>());   <span class="cm">// open for reading</span>
-<span class="k">if</span> (!inFile.<span class="fn">is_open</span>()) <span class="cm">/* handle the error */</span>;
+    <p class="body reveal" style="margin-top:16px"><b>Cases to test (advice, not subject rules).</b> Wrong number of arguments; missing or unreadable file; <code class="inline">.replace</code> cannot be created; empty file; empty <code class="inline">s1</code> (<code class="inline">find("", pos)</code> always returns <code class="inline">pos</code>: the loop never advances, so reject this case before looping); <code class="inline">s1</code> equal to <code class="inline">s2</code>; <code class="inline">s2</code> that contains <code class="inline">s1</code> (you do not rescan what you just wrote); overlapping occurrences ("aaa", <code class="inline">s1 = aa</code>, <code class="inline">s2 = b</code> gives "ba"); last line without a trailing newline.</p>
 
-<span class="ty">std::stringstream</span> buffer;
-buffer &lt;&lt; inFile.<span class="fn">rdbuf</span>();                <span class="cm">// swallow the whole file at once</span>
-<span class="ty">std::string</span> content = buffer.<span class="fn">str</span>();
-
-<span class="cm">// replace s1 with s2 WITHOUT std::string::replace :</span>
-<span class="k">while</span> ((found = content.<span class="fn">find</span>(_s1, pos)) != <span class="ty">std::string</span>::npos) {
-    result += content.<span class="fn">substr</span>(pos, found - pos);
-    result += _s2;
-    pos = found + _s1.<span class="fn">length</span>();
-}</code></pre>
+    <div class="sed reveal">
+      <div class="sed-top"><p>Simulator of <code class="inline">./replace file s1 s2</code>: the <code class="inline">find</code> + <code class="inline">substr</code> loop above, applied to the content you type.</p></div>
+      <div class="sed-form">
+        <label for="sedContent">File content</label>
+        <textarea id="sedContent" rows="3" spellcheck="false">a cat sees a cat
+the cat sleeps</textarea>
+        <div class="sed-row">
+          <div><label for="sedS1">s1 (to find)</label><input id="sedS1" type="text" value="cat" autocomplete="off" spellcheck="false"></div>
+          <div><label for="sedS2">s2 (replacement)</label><input id="sedS2" type="text" value="dog" autocomplete="off" spellcheck="false"></div>
+        </div>
+      </div>
+      <div class="sed-out">
+        <span class="sed-info">Content of &lt;filename&gt;.replace</span>
+        <pre id="sedResult" role="group" aria-label="Content of &lt;filename&gt;.replace" tabindex="0">a dog sees a dog
+the dog sleeps</pre>
+        <div id="sedInfo" class="sed-info good" role="status" aria-live="polite">3 replacements.</div>
+      </div>
     </div>
   </section>
 
@@ -489,6 +512,23 @@ buffer &lt;&lt; inFile.<span class="fn">rdbuf</span>();                <span cla
     });
   }
   renderHarl(2); // WARNING by default
+
+  /* ---------- ex04 sed simulator ---------- */
+  (function(){
+    var c=document.getElementById("sedContent"), a=document.getElementById("sedS1"), b=document.getElementById("sedS2");
+    var res=document.getElementById("sedResult"), info=document.getElementById("sedInfo");
+    function run(){
+      var content=c.value, s1=a.value, s2=b.value, out="", pos=0, found, n=0;
+      if (s1===""){ res.textContent=""; info.className="sed-info bad"; info.textContent='s1 is empty: find("", pos) always returns pos, so the loop never advances. Reject this case before looping.'; return; }
+      while ((found=content.indexOf(s1,pos))!==-1){ out+=content.substring(pos,found)+s2; pos=found+s1.length; n++; }
+      out+=content.substring(pos);
+      res.textContent=out;
+      info.className="sed-info good";
+      info.textContent=(n===0 ? '0 occurrences found: <filename>.replace is an identical copy.' : n+(n===1 ? ' replacement.' : ' replacements.')) + (content==="" ? ' The file is empty: .replace will be empty too.' : "");
+    }
+    c.addEventListener("input",run); a.addEventListener("input",run); b.addEventListener("input",run);
+    run();
+  })();
 
   /* ---------- Scroll reveal ---------- */
   var io = new IntersectionObserver(function(entries){

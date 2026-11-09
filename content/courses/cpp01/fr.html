@@ -149,6 +149,21 @@
     .seg{flex-direction:column}.seg button{border-radius:11px;border-bottom:1px solid var(--border)}
     pre{font-size:.74rem}
   }
+
+  /* ex04 simulator */
+  .sed{border:1px solid var(--border-strong);border-radius:18px;overflow:hidden;background:var(--surface);margin-top:14px}
+  .sed-top{padding:18px 20px;border-bottom:1px solid var(--border)}
+  .sed-top p{color:var(--muted);font-size:.88rem;font-weight:300}
+  .sed-form{display:grid;gap:8px;padding:16px 20px;border-bottom:1px solid var(--border)}
+  .sed-form label{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+  .sed-form textarea,.sed-form input{font-family:var(--mono);font-size:.84rem;background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:9px 12px;width:100%;min-width:0}
+  .sed-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .sed-row>div{display:grid;gap:8px;min-width:0}
+  .sed-out{padding:16px 20px}
+  .sed-out pre{margin:8px 0 12px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:.84rem;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;min-height:2.4em}
+  .sed-info{font-family:var(--mono);font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+  .sed-info.good{color:var(--stack)} .sed-info.bad{color:var(--err)}
+  @media (max-width:520px){.sed-row{grid-template-columns:1fr}}
 </style>
 <header class="hero">
   <span class="kicker"><span class="dot"></span>C++ — Module 01</span>
@@ -360,25 +375,33 @@
     </div>
   </section>
 
-  <!-- 08 FILE STREAMS -->
-  <section>
-    <div class="sec-head reveal"><span class="sec-num">08</span><h2>Les flux de fichiers <span class="accent">C++</span></h2></div>
-    <p class="body reveal">L'ex04 t'interdit les fonctions C (<code class="inline">fopen</code>, <code class="inline">read</code>…) et <code class="inline">std::string::replace</code>. Tu utilises les <b>streams</b> : <code class="inline">std::ifstream</code> (lire), <code class="inline">std::ofstream</code> (écrire), <code class="inline">std::stringstream</code> (tout charger en mémoire), et tu remplaces à la main avec <code class="inline">find</code> + <code class="inline">substr</code>.</p>
+  <!-- 08 EX04 -->
+  <section id="ex04">
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>ex04 : <span class="accent">Sed is for losers</span></h2></div>
+    <p class="body reveal"><b>Ce que demande le sujet (p. 13).</b> Un programme à trois paramètres, dans cet ordre : un nom de fichier, puis deux chaînes <code class="inline">s1</code> et <code class="inline">s2</code>. Il ouvre le fichier et en copie le contenu dans un nouveau fichier <code class="inline">&lt;filename&gt;.replace</code>, en remplaçant chaque occurrence de <code class="inline">s1</code> par <code class="inline">s2</code>. Fichiers à rendre : <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>.</p>
+    <p class="body reveal"><b>Interdits.</b> <code class="inline">std::string::replace</code>, et les fonctions C de manipulation de fichiers (<code class="inline">fopen</code>, <code class="inline">read</code>…) : le sujet parle de triche. Toutes les autres fonctions membres de <code class="inline">std::string</code> sont permises. Il faut gérer les entrées inattendues et les erreurs, et rendre tes propres tests.</p>
+    <p class="body reveal">Tu passes donc par les <b>streams</b> : <code class="inline">std::ifstream</code> (lire), <code class="inline">std::ofstream</code> (écrire), <code class="inline">std::stringstream</code> (tout charger en mémoire), et tu remplaces à la main avec <code class="inline">find</code> + <code class="inline">substr</code>.</p>
     <div class="editor reveal">
       <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">FileReplacer.cpp — l'idée</span></div>
-<pre><code><span class="ty">std::ifstream</span>  inFile(_filename.<span class="fn">c_str</span>());   <span class="cm">// ouvrir en lecture</span>
-<span class="k">if</span> (!inFile.<span class="fn">is_open</span>()) <span class="cm">/* gérer l'erreur */</span>;
+    <p class="body reveal" style="margin-top:16px"><b>Cas à tester (conseils, pas des règles du sujet).</b> Mauvais nombre d'arguments ; fichier inexistant ou illisible ; <code class="inline">.replace</code> impossible à créer ; fichier vide ; <code class="inline">s1</code> vide (<code class="inline">find("", pos)</code> renvoie toujours <code class="inline">pos</code> : la boucle ne progresse jamais, donc refuse ce cas avant de boucler) ; <code class="inline">s1</code> égal à <code class="inline">s2</code> ; <code class="inline">s2</code> qui contient <code class="inline">s1</code> (on ne rescanne pas ce qu'on vient d'écrire) ; occurrences qui se chevauchent (« aaa », <code class="inline">s1 = aa</code>, <code class="inline">s2 = b</code> donne « ba ») ; dernière ligne sans retour à la ligne final.</p>
 
-<span class="ty">std::stringstream</span> buffer;
-buffer &lt;&lt; inFile.<span class="fn">rdbuf</span>();                <span class="cm">// avaler tout le fichier d'un coup</span>
-<span class="ty">std::string</span> content = buffer.<span class="fn">str</span>();
-
-<span class="cm">// remplacer s1 par s2 SANS std::string::replace :</span>
-<span class="k">while</span> ((found = content.<span class="fn">find</span>(_s1, pos)) != <span class="ty">std::string</span>::npos) {
-    result += content.<span class="fn">substr</span>(pos, found - pos);
-    result += _s2;
-    pos = found + _s1.<span class="fn">length</span>();
-}</code></pre>
+    <div class="sed reveal">
+      <div class="sed-top"><p>Simulateur de <code class="inline">./replace fichier s1 s2</code> : la boucle <code class="inline">find</code> + <code class="inline">substr</code> ci-dessus, appliquée au contenu que tu écris.</p></div>
+      <div class="sed-form">
+        <label for="sedContent">Contenu du fichier</label>
+        <textarea id="sedContent" rows="3" spellcheck="false">un chat voit un chat
+le chat dort</textarea>
+        <div class="sed-row">
+          <div><label for="sedS1">s1 (à chercher)</label><input id="sedS1" type="text" value="chat" autocomplete="off" spellcheck="false"></div>
+          <div><label for="sedS2">s2 (remplaçant)</label><input id="sedS2" type="text" value="chien" autocomplete="off" spellcheck="false"></div>
+        </div>
+      </div>
+      <div class="sed-out">
+        <span class="sed-info">Contenu de &lt;filename&gt;.replace</span>
+        <pre id="sedResult" role="group" aria-label="Contenu de &lt;filename&gt;.replace" tabindex="0">un chien voit un chien
+le chien dort</pre>
+        <div id="sedInfo" class="sed-info good" role="status" aria-live="polite">3 remplacements.</div>
+      </div>
     </div>
   </section>
 
@@ -497,6 +520,23 @@ buffer &lt;&lt; inFile.<span class="fn">rdbuf</span>();                <span cla
     });
   }
   renderHarl(2); // WARNING par défaut
+
+  /* ---------- ex04 sed simulator ---------- */
+  (function(){
+    var c=document.getElementById("sedContent"), a=document.getElementById("sedS1"), b=document.getElementById("sedS2");
+    var res=document.getElementById("sedResult"), info=document.getElementById("sedInfo");
+    function run(){
+      var content=c.value, s1=a.value, s2=b.value, out="", pos=0, found, n=0;
+      if (s1===""){ res.textContent=""; info.className="sed-info bad"; info.textContent='s1 est vide : find("", pos) renvoie toujours pos, la boucle n\'avance jamais. Refuse ce cas avant de boucler.'; return; }
+      while ((found=content.indexOf(s1,pos))!==-1){ out+=content.substring(pos,found)+s2; pos=found+s1.length; n++; }
+      out+=content.substring(pos);
+      res.textContent=out;
+      info.className="sed-info good";
+      info.textContent=(n===0 ? '0 occurrence trouvée : <filename>.replace est une copie identique.' : n+(n===1 ? ' remplacement.' : ' remplacements.')) + (content==="" ? ' Le fichier est vide : .replace sera vide aussi.' : "");
+    }
+    c.addEventListener("input",run); a.addEventListener("input",run); b.addEventListener("input",run);
+    run();
+  })();
 
   /* ---------- Scroll reveal ---------- */
   var io = new IntersectionObserver(function(entries){
