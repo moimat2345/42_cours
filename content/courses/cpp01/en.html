@@ -311,9 +311,53 @@
     </div>
   </section>
 
-  <!-- 06 POINTERS TO MEMBERS -->
+  <!-- 06 EX04 FILE STREAMS -->
+  <section id="ex04">
+    <div class="sec-head reveal"><span class="sec-num">06</span><h2>C++ <span class="accent">file streams</span></h2></div>
+    <p class="body reveal"><b>What the subject asks (p. 13).</b> A program that takes three parameters, in this order: a filename, then two strings <code class="inline">s1</code> and <code class="inline">s2</code>. It opens the file and copies its content into a new file <code class="inline">&lt;filename&gt;.replace</code>, replacing every occurrence of <code class="inline">s1</code> with <code class="inline">s2</code>. Files to submit: <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>.</p>
+    <p class="body reveal"><b>Forbidden.</b> <code class="inline">std::string::replace</code>, and the C file manipulation functions (<code class="inline">fopen</code>, <code class="inline">read</code>…): the subject calls that cheating. All the other member functions of <code class="inline">std::string</code> are allowed. You must handle unexpected inputs and errors, and turn in your own tests.</p>
+    <p class="body reveal">So you use <b>streams</b>: <code class="inline">std::ifstream</code> (read), <code class="inline">std::ofstream</code> (write), <code class="inline">std::stringstream</code> (load everything into memory), and you replace by hand with <code class="inline">find</code> + <code class="inline">substr</code>.</p>
+    <div class="editor reveal">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">FileReplacer.cpp — the idea</span></div>
+<pre><code><span class="ty">std::ifstream</span>  inFile(_filename.<span class="fn">c_str</span>());   <span class="cm">// open for reading</span>
+<span class="k">if</span> (!inFile.<span class="fn">is_open</span>()) <span class="cm">/* handle the error */</span>;
+
+<span class="ty">std::stringstream</span> buffer;
+buffer &lt;&lt; inFile.<span class="fn">rdbuf</span>();                <span class="cm">// swallow the whole file at once</span>
+<span class="ty">std::string</span> content = buffer.<span class="fn">str</span>();
+
+<span class="cm">// replace s1 with s2 WITHOUT std::string::replace :</span>
+<span class="k">while</span> ((found = content.<span class="fn">find</span>(_s1, pos)) != <span class="ty">std::string</span>::npos) {
+    result += content.<span class="fn">substr</span>(pos, found - pos);
+    result += _s2;
+    pos = found + _s1.<span class="fn">length</span>();
+}</code></pre>
+    </div>
+    <p class="body reveal" style="margin-top:16px"><b>Cases to test (advice, not subject rules).</b> Wrong number of arguments; missing or unreadable file; <code class="inline">.replace</code> cannot be created; empty file; empty <code class="inline">s1</code> (<code class="inline">find("", pos)</code> always returns <code class="inline">pos</code>: the loop never advances, so reject this case before looping); <code class="inline">s1</code> equal to <code class="inline">s2</code>; <code class="inline">s2</code> that contains <code class="inline">s1</code> (you do not rescan what you just wrote); overlapping occurrences ("aaa", <code class="inline">s1 = aa</code>, <code class="inline">s2 = b</code> gives "ba"); last line without a trailing newline.</p>
+
+    <div class="sed reveal">
+      <div class="sed-top"><p>Simulator of <code class="inline">./replace file s1 s2</code>: the <code class="inline">find</code> + <code class="inline">substr</code> loop above, applied to the content you type.</p></div>
+      <div class="sed-form">
+        <label for="sedContent">File content</label>
+        <textarea id="sedContent" rows="3" spellcheck="false">a cat sees a cat
+the cat sleeps</textarea>
+        <div class="sed-row">
+          <div><label for="sedS1">s1 (to find)</label><input id="sedS1" type="text" value="cat" autocomplete="off" spellcheck="false"></div>
+          <div><label for="sedS2">s2 (replacement)</label><input id="sedS2" type="text" value="dog" autocomplete="off" spellcheck="false"></div>
+        </div>
+      </div>
+      <div class="sed-out">
+        <span class="sed-info">Content of &lt;filename&gt;.replace</span>
+        <pre id="sedResult" role="group" aria-label="Content of &lt;filename&gt;.replace" tabindex="0">a dog sees a dog
+the dog sleeps</pre>
+        <div id="sedInfo" class="sed-info good" role="status" aria-live="polite">3 replacements.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 POINTERS TO MEMBERS -->
   <section>
-    <div class="sec-head reveal"><span class="sec-num">06</span><h2>Pointers to <span class="accent">member functions</span></h2></div>
+    <div class="sec-head reveal"><span class="sec-num">07</span><h2>Pointers to <span class="accent">member functions</span></h2></div>
     <p class="body reveal">ex05 forces you to avoid the "forest of <code class="inline">if/else</code>". The solution: an <b>array of pointers to member functions</b>. Strange syntax, but logical:</p>
     <div class="editor reveal">
       <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">Harl.cpp — complain()</span></div>
@@ -331,9 +375,9 @@
     <p class="body reveal" style="margin-top:14px">How to read it: <code class="inline">void (Harl::*funcs[4])(void)</code> = "an array of 4 pointers to methods of <code class="inline">Harl</code> that take <code class="inline">void</code> and return <code class="inline">void</code>". You call them with <code class="inline">(this->*funcs[i])()</code>.</p>
   </section>
 
-  <!-- 07 SWITCH + HARL SIMULATOR -->
+  <!-- 08 SWITCH + HARL SIMULATOR -->
   <section>
-    <div class="sec-head reveal"><span class="sec-num">07</span><h2>The <span class="accent">switch</span> and its fall-through</h2></div>
+    <div class="sec-head reveal"><span class="sec-num">08</span><h2>The <span class="accent">switch</span> and its fall-through</h2></div>
     <p class="body reveal">ex06 exploits a behaviour often seen as a bug: without a <code class="inline">break</code>, a <code class="inline">case</code> <b>falls into</b> the next one. Here it's intentional: "this level <b>and above</b>". Click a level 👇</p>
 
     <div class="harl reveal">
@@ -364,36 +408,6 @@
     <span class="k">case</span> <span class="nm">3</span>: harl.<span class="fn">error</span>(); <span class="k">break</span>;
     <span class="k">default</span>: std::cout &lt;&lt; <span class="st">"[ Probably complaining... ]\n"</span>;
 }</code></pre>
-    </div>
-  </section>
-
-  <!-- 08 EX04 -->
-  <section id="ex04">
-    <div class="sec-head reveal"><span class="sec-num">08</span><h2>ex04: <span class="accent">Sed is for losers</span></h2></div>
-    <p class="body reveal"><b>What the subject asks (p. 13).</b> A program that takes three parameters, in this order: a filename, then two strings <code class="inline">s1</code> and <code class="inline">s2</code>. It opens the file and copies its content into a new file <code class="inline">&lt;filename&gt;.replace</code>, replacing every occurrence of <code class="inline">s1</code> with <code class="inline">s2</code>. Files to submit: <code class="inline">Makefile</code>, <code class="inline">main.cpp</code>, <code class="inline">*.cpp</code>, <code class="inline">*.{h, hpp}</code>.</p>
-    <p class="body reveal"><b>Forbidden.</b> <code class="inline">std::string::replace</code>, and the C file manipulation functions (<code class="inline">fopen</code>, <code class="inline">read</code>…): the subject calls that cheating. All the other member functions of <code class="inline">std::string</code> are allowed. You must handle unexpected inputs and errors, and turn in your own tests.</p>
-    <p class="body reveal">So you use <b>streams</b>: <code class="inline">std::ifstream</code> (read), <code class="inline">std::ofstream</code> (write), <code class="inline">std::stringstream</code> (load everything into memory), and you replace by hand with <code class="inline">find</code> + <code class="inline">substr</code>.</p>
-    <div class="editor reveal">
-      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">FileReplacer.cpp — the idea</span></div>
-    <p class="body reveal" style="margin-top:16px"><b>Cases to test (advice, not subject rules).</b> Wrong number of arguments; missing or unreadable file; <code class="inline">.replace</code> cannot be created; empty file; empty <code class="inline">s1</code> (<code class="inline">find("", pos)</code> always returns <code class="inline">pos</code>: the loop never advances, so reject this case before looping); <code class="inline">s1</code> equal to <code class="inline">s2</code>; <code class="inline">s2</code> that contains <code class="inline">s1</code> (you do not rescan what you just wrote); overlapping occurrences ("aaa", <code class="inline">s1 = aa</code>, <code class="inline">s2 = b</code> gives "ba"); last line without a trailing newline.</p>
-
-    <div class="sed reveal">
-      <div class="sed-top"><p>Simulator of <code class="inline">./replace file s1 s2</code>: the <code class="inline">find</code> + <code class="inline">substr</code> loop above, applied to the content you type.</p></div>
-      <div class="sed-form">
-        <label for="sedContent">File content</label>
-        <textarea id="sedContent" rows="3" spellcheck="false">a cat sees a cat
-the cat sleeps</textarea>
-        <div class="sed-row">
-          <div><label for="sedS1">s1 (to find)</label><input id="sedS1" type="text" value="cat" autocomplete="off" spellcheck="false"></div>
-          <div><label for="sedS2">s2 (replacement)</label><input id="sedS2" type="text" value="dog" autocomplete="off" spellcheck="false"></div>
-        </div>
-      </div>
-      <div class="sed-out">
-        <span class="sed-info">Content of &lt;filename&gt;.replace</span>
-        <pre id="sedResult" role="group" aria-label="Content of &lt;filename&gt;.replace" tabindex="0">a dog sees a dog
-the dog sleeps</pre>
-        <div id="sedInfo" class="sed-info good" role="status" aria-live="polite">3 replacements.</div>
-      </div>
     </div>
   </section>
 
